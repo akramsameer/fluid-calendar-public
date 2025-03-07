@@ -8,6 +8,8 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { logger } from "@/lib/logger";
 
 const LOG_SOURCE = "CalDAVAccountForm";
@@ -215,7 +217,7 @@ export function CalDAVAccountForm({
     if (!testResults) return null;
 
     return (
-      <div className="mt-4 p-4 border rounded-md bg-gray-50">
+      <div className="mt-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
         <h3 className="font-medium mb-2">Connection Test Results</h3>
 
         {testResults.steps &&
@@ -239,20 +241,20 @@ export function CalDAVAccountForm({
                 </span>
                 <span className="font-medium">{step.step}</span>
                 {step.status === "success" && step.calendars !== undefined && (
-                  <span className="ml-2 text-sm text-gray-600">
+                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
                     ({step.calendars} calendars found)
                   </span>
                 )}
               </div>
 
               {step.error && (
-                <div className="ml-6 mt-1 text-sm text-red-600 whitespace-pre-wrap">
+                <div className="ml-6 mt-1 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
                   Error: {step.error}
                 </div>
               )}
 
               {step.calendarNames && step.calendarNames.length > 0 && (
-                <div className="ml-6 mt-1 text-sm text-gray-600">
+                <div className="ml-6 mt-1 text-sm text-gray-600 dark:text-gray-400">
                   Calendars: {step.calendarNames.join(", ")}
                 </div>
               )}
@@ -260,7 +262,7 @@ export function CalDAVAccountForm({
           ))}
 
         {testResults.error && !testResults.steps?.some((s) => s.error) && (
-          <div className="text-red-600 mt-2">
+          <div className="text-red-600 dark:text-red-400 mt-2">
             <div className="font-medium">Error:</div>
             <div className="text-sm whitespace-pre-wrap">
               {testResults.error}
@@ -269,7 +271,7 @@ export function CalDAVAccountForm({
         )}
 
         {testResults.success && (
-          <div className="text-green-600 mt-2 font-medium">
+          <div className="text-green-600 dark:text-green-400 mt-2 font-medium">
             Connection successful! You can now connect your account.
           </div>
         )}
@@ -289,20 +291,19 @@ export function CalDAVAccountForm({
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {errorMessage && (
-            <div className="p-3 mb-3 text-sm border border-red-300 bg-red-50 text-red-800 rounded-md">
+            <div className="p-3 mb-3 text-sm border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md">
               {errorMessage}
             </div>
           )}
 
           <fieldset className="mb-4">
-            <label
-              className="block text-[15px] leading-normal mb-2.5"
+            <Label
+              className="text-[15px] leading-normal mb-2.5"
               htmlFor="serverUrl"
             >
               Server URL <span className="text-red-500">*</span>
-            </label>
-            <input
-              className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded-[4px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] border-gray-400"
+            </Label>
+            <Input
               id="serverUrl"
               name="serverUrl"
               placeholder="https://caldav.example.com"
@@ -316,14 +317,13 @@ export function CalDAVAccountForm({
           </fieldset>
 
           <fieldset className="mb-4">
-            <label
-              className="block text-[15px] leading-normal mb-2.5"
+            <Label
+              className="text-[15px] leading-normal mb-2.5"
               htmlFor="username"
             >
               Username <span className="text-red-500">*</span>
-            </label>
-            <input
-              className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded-[4px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] border-gray-400"
+            </Label>
+            <Input
               id="username"
               name="username"
               placeholder="your.email@example.com"
@@ -337,14 +337,13 @@ export function CalDAVAccountForm({
           </fieldset>
 
           <fieldset className="mb-4">
-            <label
-              className="block text-[15px] leading-normal mb-2.5"
+            <Label
+              className="text-[15px] leading-normal mb-2.5"
               htmlFor="password"
             >
               Password <span className="text-red-500">*</span>
-            </label>
-            <input
-              className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded-[4px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] border-gray-400"
+            </Label>
+            <Input
               id="password"
               name="password"
               type="password"
@@ -360,14 +359,10 @@ export function CalDAVAccountForm({
           </fieldset>
 
           <fieldset className="mb-4">
-            <label
-              className="block text-[15px] leading-normal mb-2.5"
-              htmlFor="path"
-            >
+            <Label className="text-[15px] leading-normal mb-2.5" htmlFor="path">
               Path (Optional)
-            </label>
-            <input
-              className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded-[4px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] border-gray-400"
+            </Label>
+            <Input
               id="path"
               name="path"
               placeholder="/dav/calendars/user/username@fastmail.com"
