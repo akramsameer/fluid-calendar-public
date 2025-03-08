@@ -41,8 +41,14 @@ This project is available in two versions:
 - SAAS features are controlled by the `NEXT_PUBLIC_ENABLE_SAAS_FEATURES` environment variable
 
 ### Component Loading:
-- Use the `loadSaasComponent()` function from `src/lib/saas-loader.tsx` to dynamically load SAAS components
-- Always provide fallback components that show "upgrade to SAAS" messaging
+- Use route groups to organize pages: `(saas)`, `(open)`, and `(common)`
+- Place SAAS-specific pages in `src/app/(saas)/` and open source pages in `src/app/(open)/`
+- Common pages that work in both versions go in `src/app/(common)/`
+- For shared components with different implementations:
+  - Create separate files with `.saas.tsx` and `.open.tsx` extensions in the same directory
+  - Use dynamic imports with template literals to select the correct file based on the environment variable
+  - Example: `dynamic(() => import(./path/component${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}))`
+  - See `src/app/(common)/settings/page.tsx` for an example of this pattern
 
 ### Repository Syncing:
 - Use the `scripts/sync-repos.sh` script to sync changes from the private SAAS repository to the public open source repository

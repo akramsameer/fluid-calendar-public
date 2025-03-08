@@ -257,10 +257,6 @@ cp .env.example .env
 - `NEXTAUTH_URL`: Your application URL
 - `NEXTAUTH_SECRET`: Random string for session encryption
 
-3. Optional environment variables (can be configured in System Settings instead):
-- `GOOGLE_CLIENT_ID`: From Google Cloud Console
-- `GOOGLE_CLIENT_SECRET`: From Google Cloud Console
-- `LOG_LEVEL`: Logging level (none/debug)
 
 Note: Google credentials and logging settings can be managed through the UI in Settings > System. Environment variables will be used as fallback if system settings are not configured.
 

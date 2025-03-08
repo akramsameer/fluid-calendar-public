@@ -15,7 +15,15 @@ import { useAdmin } from "@/hooks/use-admin";
 import { Suspense } from "react";
 
 // Import the Teams page directly instead of using dynamic import
-import TeamsPage from "./teams/page";
+
+import dynamic from 'next/dynamic';
+
+const TeamsPage = dynamic(
+  () => import(`./teams/page${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}`),
+  {
+    loading: () => <p>Loading...</p>,
+  }
+);
 
 type SettingsTab =
   | "accounts"
