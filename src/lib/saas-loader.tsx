@@ -29,25 +29,45 @@ export function loadSaasComponent<T extends object>(
       // Use a try-catch to handle the case when the module doesn't exist
       return new Promise<{ default: ComponentType<T> }>((resolve) => {
         try {
-          // Use dynamic import with a string literal to prevent webpack from trying to resolve
-          // the path at build time
-          const importPath = `../saas/${path}`;
-          import(/* @vite-ignore */ importPath)
-            .then((module) => {
-              // Handle both default and named exports
-              resolve({
-                default: (module.default ||
-                  module[path.split("/").pop() || ""] ||
-                  (() => null)) as ComponentType<T>,
+          // Instead of using a variable in the import path, use a context-specific approach
+          // This helps webpack understand the possible imports at build time
+          if (path.startsWith("components/")) {
+            import("../saas/components/" + path.substring("components/".length))
+              .then((module) => {
+                resolve({
+                  default: (module.default ||
+                    module[path.split("/").pop() || ""] ||
+                    (() => null)) as ComponentType<T>,
+                });
+              })
+              .catch((_error) => {
+                console.error(`Error loading SAAS component ${path}:`, _error);
+                resolve({
+                  default: (fallback || (() => null)) as ComponentType<T>,
+                });
               });
-            })
-            .catch((_error) => {
-              // If import fails, resolve with fallback
-              console.error(`Error loading SAAS component ${path}:`, _error);
-              resolve({
-                default: (fallback || (() => null)) as ComponentType<T>,
+          } else if (path.startsWith("hooks/")) {
+            import("../saas/hooks/" + path.substring("hooks/".length))
+              .then((module) => {
+                resolve({
+                  default: (module.default ||
+                    module[path.split("/").pop() || ""] ||
+                    (() => null)) as ComponentType<T>,
+                });
+              })
+              .catch((_error) => {
+                console.error(`Error loading SAAS component ${path}:`, _error);
+                resolve({
+                  default: (fallback || (() => null)) as ComponentType<T>,
+                });
               });
+          } else {
+            // For other paths, use a fallback
+            console.warn(`Unsupported SAAS component path: ${path}`);
+            resolve({
+              default: (fallback || (() => null)) as ComponentType<T>,
             });
+          }
         } catch (_error) {
           // If any error occurs, resolve with fallback
           console.error(`Error loading SAAS component ${path}:`, _error);
