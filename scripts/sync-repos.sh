@@ -45,6 +45,9 @@ echo "Copying files from private to public repo..."
 rsync -av --delete \
   --exclude-from="$PUBLIC_REPO/.gitignore" \
   --exclude=".git" \
+  --exclude="*.saas.*" \
+  --exclude="src/app/(saas)" \
+  --exclude="src/saas" \
   "$PRIVATE_REPO/" "$PUBLIC_REPO/"
 
 # Restore the public repo's .gitignore file

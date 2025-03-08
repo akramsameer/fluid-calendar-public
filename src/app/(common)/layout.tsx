@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { PrivacyProvider } from "@/components/providers/PrivacyProvider";
@@ -61,7 +61,7 @@ export default function RootLayout({
   }, [setShortcutsOpen]);
 
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <title>{getTitleFromPathname(pathname)}</title>
       </head>
@@ -73,7 +73,7 @@ export default function RootLayout({
         )}
       >
         <SessionProvider>
-          <ThemeProvider>
+          <ThemeProvider attribute="data-theme" enableSystem={true}>
             <PrivacyProvider>
               <DndProvider>
                 <SetupCheck />

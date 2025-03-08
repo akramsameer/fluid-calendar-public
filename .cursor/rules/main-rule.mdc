@@ -14,6 +14,7 @@ send this with every request so the AI knows what to do.
 - the google/outlook/caldav auth needs to handle refreshing tokens so when the token expires an hour later, we can get a new one and continue syncing.
 - use shadcn whenever possible, the correct command to use is `npx shadcn@latest add`
 - make minimal changes and don't change or break existing logic and only apply the changes requested.
+- no need to touch files after making changes
 
 ## SAAS vs Open Source
 
@@ -25,6 +26,12 @@ This project is available in two versions:
 - All SAAS-specific code is in the `src/saas/` directory, which is excluded from the open source repository via `.gitignore`
 - The open source repository is at https://github.com/fluidcalendar/fluidcalendar
 - The private SAAS repository contains both the open source code and the SAAS-specific code
+- all pages for saas are in the `src/app/(saas)` folder and all common pages are in the `src/app/(common)` folder
+
+### File Extension Convention:
+- Files with `.saas.tsx`/`.saas.ts` extension are only included in the SAAS build
+- Files with `.open.tsx`/`.open.ts` extension are only included in the open source build
+- Regular files (without special extensions) are included in both builds
 
 ### Feature Flags:
 - Use the `isSaasEnabled` and `isFeatureEnabled()` functions from `src/lib/config.ts` to conditionally enable SAAS features
@@ -43,5 +50,8 @@ When implementing new features, consider whether they should be:
 2. Premium features exclusive to the SAAS version
 3. Core features with premium enhancements in the SAAS version 
 
+
+
+### Feature Flags: 
 
 if you are not sure if this is a saas or opensource feature, then ask to confirm

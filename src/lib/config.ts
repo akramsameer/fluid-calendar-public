@@ -17,6 +17,7 @@ export const featureFlags = {
     googleCalendarSync: true,
     outlookCalendarSync: true,
     caldavSync: true,
+    landingPage: true,
   },
 
   // SAAS-only features (enabled only when SAAS mode is active)
@@ -26,6 +27,7 @@ export const featureFlags = {
     advancedAnalytics: isSaasEnabled,
     aiScheduling: isSaasEnabled,
     prioritySupport: isSaasEnabled,
+    landingPage: isSaasEnabled,
   },
 };
 
