@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { isFeatureEnabled } from "@/lib/config";
 
 // List of public routes that don't require authentication
 const publicRoutes = [
@@ -42,8 +41,7 @@ export async function middleware(request: NextRequest) {
   // redirect to the home page
   if (
     !token &&
-    pathname === "/" &&
-    isFeatureEnabled("landingPage")
+    pathname === "/" 
   ) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
