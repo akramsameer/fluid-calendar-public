@@ -15,6 +15,7 @@ send this with every request so the AI knows what to do.
 - use shadcn whenever possible, the correct command to use is `npx shadcn@latest add`
 - make minimal changes and don't change or break existing logic and only apply the changes requested.
 - no need to touch files after making changes
+- don't use .gitignore to ignore open source file, since the code is synced between the projects, instead update the sync-repos.sh script to exclude files that should not be in the open source version
 
 ## SAAS vs Open Source
 

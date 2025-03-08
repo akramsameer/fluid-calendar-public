@@ -48,6 +48,9 @@ rsync -av --delete \
   --exclude="*.saas.*" \
   --exclude="src/app/(saas)" \
   --exclude="src/saas" \
+  --exclude="src/saas/k8s" \
+  --exclude="src/saas/Dockerfile.saas" \
+  --exclude=".github/workflows/deploy.saas.yml" \
   "$PRIVATE_REPO/" "$PUBLIC_REPO/"
 
 # Restore the public repo's .gitignore file
