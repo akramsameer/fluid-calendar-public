@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { EnvelopeIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function WaitlistForm() {
   const [isLoading, setIsLoading] = useState(false);
