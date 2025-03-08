@@ -24,9 +24,10 @@ This project is available in two versions:
 
 ### Code Organization:
 - All SAAS-specific code is in the `src/saas/` directory, which is excluded from the open source repository via `.gitignore`
-- The open source repository is at https://github.com/fluidcalendar/fluidcalendar
+- The open source repository is at https://github.com/dotnetfactory/fluid-calendar
 - The private SAAS repository contains both the open source code and the SAAS-specific code
-- all pages for saas are in the `src/app/(saas)` folder and all common pages are in the `src/app/(common)` folder
+- all pages for saas are in the `src/app/(saas)` folder and all common pages are in the `src/app/(common)` folder and open source in `src/app/(open)`
+- we should still add a .saas extension and .open extension to files in (saas) and (open) folders to avoid compiling them
 
 ### File Extension Convention:
 - Files with `.saas.tsx`/`.saas.ts` extension are only included in the SAAS build

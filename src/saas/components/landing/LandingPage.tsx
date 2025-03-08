@@ -49,7 +49,7 @@ export function LandingPage() {
       {/* GitHub Button in Top Right */}
       <div className="absolute top-4 right-4">
         <Link
-          href="https://github.com/fluidcalendar/fluidcalendar"
+          href="https://github.com/dotnetfactory/fluid-calendar"
           target="_blank"
         >
           <Button size="sm" className="bg-black text-white hover:bg-gray-800">
@@ -106,7 +106,7 @@ export function LandingPage() {
         {/* GitHub Button */}
         <div className="mb-8">
           <Link
-            href="https://github.com/fluidcalendar/fluidcalendar"
+            href="https://github.com/dotnetfactory/fluid-calendar"
             target="_blank"
           >
             <Button className="px-8 py-6 text-lg bg-blue-600 hover:bg-blue-700">

@@ -10,7 +10,7 @@ export default function OpenSourceHomePage() {
       {/* GitHub Button in Top Right */}
       <div className="absolute top-4 right-4">
         <Link
-          href="https://github.com/fluidcalendar/fluidcalendar"
+          href="https://github.com/dotnetfactory/fluid-calendar"
           target="_blank"
         >
           <Button size="sm" className="bg-black text-white hover:bg-gray-800">
@@ -75,7 +75,7 @@ export default function OpenSourceHomePage() {
             </Button>
           </Link>
           <Link
-            href="https://github.com/fluidcalendar/fluidcalendar"
+            href="https://github.com/dotnetfactory/fluid-calendar"
             target="_blank"
           >
             <Button size="lg" variant="outline" className="px-8 py-6 text-lg">
@@ -197,7 +197,7 @@ export default function OpenSourceHomePage() {
               </Button>
             </Link>
             <Link
-              href="https://github.com/fluidcalendar/fluidcalendar#installation"
+              href="https://github.com/dotnetfactory/fluid-calendar#installation"
               target="_blank"
             >
               <Button size="lg" variant="outline" className="px-8 py-4">
@@ -233,7 +233,7 @@ export default function OpenSourceHomePage() {
             <div className="text-gray-500 text-sm">
               Licensed under MIT. Contribute on{" "}
               <a
-                href="https://github.com/fluidcalendar/fluidcalendar"
+                href="https://github.com/dotnetfactory/fluid-calendar"
                 className="text-blue-600 hover:underline"
                 target="_blank"
                 rel="noopener noreferrer"
