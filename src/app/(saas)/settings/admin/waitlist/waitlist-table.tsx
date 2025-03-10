@@ -484,13 +484,7 @@ export function WaitlistTable() {
                           Select
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            toast.info("View details not implemented yet");
-                          }}
-                        >
-                          View Details
-                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                           onClick={() => handleInviteEntry(entry.id)}
                           disabled={entry.status !== "WAITING"}

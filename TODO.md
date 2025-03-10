@@ -2,6 +2,8 @@
 # Random Tasks
 - [ ] add a calculator comparing motion to FC
 - [ ] update apps in google and azure to support fc domain
+- [ ] make cmd+k discoverable
+- [ ] 
 
 # CalDAV Implementation
 ## Phase 1: Setup and Basic Structure ✅

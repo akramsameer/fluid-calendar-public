@@ -361,7 +361,7 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
         },
         body: JSON.stringify({
           count,
-          invitationDate: date.toISOString(),
+          scheduledDate: date.toISOString(),
           message,
         }),
       });
@@ -403,15 +403,16 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
   ) => {
     try {
       set({ entriesLoading: true, entriesError: null });
-      const response = await fetch("/api/waitlist/bulk/invite/specific", {
+      const response = await fetch("/api/waitlist/bulk/invite", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ids,
-          invitationDate: date.toISOString(),
+          count: ids.length,
+          scheduledDate: date.toISOString(),
           message,
+          specificIds: ids,
         }),
       });
 
@@ -489,7 +490,7 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
   deleteEntries: async (ids: string[]) => {
     try {
       set({ entriesLoading: true, entriesError: null });
-      const response = await fetch("/api/waitlist/entries/delete", {
+      const response = await fetch("/api/waitlist/bulk/delete", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -533,7 +534,7 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
   boostEntries: async (ids: string[], amount: number) => {
     try {
       set({ entriesLoading: true, entriesError: null });
-      const response = await fetch("/api/waitlist/entries/boost", {
+      const response = await fetch("/api/waitlist/bulk/boost", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -577,15 +578,13 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
     try {
       set({ entriesLoading: true, entriesError: null });
 
-      // Build query params
-      const params = new URLSearchParams();
-      if (ids.length > 0) {
-        params.append("ids", ids.join(","));
-      }
-
-      const response = await fetch(
-        `/api/waitlist/entries/export?${params.toString()}`
-      );
+      const response = await fetch("/api/waitlist/bulk/export", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids }),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to export entries: ${response.statusText}`);
@@ -595,7 +594,9 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "waitlist-export.csv";
+      a.download = `waitlist-export-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
