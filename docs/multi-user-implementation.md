@@ -163,12 +163,6 @@ This document outlines the step-by-step process for transitioning FluidCalendar 
 - [ ] Create `src/components/notifications/NotificationCenter.tsx` for UI
 - [ ] Implement real-time notifications with WebSockets or SSE
 
-### 5.4 Create Team/Organization Features
-- [ ] Create `Organization` model in `prisma/schema.prisma`
-- [ ] Create `Team` model in `prisma/schema.prisma`
-- [ ] Create organization and team management API routes
-- [ ] Create organization and team management UI components
-
 ## Phase 6: SaaS Features (Optional)
 
 ### 6.1 Implement Subscription Management

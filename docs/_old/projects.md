@@ -118,7 +118,6 @@ interface Task {
   - [ ] Saved filters
 - [ ] Collaboration Features
   - [ ] Project sharing
-  - [ ] Team assignments
   - [ ] Activity tracking
 
 ## Current Status
@@ -193,7 +192,6 @@ interface Task {
 
 3. Collaboration
    - Project sharing
-   - Team management
    - Activity feed
    - Comments system
 

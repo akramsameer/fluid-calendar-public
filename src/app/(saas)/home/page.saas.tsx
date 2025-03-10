@@ -7,7 +7,6 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import { Toaster } from "sonner";
-import WaitlistForm from "@/saas/components/WaitlistForm";
 const features = [
   {
     icon: SparklesIcon,
@@ -91,7 +90,14 @@ export default function Home() {
           </div>
         </div>
 
-        <WaitlistForm />
+        <div className="flex justify-center">
+          <a
+            href="/beta"
+            className="inline-block bg-blue-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+          >
+            Join the Beta
+          </a>
+        </div>
       </section>
 
       {/* Features Section */}
@@ -133,10 +139,10 @@ export default function Home() {
             intelligent calendar management.
           </p>
           <a
-            href="#waitlist"
+            href="/beta"
             className="inline-block bg-white text-blue-600 py-3 px-8 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
           >
-            Join the Waitlist
+            Join the Beta
           </a>
         </div>
       </section>
@@ -154,6 +160,20 @@ export default function Home() {
             EliteCoders
           </a>
         </p>
+        <div className="flex justify-center mt-4 space-x-6">
+          <a
+            href="/terms"
+            className="text-sm text-gray-600 hover:text-gray-900"
+          >
+            Terms of Service
+          </a>
+          <a
+            href="/privacy"
+            className="text-sm text-gray-600 hover:text-gray-900"
+          >
+            Privacy Policy
+          </a>
+        </div>
       </footer>
     </main>
   );

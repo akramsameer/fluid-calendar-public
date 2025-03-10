@@ -177,7 +177,6 @@ interface FocusModeStore {
 ### Future Enhancements
 1. Advanced analytics
 2. Custom focus modes
-3. Team focus sessions
 4. Integration with external tools
 5. Focus mode templates
 

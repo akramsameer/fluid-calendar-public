@@ -10,6 +10,9 @@ const publicRoutes = [
   "/auth/error",
   "/api/auth/register",
   "/home",
+  "/beta",
+  "/terms",
+  "/privacy",
 ];
 
 // Routes that only admins can access

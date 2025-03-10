@@ -1,8 +1,8 @@
 # FluidCalendar Implementation Plan
 # Random Tasks
 - [ ] add a calculator comparing motion to FC
-- [ ] move homepage to this repo.
-- [ ] 
+- [ ] update apps in google and azure to support fc domain
+
 # CalDAV Implementation
 ## Phase 1: Setup and Basic Structure ✅
 - [x] Add required libraries (`tsdav`, `ical.js`)

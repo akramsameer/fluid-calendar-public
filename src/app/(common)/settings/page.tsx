@@ -14,12 +14,19 @@ import { Card } from "@/components/ui/card";
 import { useAdmin } from "@/hooks/use-admin";
 import { Suspense } from "react";
 
-// Import the Teams page directly instead of using dynamic import
+import dynamic from "next/dynamic";
+import { isSaasEnabled } from "@/lib/config";
 
-import dynamic from 'next/dynamic';
-
-const TeamsPage = dynamic(
-  () => import(`./teams/page${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}`),
+// Add dynamic import for the waitlist page
+const WaitlistPage = dynamic(
+  () =>
+    import(
+      `./waitlist/page${
+        process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true"
+          ? ".saas"
+          : ".open"
+      }`
+    ),
   {
     loading: () => <p>Loading...</p>,
   }
@@ -34,11 +41,11 @@ type SettingsTab =
   | "outlook-tasks"
   | "logs"
   | "user-management"
-  | "teams";
+  | "waitlist";
 
 export default function SettingsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const tabs = useMemo(() => {
     const baseTabs = [
@@ -49,19 +56,27 @@ export default function SettingsPage() {
       { id: "outlook-tasks", label: "Outlook Tasks" },
     ] as const;
 
-    // Only add admin tabs if the user is an admin
-    const adminTabs = isAdmin
-      ? ([
-          { id: "system", label: "System" },
-          { id: "logs", label: "Logs" },
-          { id: "user-management", label: "User Management" },
-        ] as const)
-      : ([] as const);
+    // Add admin-only tabs
+    if (isAdmin) {
+      const adminTabs = [
+        { id: "system", label: "System" },
+        { id: "logs", label: "Logs" },
+        { id: "user-management", label: "Users" },
+      ] as const;
 
-    // Always include the Teams tab - it will show either the SAAS feature or the upgrade teaser
-    const teamTab = [{ id: "teams", label: "Teams" }] as const;
+      // Only add the waitlist tab if SAAS features are enabled
+      if (isSaasEnabled) {
+        return [
+          ...baseTabs,
+          ...adminTabs,
+          { id: "waitlist", label: "Beta Waitlist" },
+        ] as const;
+      }
 
-    return [...baseTabs, ...adminTabs, ...teamTab];
+      return [...baseTabs, ...adminTabs] as const;
+    }
+
+    return baseTabs;
   }, [isAdmin]);
 
   const [activeTab, setActiveTab] = useState<SettingsTab>("accounts");
@@ -70,7 +85,21 @@ export default function SettingsPage() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1) as SettingsTab;
-      if (tabs.some((tab) => tab.id === hash)) {
+
+      // Check if the hash is a valid tab ID, regardless of admin status
+      const allPossibleTabIds: SettingsTab[] = [
+        "accounts",
+        "user",
+        "calendar",
+        "auto-schedule",
+        "outlook-tasks",
+        "system",
+        "logs",
+        "user-management",
+        "waitlist",
+      ];
+
+      if (allPossibleTabIds.includes(hash)) {
         setActiveTab(hash);
       }
     };
@@ -81,7 +110,7 @@ export default function SettingsPage() {
     // Listen for hash changes
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [tabs]);
+  }, []); // Remove tabs dependency since we're now checking against all possible tabs
 
   // Set hydrated state after mount
   useEffect(() => {
@@ -96,6 +125,30 @@ export default function SettingsPage() {
   }, [activeTab, isHydrated]);
 
   const renderContent = () => {
+    // Admin-only tabs
+    const adminOnlyTabs = ["system", "logs", "user-management", "waitlist"];
+
+    // If admin status is still loading and the active tab is admin-only, show loading state
+    if (adminOnlyTabs.includes(activeTab) && isAdminLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <p className="text-muted-foreground">Checking access privileges...</p>
+        </div>
+      );
+    }
+
+    // Check if the active tab is admin-only and the user is not an admin
+    if (adminOnlyTabs.includes(activeTab) && !isAdmin) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <h2 className="text-2xl font-bold mb-4">Admin Access Required</h2>
+          <p className="text-muted-foreground">
+            You need administrator privileges to access this section.
+          </p>
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case "accounts":
         return <AccountManager />;
@@ -113,10 +166,10 @@ export default function SettingsPage() {
         return <LogViewer />;
       case "user-management":
         return <UserManagement />;
-      case "teams":
+      case "waitlist":
         return (
-          <Suspense fallback={<div>Loading Teams...</div>}>
-            <TeamsPage />
+          <Suspense fallback={<div>Loading...</div>}>
+            <WaitlistPage />
           </Suspense>
         );
       default:

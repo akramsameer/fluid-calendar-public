@@ -17,6 +17,8 @@ send this with every request so the AI knows what to do.
 - no need to touch files after making changes
 - don't use .gitignore to ignore open source file, since the code is synced between the projects, instead update the sync-repos.sh script to exclude files that should not be in the open source version
 - if there are changes to the rules or setup, update the main-rule.mdc file accordingly
+- if you add methods or code that is not implemented add a //todo comment explaining what it needs to do so we can implement it later
+- when generating react content make sure to replace quotes and apostrohpes with &apos; and &quot;
 
 ## SAAS vs Open Source
 
@@ -50,6 +52,57 @@ This project is available in two versions:
   - Example: `dynamic(() => import(./path/component${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}))`
   - See `src/app/(common)/settings/page.tsx` for an example of this pattern
 
+### Admin Access Control:
+- Admin-only features should be secured using the `useAdmin` hook or the `AdminOnly` component
+- For pages in the settings section:
+  - Use the `useAdmin` hook to check if the user is an admin
+  - Show an access denied message using the `AccessDeniedMessage` component
+  - Example: 
+    ```tsx
+    const { isAdmin } = useAdmin();
+    if (!isAdmin) {
+      return <AccessDeniedMessage message="Custom access denied message" />;
+    }
+    ```
+- For components:
+  - Use the `AdminOnly` wrapper component from `@/components/auth/AdminOnly`
+  - Provide a fallback component to show for non-admin users
+  - Example:
+    ```tsx
+    <AdminOnly fallback={<AccessDeniedMessage message="Custom access denied message" />}>
+      {/* Admin-only content */}
+    </AdminOnly>
+    ```
+- For more complex access denied messages, create a custom component that uses the layout appropriate for that section
+- In the settings page, use the `isSaasEnabled` constant to conditionally include admin-only tabs:
+  ```tsx
+  if (isAdmin) {
+    const adminTabs = [/* ... */];
+    
+    if (isSaasEnabled) {
+      return [...baseTabs, ...adminTabs, { id: "saas-feature", label: "SAAS Feature" }];
+    }
+    
+    return [...baseTabs, ...adminTabs];
+  }
+  ```
+- For API routes that should only be accessible by admins:
+  - Use the `requireAdmin` middleware from `@/lib/auth/api-auth`
+  - Example:
+    ```typescript
+    import { requireAdmin } from "@/lib/auth/api-auth";
+    
+    export async function GET(request: NextRequest) {
+      // Check if user is admin
+      const authResponse = await requireAdmin(request);
+      if (authResponse) return authResponse;
+      
+      // Continue with admin-only logic
+    }
+    ```
+  - Do NOT use `getServerSession` and check the role manually
+  - The `requireAdmin` middleware handles all the authentication and authorization checks
+
 ### Repository Syncing:
 - Use the `scripts/sync-repos.sh` script to sync changes from the private SAAS repository to the public open source repository
 - The script preserves the `.gitignore` file in the public repository to prevent SAAS code from being published
@@ -58,8 +111,6 @@ When implementing new features, consider whether they should be:
 1. Core features available in both versions
 2. Premium features exclusive to the SAAS version
 3. Core features with premium enhancements in the SAAS version 
-
-
 
 ### Feature Flags: 
 
