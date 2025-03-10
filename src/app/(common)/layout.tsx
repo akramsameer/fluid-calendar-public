@@ -10,6 +10,8 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AppNav } from "@/components/navigation/AppNav";
 import { DndProvider } from "@/components/dnd/DndProvider";
 import { CommandPalette } from "@/components/ui/command-palette";
+import { CommandPaletteHint } from "@/components/ui/command-palette-hint";
+import { CommandPaletteFab } from "@/components/ui/command-palette-fab";
 import { ShortcutsModal } from "@/components/ui/shortcuts-modal";
 import { useShortcutsStore } from "@/store/shortcuts";
 import { usePathname } from "next/navigation";
@@ -81,6 +83,8 @@ export default function RootLayout({
                   open={commandPaletteOpen}
                   onOpenChange={setCommandPaletteOpen}
                 />
+                <CommandPaletteHint />
+                <CommandPaletteFab />
                 <ShortcutsModal
                   isOpen={shortcutsOpen}
                   onClose={() => setShortcutsOpen(false)}

@@ -5,15 +5,29 @@ class CommandRegistryImpl {
   private commands: CommandRegistry = new Map();
 
   register(command: Command) {
+    console.log(
+      `Registering command: ${command.id} with shortcut: ${command.shortcut}`
+    );
+    if (!command.id) {
+      console.error("Attempted to register command without ID:", command);
+      return;
+    }
     this.commands.set(command.id, command);
   }
 
   unregister(commandId: string) {
+    console.log(`Unregistering command: ${commandId}`);
+    if (!commandId) {
+      console.error("Attempted to unregister command without ID");
+      return;
+    }
     this.commands.delete(commandId);
   }
 
   getAll(): Command[] {
-    return Array.from(this.commands.values());
+    const commands = Array.from(this.commands.values());
+    console.log(`Getting all commands: ${commands.length} commands found`);
+    return commands;
   }
 
   getBySection(section: Command["section"]): Command[] {
@@ -35,8 +49,11 @@ class CommandRegistryImpl {
   async execute(commandId: string, router?: AppRouterInstance) {
     const command = this.commands.get(commandId);
     if (!command) {
+      console.error(`Command ${commandId} not found`);
       throw new Error(`Command ${commandId} not found`);
     }
+
+    console.log(`Executing command: ${commandId}`);
 
     if (
       command.context?.navigateIfNeeded &&
@@ -46,13 +63,21 @@ class CommandRegistryImpl {
       const currentPath = window.location.pathname;
       if (currentPath !== command.context.requiredPath) {
         // If we're not on the required path, navigate first
+        console.log(
+          `Navigating to ${command.context.requiredPath} before executing command`
+        );
         await router.push(command.context.requiredPath);
         // Wait for navigation
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
 
-    return command.perform(router);
+    try {
+      return await command.perform(router);
+    } catch (error) {
+      console.error(`Error executing command ${commandId}:`, error);
+      throw error;
+    }
   }
 }
 
