@@ -19,6 +19,13 @@ export function useCommands() {
   const pathname = usePathname();
   const router = useRouter();
 
+  console.log(
+    "useCommands initialized with router:",
+    !!router,
+    "pathname:",
+    pathname
+  );
+
   // Register commands on mount
   useEffect(() => {
     // Clear existing commands to avoid duplicates
@@ -99,13 +106,51 @@ export function useCommands() {
       const key = e.key.toLowerCase();
       const mappedKey = keyMap[key] || key;
 
+      // Get the current path for context checking
+      const currentPath = pathname || "/";
+
+      // Helper function to check if a command is valid for the current path
+      const isCommandValidForPath = (command: Command): boolean => {
+        // If no context or no requiredPath, command is valid everywhere
+        if (!command.context || !command.context.requiredPath) return true;
+
+        // If the command's required path matches the current path, it's valid
+        if (command.context.requiredPath === currentPath) return true;
+
+        // If the command has navigateIfNeeded=true, it's valid on any path
+        if (command.context.navigateIfNeeded) return true;
+
+        // Otherwise, it's not valid
+        return false;
+      };
+
+      // Get all commands and filter by current path
+      const allCommands = commandRegistry.getAll();
+      const validCommands = allCommands.filter(isCommandValidForPath);
+
+      console.log(
+        `Current path: ${currentPath}, Valid commands: ${validCommands.length}/${allCommands.length}`
+      );
+
+      if (allCommands.length !== validCommands.length) {
+        console.log(
+          "Filtered out commands:",
+          allCommands
+            .filter((cmd) => !isCommandValidForPath(cmd))
+            .map((cmd) => ({
+              id: cmd.id,
+              shortcut: cmd.shortcut,
+              requiredPath: cmd.context?.requiredPath,
+            }))
+        );
+      }
+
       // For arrow keys, we want to handle them directly
       if (mappedKey === "left" || mappedKey === "right") {
         console.log("Arrow key pressed:", mappedKey);
 
-        // Find a command with this shortcut
-        const commands = commandRegistry.getAll();
-        const command = commands.find((cmd) => cmd.shortcut === mappedKey);
+        // Find a command with this shortcut that's valid for the current path
+        const command = validCommands.find((cmd) => cmd.shortcut === mappedKey);
 
         if (command) {
           console.log("Command found for arrow key:", command.id);
@@ -128,9 +173,8 @@ export function useCommands() {
 
         console.log("Modifier shortcut pressed:", shortcut);
 
-        // Find a command with this shortcut
-        const commands = commandRegistry.getAll();
-        const command = commands.find((cmd) => cmd.shortcut === shortcut);
+        // Find a command with this shortcut that's valid for the current path
+        const command = validCommands.find((cmd) => cmd.shortcut === shortcut);
 
         if (command) {
           console.log("Command found:", command.id);
@@ -162,19 +206,41 @@ export function useCommands() {
           pressedKeys.slice(-1).join(""), // Just the last key
         ];
 
-        console.log("Key combinations:", keyCombinations);
+        console.log(
+          "Key combinations:",
+          keyCombinations,
+          "Pressed keys:",
+          pressedKeys
+        );
 
-        // Find a command with any of these shortcuts
-        const commands = commandRegistry.getAll();
+        // Find a command with any of these shortcuts that's valid for the current path
         for (const combo of keyCombinations) {
-          const command = commands.find((cmd) => cmd.shortcut === combo);
+          const command = validCommands.find((cmd) => cmd.shortcut === combo);
           if (command) {
             console.log("Command found:", command.id, "for combo:", combo);
             e.preventDefault();
+            console.log("Executing command with router:", !!router);
             await commandRegistry.execute(command.id, router);
             // Reset the sequence after executing a command
             pressedKeys = [];
             break;
+          } else {
+            // Check if there's a command with this shortcut that was filtered out
+            const filteredCommand = allCommands.find(
+              (cmd) => cmd.shortcut === combo && !isCommandValidForPath(cmd)
+            );
+            if (filteredCommand) {
+              console.log(
+                "Command found but filtered out:",
+                filteredCommand.id,
+                "for combo:",
+                combo,
+                "requiredPath:",
+                filteredCommand.context?.requiredPath,
+                "navigateIfNeeded:",
+                filteredCommand.context?.navigateIfNeeded
+              );
+            }
           }
         }
       }
@@ -197,8 +263,10 @@ export function useCommands() {
       getCommandsBySection: (section: Command["section"]) =>
         commandRegistry.getBySection(section),
       searchCommands: (query: string) => commandRegistry.search(query),
-      executeCommand: (commandId: string) =>
-        commandRegistry.execute(commandId, router),
+      executeCommand: (commandId: string) => {
+        console.log("executeCommand called with router:", !!router);
+        return commandRegistry.execute(commandId, router);
+      },
     }),
     [router]
   );

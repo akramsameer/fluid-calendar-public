@@ -53,22 +53,41 @@ class CommandRegistryImpl {
       throw new Error(`Command ${commandId} not found`);
     }
 
-    console.log(`Executing command: ${commandId}`);
+    console.log(`Executing command: ${commandId}`, {
+      id: command.id,
+      shortcut: command.shortcut,
+      requiredPath: command.context?.requiredPath,
+      navigateIfNeeded: command.context?.navigateIfNeeded,
+      hasRouter: !!router,
+    });
 
-    if (
-      command.context?.navigateIfNeeded &&
-      typeof window !== "undefined" &&
-      router
-    ) {
+    // Check if the command has a required path
+    if (command.context?.requiredPath && typeof window !== "undefined") {
       const currentPath = window.location.pathname;
+
+      // If we're not on the required path
       if (currentPath !== command.context.requiredPath) {
-        // If we're not on the required path, navigate first
         console.log(
-          `Navigating to ${command.context.requiredPath} before executing command`
+          `Command ${commandId} requires path ${command.context.requiredPath}, current path is ${currentPath}`
         );
-        await router.push(command.context.requiredPath);
-        // Wait for navigation
-        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // If navigateIfNeeded is true and we have a router, navigate
+        if (command.context.navigateIfNeeded && router) {
+          console.log(
+            `Navigating to ${command.context.requiredPath} before executing command`
+          );
+          await router.push(command.context.requiredPath);
+          // Wait for navigation
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } else if (command.context.navigateIfNeeded && !router) {
+          console.error(
+            `Command ${commandId} needs to navigate but no router was provided`
+          );
+          return; // Don't execute the command if we can't navigate
+        } else {
+          // If navigateIfNeeded is false, log a warning
+          console.log(`Not navigating, command may not work as expected`);
+        }
       }
     }
 
