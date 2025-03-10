@@ -1,9 +1,10 @@
 # FluidCalendar Implementation Plan
 # Random Tasks
 - [ ] add a calculator comparing motion to FC
-- [ ] update apps in google and azure to support fc domain
 - [ ] make cmd+k discoverable
-- [ ] 
+- [ ] hide sponsor in sidebar in saas
+- [ ] add a sidebar thingy in open to tell them to move to saas
+- [ ] scrolling on tasks list is not working well.
 
 # CalDAV Implementation
 ## Phase 1: Setup and Basic Structure ✅

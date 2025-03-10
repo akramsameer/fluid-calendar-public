@@ -9,6 +9,7 @@ import { SystemSettings } from "@/components/settings/SystemSettings";
 import { OutlookTaskSettings } from "@/components/settings/OutlookTaskSettings";
 import { LogViewer } from "@/components/settings/LogViewer";
 import { UserManagement } from "@/components/settings/UserManagement";
+import { ImportExportSettings } from "@/components/settings/ImportExportSettings";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { useAdmin } from "@/hooks/use-admin";
@@ -41,7 +42,8 @@ type SettingsTab =
   | "outlook-tasks"
   | "logs"
   | "user-management"
-  | "waitlist";
+  | "waitlist"
+  | "import-export";
 
 export default function SettingsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -54,6 +56,7 @@ export default function SettingsPage() {
       { id: "calendar", label: "Calendar" },
       { id: "auto-schedule", label: "Auto-Schedule" },
       { id: "outlook-tasks", label: "Outlook Tasks" },
+      { id: "import-export", label: "Import/Export" },
     ] as const;
 
     // Add admin-only tabs
@@ -97,6 +100,7 @@ export default function SettingsPage() {
         "logs",
         "user-management",
         "waitlist",
+        "import-export",
       ];
 
       if (allPossibleTabIds.includes(hash)) {
@@ -166,6 +170,8 @@ export default function SettingsPage() {
         return <LogViewer />;
       case "user-management":
         return <UserManagement />;
+      case "import-export":
+        return <ImportExportSettings />;
       case "waitlist":
         return (
           <Suspense fallback={<div>Loading...</div>}>
