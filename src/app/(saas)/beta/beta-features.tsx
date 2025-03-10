@@ -3,7 +3,6 @@ import {
   Clock,
   Zap,
   Calendar,
-  Users,
   BarChart3,
 } from "lucide-react";
 
