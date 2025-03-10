@@ -27,7 +27,6 @@ import {
   Mail,
   Trash,
   Download,
-  ArrowUpDown,
   Star,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +62,11 @@ export function WaitlistTable() {
   useEffect(() => {
     fetchEntries();
   }, [fetchEntries]);
+
+  // Fetch entries when filters change
+  useEffect(() => {
+    fetchEntries();
+  }, [filters, fetchEntries]);
 
   // Handle sort toggle
   const toggleSort = (field: keyof WaitlistEntry) => {
@@ -373,7 +377,7 @@ export function WaitlistTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">
+              <TableHead className="w-12">
                 <Checkbox
                   checked={
                     selectedEntries.length > 0 &&
@@ -383,70 +387,107 @@ export function WaitlistTable() {
                   aria-label="Select all"
                 />
               </TableHead>
-              <TableHead className="w-[200px]">
-                <div
-                  className="flex items-center cursor-pointer"
-                  onClick={() => toggleSort("email")}
-                >
-                  Email
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("email")}
+              >
+                Email
+                {filters.sortField === "email" && (
+                  <span className="ml-2">
+                    {filters.sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
               </TableHead>
-              <TableHead>
-                <div
-                  className="flex items-center cursor-pointer"
-                  onClick={() => toggleSort("name")}
-                >
-                  Name
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("name")}
+              >
+                Name
+                {filters.sortField === "name" && (
+                  <span className="ml-2">
+                    {filters.sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
               </TableHead>
-              <TableHead>
-                <div
-                  className="flex items-center cursor-pointer"
-                  onClick={() => toggleSort("status")}
-                >
-                  Status
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("status")}
+              >
+                Status
+                {filters.sortField === "status" && (
+                  <span className="ml-2">
+                    {filters.sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
               </TableHead>
-              <TableHead>
-                <div
-                  className="flex items-center cursor-pointer"
-                  onClick={() => toggleSort("createdAt")}
-                >
-                  Joined
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("createdAt")}
+              >
+                Joined
+                {filters.sortField === "createdAt" && (
+                  <span className="ml-2">
+                    {filters.sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
               </TableHead>
-              <TableHead>
-                <div
-                  className="flex items-center cursor-pointer"
-                  onClick={() => toggleSort("referralCount")}
-                >
-                  Referrals
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("referralCount")}
+              >
+                Referrals
+                {filters.sortField === "referralCount" && (
+                  <span className="ml-2">
+                    {filters.sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
               </TableHead>
-              <TableHead>
-                <div
-                  className="flex items-center cursor-pointer"
-                  onClick={() => toggleSort("priorityScore")}
-                >
-                  Priority
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("priorityScore")}
+              >
+                Priority
+                {filters.sortField === "priorityScore" && (
+                  <span className="ml-2">
+                    {filters.sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
               </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {entries.length === 0 ? (
+            {entriesLoading ? (
               <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="h-24 text-center text-muted-foreground"
-                >
+                <TableCell colSpan={8} className="h-24 text-center">
+                  <div className="flex justify-center items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Loading entries...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : entries.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
                   No entries found.
                 </TableCell>
               </TableRow>

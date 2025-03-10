@@ -335,6 +335,11 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
 
       return { filters: updatedFilters };
     });
+
+    // Fetch entries with the updated filters
+    setTimeout(() => {
+      get().fetchEntries();
+    }, 0);
   },
 
   selectEntry: (id: string, selected: boolean) => {

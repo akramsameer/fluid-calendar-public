@@ -53,3 +53,5 @@ node_modules/
 /blog/
 diff.txt
 data/*
+scripts/import-resend-waitlist.js
+scripts/import-resend-waitlist.saas.js
