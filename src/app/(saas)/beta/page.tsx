@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import WaitlistForm from "./waitlist-form";
 import { BetaHero } from "./beta-hero";
 import { BetaFeatures } from "./beta-features";
@@ -26,7 +27,17 @@ export default function BetaPage() {
               join, the sooner you&apos;ll get access!
             </p>
             <div className="mt-8">
-              <WaitlistForm />
+              <Suspense
+                fallback={
+                  <div className="p-4 border rounded animate-pulse">
+                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                  </div>
+                }
+              >
+                <WaitlistForm />
+              </Suspense>
             </div>
           </div>
 

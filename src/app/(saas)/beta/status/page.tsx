@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import StatusForm from "./status-form";
 
 export const metadata: Metadata = {
@@ -22,7 +23,13 @@ export default function StatusPage() {
         </div>
 
         <div className="mt-12">
-          <StatusForm />
+          <Suspense
+            fallback={
+              <div className="text-center py-4">Loading status form...</div>
+            }
+          >
+            <StatusForm />
+          </Suspense>
         </div>
 
         <div className="mt-16 space-y-8">

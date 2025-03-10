@@ -324,11 +324,17 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
   },
 
   setFilters: (filters: Partial<WaitlistFilters>) => {
-    set((state) => ({
-      filters: { ...state.filters, ...filters },
-      // Reset to page 1 if any filter changes except page
-      ...(filters.page === undefined ? { filters: { page: 1 } } : {}),
-    }));
+    set((state) => {
+      // Create the updated filters object
+      const updatedFilters = { ...state.filters, ...filters };
+
+      // Reset page to 1 if any filter changes except page itself
+      if (filters.page === undefined) {
+        updatedFilters.page = 1;
+      }
+
+      return { filters: updatedFilters };
+    });
   },
 
   selectEntry: (id: string, selected: boolean) => {
