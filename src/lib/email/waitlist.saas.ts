@@ -51,6 +51,64 @@ export async function sendWaitlistConfirmationEmail({
       throw new Error(error.message);
     }
 
+    // Send notification to admin
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      try {
+        const { data: adminData, error: adminError } = await resend.emails.send(
+          {
+            from: `Fluid Calendar <${
+              process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
+            }>`,
+            to: adminEmail,
+            subject: "New Waitlist Signup",
+            html: `
+            <div>
+              <h2>New Waitlist Signup</h2>
+              <p>A new user has signed up for the waitlist:</p>
+              <ul>
+                <li><strong>Name:</strong> ${name}</li>
+                <li><strong>Email:</strong> ${email}</li>
+                <li><strong>Position:</strong> ${position}</li>
+                <li><strong>Referral Code:</strong> ${referralCode}</li>
+              </ul>
+            </div>
+          `,
+          }
+        );
+
+        if (adminError) {
+          logger.warn(
+            "Failed to send admin notification for waitlist signup",
+            {
+              error: adminError.message,
+              email: adminEmail,
+            },
+            LOG_SOURCE
+          );
+        } else {
+          logger.info(
+            "Sent admin notification for waitlist signup",
+            { email: adminEmail, messageId: adminData?.id || "unknown" },
+            LOG_SOURCE
+          );
+        }
+      } catch (adminNotificationError) {
+        // Log the error but don't fail the main function
+        logger.warn(
+          "Failed to send admin notification for waitlist signup",
+          {
+            error:
+              adminNotificationError instanceof Error
+                ? adminNotificationError.message
+                : "Unknown error",
+            email: adminEmail,
+          },
+          LOG_SOURCE
+        );
+      }
+    }
+
     logger.info(
       "Sent waitlist confirmation email",
       { email, messageId: data?.id || "unknown" },
