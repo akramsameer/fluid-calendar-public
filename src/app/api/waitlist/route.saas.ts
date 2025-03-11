@@ -14,6 +14,8 @@ const waitlistSchema = z.object({
   name: z.string().optional().nullable(),
   referralCode: z.string().optional().nullable(),
   acceptTerms: z.boolean().optional(),
+  // Honeypot field - should be empty
+  website: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -35,7 +37,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, name, referralCode } = result.data;
+    const { email, name, referralCode, website } = result.data;
+
+    // Bot detection: Check if honeypot field is filled
+    if (website && website.length > 0) {
+      logger.warn(
+        "Bot submission detected via honeypot field",
+        { email },
+        LOG_SOURCE
+      );
+      // Return a 200 status to avoid giving feedback to bots
+      // but don't actually process the submission
+      return NextResponse.json(
+        {
+          message: "Your submission is being processed",
+          requiresVerification: true,
+        },
+        { status: 200 }
+      );
+    }
 
     // Check if user is already on the waitlist
     const existingEntry = await prisma.waitlist.findUnique({

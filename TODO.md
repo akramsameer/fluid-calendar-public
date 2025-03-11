@@ -1,7 +1,5 @@
 # FluidCalendar Implementation Plan
 # Random Tasks
-- [ ] simple recaptcha
-- [ ] verify emails for signups and waitlist
 - [ ] add a calculator comparing motion to FC
 - [ ] add a sidebar thingy in open to tell them to move to saas
 - [ ] scrolling on tasks list is not working well.

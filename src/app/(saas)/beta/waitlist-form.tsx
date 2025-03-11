@@ -24,6 +24,9 @@ const formSchema = z.object({
   acceptTerms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and privacy policy",
   }),
+  website: z.string().refine((val) => val === "", {
+    message: "This field should be left empty",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -48,6 +51,7 @@ export default function WaitlistForm() {
       email: "",
       name: "",
       acceptTerms: false,
+      website: "",
     },
   });
 
@@ -59,6 +63,7 @@ export default function WaitlistForm() {
         name: data.name || undefined,
         referralCode: referralCode || null,
         acceptTerms: data.acceptTerms,
+        website: data.website,
       });
 
       const response = await fetch("/api/waitlist", {
@@ -71,6 +76,7 @@ export default function WaitlistForm() {
           name: data.name || undefined,
           referralCode: referralCode || null,
           acceptTerms: data.acceptTerms,
+          website: data.website,
         }),
       });
 
@@ -175,6 +181,17 @@ export default function WaitlistForm() {
           </p>
         </div>
       )}
+
+      <div className="hidden" aria-hidden="true" style={{ display: "none" }}>
+        <Label htmlFor="website">Website (leave this empty)</Label>
+        <Input
+          id="website"
+          type="text"
+          autoComplete="off"
+          tabIndex={-1}
+          {...register("website")}
+        />
+      </div>
 
       <div className="flex items-start space-x-2">
         <Checkbox
