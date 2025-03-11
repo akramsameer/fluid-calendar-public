@@ -80,7 +80,7 @@ export async function PUT(
 
     const json = await request.json();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { tagIds, project, projectId, ...updates } = json;
+    const { tagIds, project, projectId, userId: _, ...updates } = json;
 
     // Set completedAt when task is marked as completed
     if (

@@ -98,11 +98,13 @@ function SortableHeader({
   onSort,
   className = "",
 }: {
-  column: "title" | "dueDate" | "status" | "project";
+  column: "title" | "dueDate" | "status" | "project" | "schedule";
   label: string;
   currentSort: string;
   direction: "asc" | "desc";
-  onSort: (column: "title" | "dueDate" | "status" | "project") => void;
+  onSort: (
+    column: "title" | "dueDate" | "status" | "project" | "schedule"
+  ) => void;
   className?: string;
 }) {
   return (
@@ -323,11 +325,7 @@ function EditableCell({ task, field, value, onSave }: EditableCellProps) {
             <div className="text-sm font-medium text-foreground task-title">
               {value}
             </div>
-            {task.description && (
-              <div className="text-xs text-muted-foreground line-clamp-1 task-description">
-                {task.description}
-              </div>
-            )}
+
             {task.tags.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {task.tags.map((tag) => (
@@ -968,6 +966,26 @@ export function TaskList({
           if (!a.project?.name) return 1;
           if (!b.project?.name) return -1;
           return direction * a.project.name.localeCompare(b.project.name);
+        case "schedule":
+          // First sort by auto-scheduled vs manual
+          if (a.isAutoScheduled !== b.isAutoScheduled) {
+            return direction * (a.isAutoScheduled ? -1 : 1);
+          }
+          // Then sort by scheduled start time
+          if (a.isAutoScheduled && b.isAutoScheduled) {
+            if (!a.scheduledStart) return 1;
+            if (!b.scheduledStart) return -1;
+            return (
+              direction *
+              (newDate(a.scheduledStart).getTime() -
+                newDate(b.scheduledStart).getTime())
+            );
+          }
+          // Default to creation date for manual tasks
+          return (
+            direction *
+            (newDate(b.createdAt).getTime() - newDate(a.createdAt).getTime())
+          );
         default:
           return (
             direction *
@@ -1060,7 +1078,10 @@ export function TaskList({
       </div>
 
       <div className="flex-1 overflow-hidden flex flex-col min-h-0 bg-background border rounded-lg">
-        <div className="overflow-auto">
+        <div
+          className="overflow-auto"
+          style={{ maxHeight: "calc(100vh - 250px)" }}
+        >
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted sticky top-0">
               <tr>
@@ -1123,12 +1144,13 @@ export function TaskList({
                   onSort={handleSort}
                   className="w-40"
                 />
-                <th
-                  scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-                >
-                  Schedule
-                </th>
+                <SortableHeader
+                  column="schedule"
+                  label="Schedule"
+                  currentSort={sortBy}
+                  direction={sortDirection}
+                  onSort={handleSort}
+                />
                 <th scope="col" className="relative px-3 py-2 w-10">
                   <span className="sr-only">Actions</span>
                 </th>

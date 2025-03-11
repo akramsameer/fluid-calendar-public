@@ -2,14 +2,13 @@
 # Random Tasks
 - [ ] add a calculator comparing motion to FC
 - [ ] add a sidebar thingy in open to tell them to move to saas
-- [ ] scrolling on tasks list is not working well.
 - [ ] auto schedule working hours in settings using 24 instead am/pm
 - [ ] improve auto scheduling performance
 - [ ] improve task lists and focus view
   - [ ] add view for scheduled tasks and over due
-  - [ ] sort by scheduled time
 - [ ] background jobs
 - [ ] import outlook tasks not working
+- [ ] add a flag that auto schedule needs to run instead of automatically auto scheduling
 
 # CalDAV Implementation
 ## Phase 1: Setup and Basic Structure ✅

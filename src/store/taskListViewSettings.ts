@@ -4,7 +4,7 @@ import { TaskStatus, EnergyLevel, TimePreference } from "@/types/task";
 
 interface TaskListViewSettings {
   // Sort settings
-  sortBy: "dueDate" | "title" | "status" | "project";
+  sortBy: "dueDate" | "title" | "status" | "project" | "schedule";
   sortDirection: "asc" | "desc";
 
   // Filter settings
