@@ -28,7 +28,7 @@ model ConnectedAccount {
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
 
-  @@unique([provider, email])
+  @@unique([userId, provider, email])
   @@index([userId])
 }
 
