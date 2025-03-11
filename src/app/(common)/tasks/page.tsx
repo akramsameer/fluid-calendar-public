@@ -15,6 +15,7 @@ import { useTaskModalStore } from "@/store/taskModal";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { toast } from "sonner";
 
 export default function TasksPage() {
   const {
@@ -86,11 +87,18 @@ export default function TasksPage() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, tags, createdAt, updatedAt, project, ...updates } = task;
     console.log("Updating task:", { id, updates });
-    await updateTask(id, updates);
-    await fetchTasks();
-    // If projectId was changed, refresh projects to update task counts
-    if ("projectId" in updates) {
-      await fetchProjects();
+    try {
+      await updateTask(id, updates);
+      await fetchTasks();
+      // If projectId was changed, refresh projects to update task counts
+      if ("projectId" in updates) {
+        await fetchProjects();
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      toast.error("Failed to update task", {
+        description: "Please try again later.",
+      });
     }
   };
 
@@ -203,7 +211,7 @@ export default function TasksPage() {
         {loading && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
             <div className="bg-background rounded-lg p-4 shadow-lg border">
-            <LoadingSpinner size="lg" />
+              <LoadingSpinner size="lg" />
             </div>
           </div>
         )}

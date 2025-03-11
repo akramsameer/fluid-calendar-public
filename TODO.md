@@ -6,6 +6,7 @@
 - [ ] improve auto scheduling performance
 - [ ] improve task lists and focus view
   - [ ] add view for scheduled tasks and over due
+  - [ ] add more sortable headers
 - [ ] background jobs
 - [ ] import outlook tasks not working
 - [ ] add a flag that auto schedule needs to run instead of automatically auto scheduling
