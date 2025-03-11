@@ -401,6 +401,20 @@ model Log {
   @@index([source, level])
 }
 
+model PendingWaitlist {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  name               String?
+  referralCode       String? // Referral code used during signup
+  verificationToken  String   @unique
+  verificationExpiry DateTime
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([verificationToken])
+  @@index([email])
+}
+
 model Waitlist {
   id               String    @id @default(cuid())
   email            String    @unique

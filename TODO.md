@@ -1,9 +1,17 @@
 # FluidCalendar Implementation Plan
 # Random Tasks
+- [ ] simple recaptcha
+- [ ] verify emails for signups and waitlist
 - [ ] add a calculator comparing motion to FC
 - [ ] add a sidebar thingy in open to tell them to move to saas
 - [ ] scrolling on tasks list is not working well.
-- [ ] improve shorcuts and avoid gc type shortcuts
+- [ ] auto schedule working hours in settings using 24 instead am/pm
+- [ ] improve auto scheduling performance
+- [ ] improve task lists and focus view
+  - [ ] add view for scheduled tasks and over due
+  - [ ] sort by scheduled time
+- [ ] background jobs
+- [ ] import outlook tasks not working
 
 # CalDAV Implementation
 ## Phase 1: Setup and Basic Structure ✅

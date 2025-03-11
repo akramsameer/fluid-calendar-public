@@ -4,6 +4,12 @@ import { logger } from "@/lib/logger";
 const LOG_SOURCE = "WaitlistEmail";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+/**
+ * Utility function to delay execution
+ * @param ms Milliseconds to delay
+ */
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 interface WaitlistConfirmationEmailProps {
   email: string;
   name: string;
@@ -47,6 +53,9 @@ export async function sendWaitlistConfirmationEmail({
       html,
     });
 
+    // Add delay after Resend API call to avoid rate limiting
+    await delay(1000);
+
     if (error) {
       throw new Error(error.message);
     }
@@ -76,6 +85,9 @@ export async function sendWaitlistConfirmationEmail({
           `,
           }
         );
+
+        // Add delay after Resend API call to avoid rate limiting
+        await delay(1000);
 
         if (adminError) {
           logger.warn(
@@ -205,6 +217,9 @@ export async function sendInvitationEmail({
       html,
     });
 
+    // Add delay after Resend API call to avoid rate limiting
+    await delay(1000);
+
     if (error) {
       throw new Error(error.message);
     }
@@ -326,6 +341,9 @@ export async function sendReferralMilestoneEmail({
       subject: getReferralEmailSubject(notificationType),
       html,
     });
+
+    // Add delay after Resend API call to avoid rate limiting
+    await delay(1000);
 
     if (error) {
       throw new Error(error.message);
@@ -486,6 +504,9 @@ export async function sendReminderEmail({
       html,
     });
 
+    // Add delay after Resend API call to avoid rate limiting
+    await delay(1000);
+
     if (error) {
       throw new Error(error.message);
     }
@@ -524,4 +545,145 @@ function getDefaultReminderTemplate(): string {
 <a href="{{invitationLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Join the Beta</a>
 <p>We're excited to have you try out Fluid Calendar!</p>
   `;
+}
+
+export interface VerificationEmailProps {
+  email: string;
+  name: string;
+  verificationToken: string;
+  expirationDate: Date;
+}
+
+/**
+ * Sends a verification email to a user who signed up for the waitlist
+ */
+export async function sendVerificationEmail({
+  email,
+  name,
+  verificationToken,
+  expirationDate,
+}: VerificationEmailProps) {
+  try {
+    // Generate the verification link
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const verificationLink = `${baseUrl}/beta/verify?token=${verificationToken}`;
+
+    // Format the expiration date
+    const formattedExpirationDate = expirationDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Create HTML email content
+    const html = `
+      <h1>Verify Your Email for Fluid Calendar Waitlist</h1>
+      <p>Hi ${name},</p>
+      <p>Thanks for signing up for the Fluid Calendar waitlist! Please verify your email address to complete your registration.</p>
+      <p>Click the button below to verify your email:</p>
+      <a href="${verificationLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Verify Email</a>
+      <p>This verification link will expire on ${formattedExpirationDate}.</p>
+      <p>If you didn't sign up for the Fluid Calendar waitlist, you can safely ignore this email.</p>
+    `;
+
+    // Send the email
+    const { data, error } = await resend.emails.send({
+      from: `Fluid Calendar <${
+        process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
+      }>`,
+      to: email,
+      subject: "Verify Your Email for Fluid Calendar Waitlist",
+      html,
+    });
+
+    // Add delay after Resend API call to avoid rate limiting
+    await delay(1000);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    logger.info(
+      "Sent verification email",
+      { email, messageId: data?.id || "unknown" },
+      LOG_SOURCE
+    );
+
+    return { success: true, messageId: data?.id };
+  } catch (error) {
+    logger.error(
+      "Failed to send verification email",
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+        email,
+      },
+      LOG_SOURCE
+    );
+
+    throw error;
+  }
+}
+
+/**
+ * Adds a contact to the Resend audience and sends a waitlist confirmation email
+ */
+export async function addToAudienceAndsendWaitlistConfirmationEmail(props: {
+  email: string;
+  name: string;
+  referralCode: string;
+  position: number;
+  waitlistTemplate?: string;
+}) {
+  const { email, name, referralCode, position, waitlistTemplate } = props;
+
+  try {
+    // Create contact in Resend audience
+    try {
+      await resend.contacts.create({
+        email,
+        firstName: name || undefined,
+        unsubscribed: false,
+        audienceId:
+          process.env.RESEND_AUDIENCE_ID ||
+          "5eeff6c8-df9f-4dfe-9fb2-e93130d93686",
+      });
+
+      // Add delay after Resend API call to avoid rate limiting
+      await delay(1000);
+
+      logger.info("Added contact to Resend audience", { email }, LOG_SOURCE);
+    } catch (contactError) {
+      // Log but continue if contact creation fails
+      logger.error(
+        "Failed to add contact to Resend audience",
+        {
+          error:
+            contactError instanceof Error
+              ? contactError.message
+              : "Unknown error",
+          email,
+        },
+        LOG_SOURCE
+      );
+    }
+
+    // Send the waitlist confirmation email
+    await sendWaitlistConfirmationEmail({
+      email,
+      name,
+      referralCode,
+      position,
+      waitlistTemplate,
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error(
+      "Error adding to audience and sending waitlist confirmation email",
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      LOG_SOURCE
+    );
+    throw error;
+  }
 }

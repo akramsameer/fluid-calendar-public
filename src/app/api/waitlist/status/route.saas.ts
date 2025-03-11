@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { logger } from "@/lib/logger";
+import { getWaitlistPosition } from "@/lib/waitlist/position";
 
 const LOG_SOURCE = "WaitlistStatusAPI";
 const prisma = new PrismaClient();
@@ -23,6 +24,25 @@ export async function GET(request: NextRequest) {
     const waitlistEntry = await prisma.waitlist.findUnique({
       where: { email },
     });
+
+    // Check if there's a pending verification
+    const pendingVerification = await prisma.pendingWaitlist.findUnique({
+      where: { email },
+    });
+
+    if (pendingVerification) {
+      // Email is pending verification
+      return NextResponse.json(
+        {
+          found: true,
+          pendingVerification: true,
+          email,
+          message:
+            "Your email is pending verification. Please check your inbox for the verification link.",
+        },
+        { status: 200 }
+      );
+    }
 
     if (!waitlistEntry) {
       return NextResponse.json(
@@ -60,18 +80,18 @@ export async function GET(request: NextRequest) {
           : `Approximately ${weeksEstimate} weeks`;
     }
 
-    return NextResponse.json(
-      {
-        found: true,
-        position,
-        totalWaitlist,
-        referralCount: waitlistEntry.referralCount || 0,
-        referralCode: waitlistEntry.referralCode,
-        status: waitlistEntry.status,
-        estimatedTime,
-      },
-      { status: 200 }
-    );
+    // Return the status information
+    return NextResponse.json({
+      found: true,
+      position,
+      totalWaitlist,
+      referralCount: waitlistEntry.referralCount,
+      referralCode: waitlistEntry.referralCode,
+      status: waitlistEntry.status,
+      estimatedTime,
+      showPosition: betaSettings?.showQueuePosition || true,
+      showTotal: betaSettings?.showTotalWaitlist || true,
+    });
   } catch (error) {
     logger.error(
       "Error checking waitlist status",
@@ -84,27 +104,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// Helper function to get waitlist position based on priority score
-async function getWaitlistPosition(userId: string): Promise<number> {
-  const userEntry = await prisma.waitlist.findUnique({
-    where: { id: userId },
-    select: { priorityScore: true },
-  });
-
-  if (!userEntry) return 0;
-
-  // Count entries with higher or equal priority score
-  // This is a simple implementation - could be optimized for large waitlists
-  const position = await prisma.waitlist.count({
-    where: {
-      status: "WAITING",
-      priorityScore: {
-        gte: userEntry.priorityScore,
-      },
-    },
-  });
-
-  return position;
 }

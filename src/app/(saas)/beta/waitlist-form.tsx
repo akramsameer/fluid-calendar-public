@@ -32,6 +32,7 @@ export default function WaitlistForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [verificationRequired, setVerificationRequired] = useState(false);
   const searchParams = useSearchParams();
   const referralCode = searchParams.get("ref");
 
@@ -91,7 +92,16 @@ export default function WaitlistForm() {
 
       setSubmittedEmail(data.email);
       setIsSuccess(true);
-      toast.success("You've been added to the waitlist!");
+
+      // Check if verification is required
+      if (result.requiresVerification) {
+        setVerificationRequired(true);
+        toast.success(
+          "Please check your email to verify your address and complete your signup."
+        );
+      } else {
+        toast.success("You've been added to the waitlist!");
+      }
     } catch (error) {
       console.error("Error joining waitlist:", error);
       toast.error(
@@ -104,36 +114,29 @@ export default function WaitlistForm() {
 
   if (isSuccess) {
     return (
-      <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800">
-        <h3 className="text-lg font-medium text-green-800 dark:text-green-300">
-          You&apos;re on the list!
-        </h3>
-        <p className="mt-2 text-green-700 dark:text-green-400">
-          Thank you for joining the Fluid Calendar beta waitlist. We&apos;ve
-          sent you an email with more details and your referral link.
-        </p>
-        <div className="mt-4">
-          <a
-            href={`/beta/status?email=${encodeURIComponent(submittedEmail)}`}
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            <span>Check your waitlist status</span>
-            <svg
-              className="ml-1 w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </a>
-        </div>
+      <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded border border-green-100 dark:border-green-800 text-center">
+        {verificationRequired ? (
+          <>
+            <h3 className="text-lg font-medium text-green-800 dark:text-green-300">
+              Check your email
+            </h3>
+            <p className="mt-2 text-sm text-green-700 dark:text-green-400">
+              We&apos;ve sent a verification link to{" "}
+              <strong>{submittedEmail}</strong>. Please check your inbox and
+              click the link to complete your waitlist signup.
+            </p>
+          </>
+        ) : (
+          <>
+            <h3 className="text-lg font-medium text-green-800 dark:text-green-300">
+              You&apos;re on the waitlist!
+            </h3>
+            <p className="mt-2 text-sm text-green-700 dark:text-green-400">
+              We&apos;ve sent a confirmation email to{" "}
+              <strong>{submittedEmail}</strong> with your waitlist details.
+            </p>
+          </>
+        )}
       </div>
     );
   }

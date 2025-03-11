@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import WaitlistStatus from "./waitlist-status";
 
 const formSchema = z.object({
@@ -26,11 +26,16 @@ interface WaitlistStatusData {
   referralCode: string;
   status: string;
   estimatedTime?: string;
+  showPosition?: boolean;
+  showTotal?: boolean;
 }
 
 export default function StatusForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusData, setStatusData] = useState<WaitlistStatusData | null>(null);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [resendingVerification, setResendingVerification] = useState(false);
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
@@ -55,6 +60,7 @@ export default function StatusForm() {
 
   async function onSubmit(data: FormValues) {
     setIsSubmitting(true);
+    setPendingVerification(false);
     try {
       const response = await fetch(
         `/api/waitlist/status?email=${encodeURIComponent(data.email)}`
@@ -65,7 +71,10 @@ export default function StatusForm() {
         throw new Error(result.message || "Failed to check waitlist status");
       }
 
-      if (result.found) {
+      if (result.pendingVerification) {
+        setPendingVerification(true);
+        setPendingEmail(data.email);
+      } else if (result.found) {
         setStatusData(result);
       } else {
         toast.error("Email not found in waitlist");
@@ -82,6 +91,38 @@ export default function StatusForm() {
     }
   }
 
+  async function handleResendVerification() {
+    if (!pendingEmail) return;
+
+    setResendingVerification(true);
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: pendingEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to resend verification email");
+      }
+
+      toast.success("Verification email resent. Please check your inbox.");
+    } catch (error) {
+      console.error("Error resending verification:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to resend verification email"
+      );
+    } finally {
+      setResendingVerification(false);
+    }
+  }
+
   if (statusData) {
     return (
       <WaitlistStatus data={statusData} onBack={() => setStatusData(null)} />
@@ -90,6 +131,40 @@ export default function StatusForm() {
 
   return (
     <div className="max-w-md mx-auto">
+      {pendingVerification ? (
+        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded border border-yellow-100 dark:border-yellow-800 mb-4">
+          <div className="flex items-start">
+            <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                Email verification required
+              </h3>
+              <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-400">
+                Your email address needs to be verified before you can check
+                your waitlist status. We sent a verification link to{" "}
+                <strong>{pendingEmail}</strong>.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={handleResendVerification}
+                disabled={resendingVerification}
+              >
+                {resendingVerification ? (
+                  <>
+                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Resend verification email"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <Label htmlFor="email">Email address</Label>
