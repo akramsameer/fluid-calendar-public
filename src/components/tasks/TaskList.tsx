@@ -135,6 +135,22 @@ export function TaskList({
           if (!a.project?.name) return 1;
           if (!b.project?.name) return -1;
           return direction * a.project.name.localeCompare(b.project.name);
+        case "priority":
+          if (!a.priority) return 1;
+          if (!b.priority) return -1;
+          return direction * a.priority.localeCompare(b.priority);
+        case "energyLevel":
+          if (!a.energyLevel) return 1;
+          if (!b.energyLevel) return -1;
+          return direction * a.energyLevel.localeCompare(b.energyLevel);
+        case "preferredTime":
+          if (!a.preferredTime) return 1;
+          if (!b.preferredTime) return -1;
+          return direction * a.preferredTime.localeCompare(b.preferredTime);
+        case "duration":
+          if (!a.duration) return 1;
+          if (!b.duration) return -1;
+          return direction * (a.duration - b.duration);
         case "schedule":
           // First sort by auto-scheduled vs manual
           if (a.isAutoScheduled !== b.isAutoScheduled) {
@@ -260,12 +276,14 @@ export function TaskList({
                 >
                   {/* Drag handle column */}
                 </th>
-                <th
-                  scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-32"
-                >
-                  Status
-                </th>
+                <SortableHeader
+                  column="status"
+                  label="Status"
+                  currentSort={sortBy}
+                  direction={sortDirection}
+                  onSort={handleSort}
+                  className="w-32"
+                />
                 <SortableHeader
                   column="title"
                   label="Title"
@@ -273,24 +291,30 @@ export function TaskList({
                   direction={sortDirection}
                   onSort={handleSort}
                 />
-                <th
-                  scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-32"
-                >
-                  Priority
-                </th>
-                <th
-                  scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-32"
-                >
-                  Energy
-                </th>
-                <th
-                  scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-32"
-                >
-                  Time
-                </th>
+                <SortableHeader
+                  column="priority"
+                  label="Priority"
+                  currentSort={sortBy}
+                  direction={sortDirection}
+                  onSort={handleSort}
+                  className="w-32"
+                />
+                <SortableHeader
+                  column="energyLevel"
+                  label="Energy"
+                  currentSort={sortBy}
+                  direction={sortDirection}
+                  onSort={handleSort}
+                  className="w-32"
+                />
+                <SortableHeader
+                  column="preferredTime"
+                  label="Time"
+                  currentSort={sortBy}
+                  direction={sortDirection}
+                  onSort={handleSort}
+                  className="w-32"
+                />
                 <SortableHeader
                   column="dueDate"
                   label="Due Date"
@@ -299,12 +323,14 @@ export function TaskList({
                   onSort={handleSort}
                   className="w-40"
                 />
-                <th
-                  scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-20"
-                >
-                  Duration
-                </th>
+                <SortableHeader
+                  column="duration"
+                  label="Duration"
+                  currentSort={sortBy}
+                  direction={sortDirection}
+                  onSort={handleSort}
+                  className="w-20"
+                />
                 <SortableHeader
                   column="project"
                   label="Project"

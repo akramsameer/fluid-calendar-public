@@ -1,7 +1,16 @@
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { cn } from "@/lib/utils";
 
-type SortableColumn = "title" | "dueDate" | "status" | "project" | "schedule";
+type SortableColumn =
+  | "title"
+  | "dueDate"
+  | "status"
+  | "project"
+  | "schedule"
+  | "priority"
+  | "energyLevel"
+  | "preferredTime"
+  | "duration";
 
 interface SortableHeaderProps {
   column: SortableColumn;
