@@ -25,7 +25,7 @@ export default function VerifiedPageClient() {
           </div>
           <CardTitle className="text-center">Email Verified!</CardTitle>
           <CardDescription className="text-center">
-            You&apos;ve successfully joined the Fluid Calendar waitlist
+            You&apos;ve successfully joined the FluidCalendar waitlist
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

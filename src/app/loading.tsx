@@ -13,7 +13,7 @@ export default function Loading() {
   useEffect(() => {
     setMounted(true);
     // Set document title on the client side
-    document.title = "Loading - Fluid Calendar";
+    document.title = "Loading - FluidCalendar";
   }, []);
 
   // Only render the full content after mounting on the client

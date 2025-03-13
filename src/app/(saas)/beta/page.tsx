@@ -5,9 +5,9 @@ import { BetaHero } from "./beta-hero";
 import { BetaFeatures } from "./beta-features";
 
 export const metadata: Metadata = {
-  title: "Join the Fluid Calendar Beta",
+  title: "Join the FluidCalendar Beta",
   description:
-    "Sign up for early access to Fluid Calendar, the modern calendar and task management app.",
+    "Sign up for early access to FluidCalendar, the modern calendar and task management app.",
 };
 
 export default function BetaPage() {
@@ -22,7 +22,7 @@ export default function BetaPage() {
               Join the Waitlist
             </h2>
             <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Sign up to get early access to Fluid Calendar. We&apos;re inviting
+              Sign up to get early access to FluidCalendar. We&apos;re inviting
               users in batches to ensure the best experience. The sooner you
               join, the sooner you&apos;ll get access!
             </p>

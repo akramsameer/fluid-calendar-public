@@ -10,6 +10,8 @@
 - [ ] add a flag that auto schedule needs to run instead of automatically auto scheduling
 - [ ] add start date to tasks to hide them from view until start date
 - [ ] use task-reminder job for sending reminders
+- [ ] cron job to cleanup logs
+- [ ] cron job to expire waitlist verifications
 
 # CalDAV Implementation
 ## Phase 1: Setup and Basic Structure ✅

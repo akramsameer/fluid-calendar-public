@@ -272,6 +272,7 @@ spec:
       labels:
         app: fluid-calendar-worker
     spec:
+      serviceAccountName: fluid-calendar-sa
       imagePullSecrets:
         - name: do-registry-secret
       initContainers:

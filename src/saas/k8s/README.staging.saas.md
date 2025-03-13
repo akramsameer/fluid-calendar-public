@@ -1,4 +1,4 @@
-# Fluid Calendar SAAS Staging Environment
+# FluidCalendar SAAS Staging Environment
 
 This document describes the staging environment setup for testing the BullMQ and Redis background job processing system without affecting the production environment.
 

@@ -1,6 +1,6 @@
 # CalDAV Integration Plan
 
-This document outlines the plan for adding CalDAV support to Fluid Calendar, enabling users to connect to a wide range of calendar servers that support the CalDAV standard (NextCloud, Fastmail, Baikal, Radicale, etc.).
+This document outlines the plan for adding CalDAV support to FluidCalendar, enabling users to connect to a wide range of calendar servers that support the CalDAV standard (NextCloud, Fastmail, Baikal, Radicale, etc.).
 
 ## Current Architecture Overview
 
@@ -147,7 +147,7 @@ Example of converting between internal format and iCalendar:
 // Internal event to iCalendar
 function convertToICalendar(event: CalendarEventInput): string {
   const calendar = new ICAL.Component(['vcalendar', [], []]);
-  calendar.updatePropertyWithValue('prodid', '-//Fluid Calendar//EN');
+  calendar.updatePropertyWithValue('prodid', '-//FluidCalendar//EN');
   calendar.updatePropertyWithValue('version', '2.0');
   
   const vevent = new ICAL.Component(['vevent', [], []]);

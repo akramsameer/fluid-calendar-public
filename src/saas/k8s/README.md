@@ -1,6 +1,6 @@
-# Fluid Calendar SAAS Kubernetes Deployment
+# FluidCalendar SAAS Kubernetes Deployment
 
-This directory contains the Kubernetes configuration files for deploying the SAAS version of Fluid Calendar to a DigitalOcean Kubernetes cluster.
+This directory contains the Kubernetes configuration files for deploying the SAAS version of FluidCalendar to a DigitalOcean Kubernetes cluster.
 
 ## Files
 

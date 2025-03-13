@@ -1,4 +1,4 @@
-# Fluid Calendar Development Guide
+# FluidCalendar Development Guide
 
 ## Build & Run Commands
 - `npm run dev` - Development server (Turbopack)

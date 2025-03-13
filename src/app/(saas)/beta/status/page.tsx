@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import StatusForm from "./status-form";
 
 export const metadata: Metadata = {
-  title: "Check Your Waitlist Status | Fluid Calendar Beta",
+  title: "Check Your Waitlist Status | FluidCalendar Beta",
   description:
-    "Check your position in the Fluid Calendar beta waitlist and see how to move up the queue.",
+    "Check your position in the FluidCalendar beta waitlist and see how to move up the queue.",
 };
 
 export default function StatusPage() {
@@ -39,8 +39,7 @@ export default function StatusPage() {
             </h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               The more friends you refer, the faster you&apos;ll get access to
-              Fluid Calendar. Each successful referral moves you up in the
-              queue!
+              FluidCalendar. Each successful referral moves you up in the queue!
             </p>
           </div>
 

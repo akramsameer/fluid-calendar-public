@@ -33,7 +33,7 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
 
   const shareOnTwitter = () => {
     const text = encodeURIComponent(
-      `I just joined the Fluid Calendar beta waitlist! Join using my referral link to get early access: ${referralLink}`
+      `I just joined the FluidCalendar beta waitlist! Join using my referral link to get early access: ${referralLink}`
     );
     window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
   };
@@ -154,7 +154,7 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
             You&apos;ve Been Invited!
           </h3>
           <p className="mt-2 text-green-700 dark:text-green-400">
-            Check your email for an invitation to join the Fluid Calendar beta.
+            Check your email for an invitation to join the FluidCalendar beta.
           </p>
           <Button className="mt-4" variant="outline">
             Resend Invitation

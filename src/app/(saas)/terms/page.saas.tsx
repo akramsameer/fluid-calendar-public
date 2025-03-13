@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Fluid Calendar",
-  description: "Terms of Service for Fluid Calendar",
+  title: "Terms of Service | FluidCalendar",
+  description: "Terms of Service for FluidCalendar",
 };
 
 export default function TermsPage() {
@@ -21,8 +21,8 @@ export default function TermsPage() {
           1. Introduction
         </h2>
         <p>
-          Welcome to Fluid Calendar. These Terms of Service govern your use of
-          our website and services. By accessing or using Fluid Calendar, you
+          Welcome to FluidCalendar. These Terms of Service govern your use of
+          our website and services. By accessing or using FluidCalendar, you
           agree to be bound by these Terms.
         </p>
 
@@ -30,7 +30,7 @@ export default function TermsPage() {
           2. Definitions
         </h2>
         <p>
-          <strong>&quot;Service&quot;</strong> refers to the Fluid Calendar
+          <strong>&quot;Service&quot;</strong> refers to the FluidCalendar
           application, website, and any related services.
           <br />
           <strong>&quot;User&quot;</strong> refers to individuals who access or
@@ -97,7 +97,7 @@ export default function TermsPage() {
         </h2>
         <p>
           The Service and its original content, features, and functionality are
-          and will remain the exclusive property of Fluid Calendar and its
+          and will remain the exclusive property of FluidCalendar and its
           licensors. The Service is protected by copyright, trademark, and other
           laws.
         </p>
@@ -121,7 +121,7 @@ export default function TermsPage() {
           8. Limitation of Liability
         </h2>
         <p>
-          In no event shall Fluid Calendar, nor its directors, employees,
+          In no event shall FluidCalendar, nor its directors, employees,
           partners, agents, suppliers, or affiliates, be liable for any
           indirect, incidental, special, consequential, or punitive damages,
           including without limitation, loss of profits, data, use, goodwill, or

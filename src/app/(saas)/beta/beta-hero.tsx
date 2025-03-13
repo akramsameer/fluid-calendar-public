@@ -7,7 +7,7 @@ export function BetaHero() {
             <div className="px-4 sm:px-6 sm:text-center md:mx-auto md:max-w-2xl lg:col-span-12 lg:flex lg:items-center lg:text-left">
               <div>
                 <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl dark:text-white">
-                  <span className="block">Fluid Calendar</span>
+                  <span className="block">FluidCalendar</span>
                   <span className="block text-blue-600 dark:text-blue-400">
                     Beta Program
                   </span>

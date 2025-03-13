@@ -20,7 +20,7 @@ export default function Error({
   useEffect(() => {
     setMounted(true);
     // Set document title on the client side
-    document.title = "Error - Fluid Calendar";
+    document.title = "Error - FluidCalendar";
     // Log the error to an error reporting service
     console.error(error);
   }, [error]);

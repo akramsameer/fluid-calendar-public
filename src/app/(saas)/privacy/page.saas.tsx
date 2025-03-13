@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Fluid Calendar",
-  description: "Privacy Policy for Fluid Calendar",
+  title: "Privacy Policy | FluidCalendar",
+  description: "Privacy Policy for FluidCalendar",
 };
 
 export default function PrivacyPage() {
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           1. Introduction
         </h2>
         <p>
-          At Fluid Calendar, we respect your privacy and are committed to
+          At FluidCalendar, we respect your privacy and are committed to
           protecting your personal data. This Privacy Policy explains how we
           collect, use, and safeguard your information when you use our service.
         </p>

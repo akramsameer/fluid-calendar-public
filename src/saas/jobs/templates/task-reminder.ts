@@ -149,12 +149,12 @@ export function generateTaskReminderHtml(
         </div>
         
         <div style="text-align: center; margin-top: 30px;">
-          <a href="${baseUrl}" class="cta-button">Open Fluid Calendar</a>
+          <a href="${baseUrl}" class="cta-button">Open FluidCalendar</a>
         </div>
         
         <div class="footer">
-          <p>This email was sent to you as part of your Fluid Calendar subscription.</p>
-          <p>© ${new Date().getFullYear()} Fluid Calendar. All rights reserved.</p>
+          <p>This email was sent to you as part of your FluidCalendar subscription.</p>
+          <p>© ${new Date().getFullYear()} FluidCalendar. All rights reserved.</p>
         </div>
       </body>
     </html>
@@ -200,7 +200,7 @@ View your task: ${taskUrl}
 
 Visit your dashboard: ${baseUrl}
 
-This email was sent to you as part of your Fluid Calendar subscription.
-© ${new Date().getFullYear()} Fluid Calendar. All rights reserved.
+This email was sent to you as part of your FluidCalendar subscription.
+© ${new Date().getFullYear()} FluidCalendar. All rights reserved.
   `;
 }

@@ -143,7 +143,7 @@ export default function JoinPageClient() {
               Registration Complete!
             </CardTitle>
             <CardDescription className="text-center">
-              Welcome to Fluid Calendar Beta
+              Welcome to FluidCalendar Beta
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-center">
@@ -232,9 +232,7 @@ export default function JoinPageClient() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center">
-            Join Fluid Calendar Beta
-          </CardTitle>
+          <CardTitle className="text-center">Join FluidCalendar Beta</CardTitle>
           <CardDescription className="text-center">
             {waitlistEntry
               ? "Complete your registration to join the beta program"

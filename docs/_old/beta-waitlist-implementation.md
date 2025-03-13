@@ -1,6 +1,6 @@
 # Beta Waitlist Implementation Guide
 
-This document outlines the implementation plan for the beta waitlist feature in the SAAS version of Fluid Calendar. The feature will allow us to manage a controlled rollout of the application to beta users, with admin controls for inviting users in batches.
+This document outlines the implementation plan for the beta waitlist feature in the SAAS version of FluidCalendar. The feature will allow us to manage a controlled rollout of the application to beta users, with admin controls for inviting users in batches.
 
 ## Database Schema ✅
 

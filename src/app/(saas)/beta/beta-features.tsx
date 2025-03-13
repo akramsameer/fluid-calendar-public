@@ -1,10 +1,4 @@
-import {
-  CalendarDays,
-  Clock,
-  Zap,
-  Calendar,
-  BarChart3,
-} from "lucide-react";
+import { CalendarDays, Clock, Zap, Calendar, BarChart3 } from "lucide-react";
 
 export function BetaFeatures() {
   const features = [
@@ -45,7 +39,7 @@ export function BetaFeatures() {
             Features You&apos;ll Get Access To
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-xl text-gray-500 dark:text-gray-400 sm:mt-4">
-            Fluid Calendar combines the best of calendar and task management in
+            FluidCalendar combines the best of calendar and task management in
             one seamless experience.
           </p>
         </div>

@@ -1,6 +1,5 @@
-
 import { logger } from "../logger";
-import { EmailService } from "./email-service";
+import { EmailService } from "./email-service.saas";
 import { Resend } from "resend";
 
 const LOG_SOURCE = "WaitlistEmail";
@@ -47,9 +46,9 @@ export async function sendWaitlistConfirmationEmail({
 
     // Send the email using the queue
     const { jobId } = await EmailService.sendEmail({
-      from: EmailService.formatSender("Fluid Calendar"),
+      from: EmailService.formatSender("FluidCalendar"),
       to: email,
-      subject: "Welcome to the Fluid Calendar Beta Waitlist",
+      subject: "Welcome to the FluidCalendar Beta Waitlist",
       html,
     });
 
@@ -58,7 +57,7 @@ export async function sendWaitlistConfirmationEmail({
     if (adminEmail) {
       try {
         await EmailService.sendEmail({
-          from: EmailService.formatSender("Fluid Calendar"),
+          from: EmailService.formatSender("FluidCalendar"),
           to: adminEmail,
           subject: "New Waitlist Signup",
           html: `
@@ -119,16 +118,16 @@ export async function sendWaitlistConfirmationEmail({
 
 function getDefaultWaitlistTemplate(): string {
   return `
-<h1>You're on the Fluid Calendar Waitlist!</h1>
+<h1>You're on the FluidCalendar Waitlist!</h1>
 <p>Hi {{name}},</p>
-<p>Thank you for joining the Fluid Calendar waitlist! We'll notify you when your spot is available.</p>
+<p>Thank you for joining the FluidCalendar waitlist! We'll notify you when your spot is available.</p>
 <p>Your current position: {{position}}</p>
 <p>Want to move up the list? Share your referral link with friends:</p>
 <p><strong>{{referralLink}}</strong></p>
 <p>Each person who joins using your link will help you move up in the queue!</p>
 <p>Check your current status anytime:</p>
 <a href="{{statusLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Check Status</a>
-<p>Thank you for your interest in Fluid Calendar!</p>
+<p>Thank you for your interest in FluidCalendar!</p>
 `;
 }
 
@@ -184,9 +183,9 @@ export async function sendInvitationEmail({
 
     // Send the email using the queue
     const { jobId } = await EmailService.sendEmail({
-      from: EmailService.formatSender("Fluid Calendar"),
+      from: EmailService.formatSender("FluidCalendar"),
       to: email,
-      subject: "You're Invited to Join Fluid Calendar Beta!",
+      subject: "You're Invited to Join FluidCalendar Beta!",
       html,
     });
 
@@ -212,13 +211,13 @@ export async function sendInvitationEmail({
  */
 function getDefaultInvitationTemplate(): string {
   return `
-<h1>You're Invited to Join Fluid Calendar Beta!</h1>
+<h1>You're Invited to Join FluidCalendar Beta!</h1>
 <p>Hi {{name}},</p>
-<p>We're excited to invite you to join the Fluid Calendar beta program! Your spot is now available.</p>
-<p>Click the button below to create your account and start using Fluid Calendar:</p>
+<p>We're excited to invite you to join the FluidCalendar beta program! Your spot is now available.</p>
+<p>Click the button below to create your account and start using FluidCalendar:</p>
 <a href="{{invitationLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Join the Beta</a>
 <p>This invitation will expire on {{expirationDate}}.</p>
-<p>Thank you for your interest in Fluid Calendar!</p>
+<p>Thank you for your interest in FluidCalendar!</p>
   `;
 }
 
@@ -296,7 +295,7 @@ export async function sendReferralMilestoneEmail({
 
     // Send the email using the queue
     const { jobId } = await EmailService.sendEmail({
-      from: EmailService.formatSender("Fluid Calendar"),
+      from: EmailService.formatSender("FluidCalendar"),
       to: email,
       subject: getReferralEmailSubject(notificationType),
       html,
@@ -336,13 +335,13 @@ function getReferralEmailSubject(
 ): string {
   switch (notificationType) {
     case "NEW_REFERRAL":
-      return "Someone joined Fluid Calendar using your referral!";
+      return "Someone joined FluidCalendar using your referral!";
     case "MILESTONE":
-      return "You've reached a referral milestone for Fluid Calendar!";
+      return "You've reached a referral milestone for FluidCalendar!";
     case "POSITION_IMPROVEMENT":
-      return "Your position in the Fluid Calendar waitlist has improved!";
+      return "Your position in the FluidCalendar waitlist has improved!";
     default:
-      return "Fluid Calendar Waitlist Update";
+      return "FluidCalendar Waitlist Update";
   }
 }
 
@@ -357,52 +356,52 @@ function getDefaultReferralTemplate(
       return `
 <h1>Someone Joined Using Your Referral!</h1>
 <p>Hi {{name}},</p>
-<p>Great news! {{referredName}} just joined the Fluid Calendar waitlist using your referral link.</p>
+<p>Great news! {{referredName}} just joined the FluidCalendar waitlist using your referral link.</p>
 <p>You now have {{referralCount}} referral(s), which helps improve your position in the queue!</p>
 <p>Keep sharing your referral link to move up even faster:</p>
 <p><strong>{{referralLink}}</strong></p>
 <p>Check your current status anytime:</p>
 <a href="{{statusLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Check Status</a>
-<p>Thank you for spreading the word about Fluid Calendar!</p>
+<p>Thank you for spreading the word about FluidCalendar!</p>
       `;
 
     case "MILESTONE":
       return `
 <h1>Referral Milestone Reached!</h1>
 <p>Hi {{name}},</p>
-<p>Congratulations! You've reached {{milestoneCount}} referrals for Fluid Calendar.</p>
+<p>Congratulations! You've reached {{milestoneCount}} referrals for FluidCalendar.</p>
 <p>This is a significant milestone that has greatly improved your position in the waitlist.</p>
 <p>Keep sharing your referral link to move up even faster:</p>
 <p><strong>{{referralLink}}</strong></p>
 <p>Check your current status anytime:</p>
 <a href="{{statusLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Check Status</a>
-<p>Thank you for your continued support of Fluid Calendar!</p>
+<p>Thank you for your continued support of FluidCalendar!</p>
       `;
 
     case "POSITION_IMPROVEMENT":
       return `
 <h1>Your Waitlist Position Has Improved!</h1>
 <p>Hi {{name}},</p>
-<p>Great news! Your position in the Fluid Calendar waitlist has improved by {{positionImprovement}} spots.</p>
+<p>Great news! Your position in the FluidCalendar waitlist has improved by {{positionImprovement}} spots.</p>
 <p>Your current position is now {{currentPosition}}.</p>
 <p>Keep sharing your referral link to move up even faster:</p>
 <p><strong>{{referralLink}}</strong></p>
 <p>Check your current status anytime:</p>
 <a href="{{statusLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Check Status</a>
-<p>Thank you for your interest in Fluid Calendar!</p>
+<p>Thank you for your interest in FluidCalendar!</p>
       `;
 
     default:
       return `
-<h1>Fluid Calendar Waitlist Update</h1>
+<h1>FluidCalendar Waitlist Update</h1>
 <p>Hi {{name}},</p>
-<p>We have an update about your position in the Fluid Calendar waitlist.</p>
+<p>We have an update about your position in the FluidCalendar waitlist.</p>
 <p>You currently have {{referralCount}} referrals.</p>
 <p>Keep sharing your referral link to move up even faster:</p>
 <p><strong>{{referralLink}}</strong></p>
 <p>Check your current status anytime:</p>
 <a href="{{statusLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Check Status</a>
-<p>Thank you for your interest in Fluid Calendar!</p>
+<p>Thank you for your interest in FluidCalendar!</p>
       `;
   }
 }
@@ -449,9 +448,9 @@ export async function sendReminderEmail({
 
     // Send the email using the queue
     const { jobId } = await EmailService.sendEmail({
-      from: EmailService.formatSender("Fluid Calendar"),
+      from: EmailService.formatSender("FluidCalendar"),
       to: email,
-      subject: "Reminder: Your Fluid Calendar Beta Invitation",
+      subject: "Reminder: Your FluidCalendar Beta Invitation",
       html,
     });
 
@@ -477,13 +476,13 @@ export async function sendReminderEmail({
  */
 function getDefaultReminderTemplate(): string {
   return `
-<h1>Reminder: Your Fluid Calendar Beta Invitation</h1>
+<h1>Reminder: Your FluidCalendar Beta Invitation</h1>
 <p>Hi {{name}},</p>
-<p>This is a friendly reminder that you've been invited to join the Fluid Calendar beta program!</p>
+<p>This is a friendly reminder that you've been invited to join the FluidCalendar beta program!</p>
 <p>Your invitation is still active, but will expire on {{expirationDate}}.</p>
-<p>Click the button below to create your account and start using Fluid Calendar:</p>
+<p>Click the button below to create your account and start using FluidCalendar:</p>
 <a href="{{invitationLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Join the Beta</a>
-<p>We're excited to have you try out Fluid Calendar!</p>
+<p>We're excited to have you try out FluidCalendar!</p>
   `;
 }
 
@@ -518,20 +517,20 @@ export async function sendVerificationEmail({
 
     // Create HTML email content
     const html = `
-      <h1>Verify Your Email for Fluid Calendar Waitlist</h1>
+      <h1>Verify Your Email for FluidCalendar Waitlist</h1>
       <p>Hi ${name},</p>
-      <p>Thanks for signing up for the Fluid Calendar waitlist! Please verify your email address to complete your registration.</p>
+      <p>Thanks for signing up for the FluidCalendar waitlist! Please verify your email address to complete your registration.</p>
       <p>Click the button below to verify your email:</p>
       <a href="${verificationLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Verify Email</a>
       <p>This verification link will expire on ${formattedExpirationDate}.</p>
-      <p>If you didn't sign up for the Fluid Calendar waitlist, you can safely ignore this email.</p>
+      <p>If you didn't sign up for the FluidCalendar waitlist, you can safely ignore this email.</p>
     `;
 
     // Send the email using the queue
     const { jobId } = await EmailService.sendEmail({
-      from: EmailService.formatSender("Fluid Calendar"),
+      from: EmailService.formatSender("FluidCalendar"),
       to: email,
-      subject: "Verify Your Email for Fluid Calendar Waitlist",
+      subject: "Verify Your Email for FluidCalendar Waitlist",
       html,
     });
 
