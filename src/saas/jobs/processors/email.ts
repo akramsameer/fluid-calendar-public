@@ -3,6 +3,7 @@ import { BaseProcessor } from "./base-processor";
 import { EmailJobData, QUEUE_NAMES } from "../queues";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
+import { EmailService } from "@/lib/email/email-service.saas";
 
 const LOG_SOURCE = "EmailProcessor";
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -40,8 +41,7 @@ export class EmailProcessor extends BaseProcessor<
 
     try {
       // Send email using Resend
-      const fromEmail =
-        from || process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com";
+      const fromEmail = EmailService.formatSender("FluidCalendar");
 
       const emailData = {
         from: fromEmail,

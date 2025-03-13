@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CalendarDaysIcon,
   ClockIcon,
@@ -7,6 +9,9 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import { Toaster } from "sonner";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 const features = [
   {
     icon: SparklesIcon,
@@ -47,6 +52,17 @@ const features = [
 ];
 
 export default function Home() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleLogin = () => {
+    if (session) {
+      router.push("/");
+    } else {
+      router.push("/auth/signin");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Toaster position="top-right" />
@@ -90,13 +106,19 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-4">
           <a
             href="/beta"
             className="inline-block bg-blue-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
           >
             Join the Beta
           </a>
+          <button
+            onClick={handleLogin}
+            className="inline-block bg-white text-blue-600 py-3 px-8 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 transition-colors duration-200"
+          >
+            {session ? "Go to App" : "Login"}
+          </button>
         </div>
       </section>
 

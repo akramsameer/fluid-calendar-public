@@ -3,7 +3,7 @@ name: Deploy to DigitalOcean Kubernetes (Staging)
 on:
   push:
     branches:
-      - bullmq
+      - staging
   workflow_dispatch:
 
 jobs:
