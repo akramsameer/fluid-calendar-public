@@ -1,5 +1,7 @@
+
+import { logger } from "../logger";
+import { EmailService } from "./email-service";
 import { Resend } from "resend";
-import { logger } from "@/lib/logger";
 
 const LOG_SOURCE = "WaitlistEmail";
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -43,35 +45,23 @@ export async function sendWaitlistConfirmationEmail({
       .replace(/{{referralLink}}/g, referralLink)
       .replace(/{{statusLink}}/g, statusLink);
 
-    // Send the email
-    const { data, error } = await resend.emails.send({
-      from: `Fluid Calendar <${
-        process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
-      }>`,
+    // Send the email using the queue
+    const { jobId } = await EmailService.sendEmail({
+      from: EmailService.formatSender("Fluid Calendar"),
       to: email,
       subject: "Welcome to the Fluid Calendar Beta Waitlist",
       html,
     });
 
-    // Add delay after Resend API call to avoid rate limiting
-    await delay(1000);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
     // Send notification to admin
     const adminEmail = process.env.ADMIN_EMAIL;
     if (adminEmail) {
       try {
-        const { data: adminData, error: adminError } = await resend.emails.send(
-          {
-            from: `Fluid Calendar <${
-              process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
-            }>`,
-            to: adminEmail,
-            subject: "New Waitlist Signup",
-            html: `
+        await EmailService.sendEmail({
+          from: EmailService.formatSender("Fluid Calendar"),
+          to: adminEmail,
+          subject: "New Waitlist Signup",
+          html: `
             <div>
               <h2>New Waitlist Signup</h2>
               <p>A new user has signed up for the waitlist:</p>
@@ -83,32 +73,17 @@ export async function sendWaitlistConfirmationEmail({
               </ul>
             </div>
           `,
-          }
+        });
+
+        logger.info(
+          "Queued admin notification for waitlist signup",
+          { email: adminEmail },
+          LOG_SOURCE
         );
-
-        // Add delay after Resend API call to avoid rate limiting
-        await delay(1000);
-
-        if (adminError) {
-          logger.warn(
-            "Failed to send admin notification for waitlist signup",
-            {
-              error: adminError.message,
-              email: adminEmail,
-            },
-            LOG_SOURCE
-          );
-        } else {
-          logger.info(
-            "Sent admin notification for waitlist signup",
-            { email: adminEmail, messageId: adminData?.id || "unknown" },
-            LOG_SOURCE
-          );
-        }
       } catch (adminNotificationError) {
         // Log the error but don't fail the main function
         logger.warn(
-          "Failed to send admin notification for waitlist signup",
+          "Failed to queue admin notification for waitlist signup",
           {
             error:
               adminNotificationError instanceof Error
@@ -122,15 +97,15 @@ export async function sendWaitlistConfirmationEmail({
     }
 
     logger.info(
-      "Sent waitlist confirmation email",
-      { email, messageId: data?.id || "unknown" },
+      "Queued waitlist confirmation email",
+      { email, jobId },
       LOG_SOURCE
     );
 
-    return { success: true, messageId: data?.id };
+    return { success: true, jobId };
   } catch (error) {
     logger.error(
-      "Failed to send waitlist confirmation email",
+      "Failed to queue waitlist confirmation email",
       {
         error: error instanceof Error ? error.message : "Unknown error",
         email,
@@ -207,33 +182,20 @@ export async function sendInvitationEmail({
       );
     }
 
-    // Send the email
-    const { data, error } = await resend.emails.send({
-      from: `Fluid Calendar <${
-        process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
-      }>`,
+    // Send the email using the queue
+    const { jobId } = await EmailService.sendEmail({
+      from: EmailService.formatSender("Fluid Calendar"),
       to: email,
       subject: "You're Invited to Join Fluid Calendar Beta!",
       html,
     });
 
-    // Add delay after Resend API call to avoid rate limiting
-    await delay(1000);
+    logger.info("Queued invitation email", { email, jobId }, LOG_SOURCE);
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    logger.info(
-      "Sent invitation email",
-      { email, messageId: data?.id || "unknown" },
-      LOG_SOURCE
-    );
-
-    return { success: true, messageId: data?.id };
+    return { success: true, jobId };
   } catch (error) {
     logger.error(
-      "Failed to send invitation email",
+      "Failed to queue invitation email",
       {
         error: error instanceof Error ? error.message : "Unknown error",
         email,
@@ -332,37 +294,28 @@ export async function sendReferralMilestoneEmail({
         break;
     }
 
-    // Send the email
-    const { data, error } = await resend.emails.send({
-      from: `Fluid Calendar <${
-        process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
-      }>`,
+    // Send the email using the queue
+    const { jobId } = await EmailService.sendEmail({
+      from: EmailService.formatSender("Fluid Calendar"),
       to: email,
       subject: getReferralEmailSubject(notificationType),
       html,
     });
 
-    // Add delay after Resend API call to avoid rate limiting
-    await delay(1000);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
     logger.info(
-      "Sent referral milestone email",
+      "Queued referral milestone email",
       {
         email,
-        messageId: data?.id || "unknown",
+        jobId,
         notificationType,
       },
       LOG_SOURCE
     );
 
-    return { success: true, messageId: data?.id };
+    return { success: true, jobId };
   } catch (error) {
     logger.error(
-      "Failed to send referral milestone email",
+      "Failed to queue referral milestone email",
       {
         error: error instanceof Error ? error.message : "Unknown error",
         email,
@@ -494,33 +447,20 @@ export async function sendReminderEmail({
       .replace(/{{invitationLink}}/g, invitationLink)
       .replace(/{{expirationDate}}/g, formattedExpirationDate);
 
-    // Send the email
-    const { data, error } = await resend.emails.send({
-      from: `Fluid Calendar <${
-        process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
-      }>`,
+    // Send the email using the queue
+    const { jobId } = await EmailService.sendEmail({
+      from: EmailService.formatSender("Fluid Calendar"),
       to: email,
       subject: "Reminder: Your Fluid Calendar Beta Invitation",
       html,
     });
 
-    // Add delay after Resend API call to avoid rate limiting
-    await delay(1000);
+    logger.info("Queued reminder email", { email, jobId }, LOG_SOURCE);
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    logger.info(
-      "Sent reminder email",
-      { email, messageId: data?.id || "unknown" },
-      LOG_SOURCE
-    );
-
-    return { success: true, messageId: data?.id };
+    return { success: true, jobId };
   } catch (error) {
     logger.error(
-      "Failed to send reminder email",
+      "Failed to queue reminder email",
       {
         error: error instanceof Error ? error.message : "Unknown error",
         email,
@@ -587,33 +527,20 @@ export async function sendVerificationEmail({
       <p>If you didn't sign up for the Fluid Calendar waitlist, you can safely ignore this email.</p>
     `;
 
-    // Send the email
-    const { data, error } = await resend.emails.send({
-      from: `Fluid Calendar <${
-        process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com"
-      }>`,
+    // Send the email using the queue
+    const { jobId } = await EmailService.sendEmail({
+      from: EmailService.formatSender("Fluid Calendar"),
       to: email,
       subject: "Verify Your Email for Fluid Calendar Waitlist",
       html,
     });
 
-    // Add delay after Resend API call to avoid rate limiting
-    await delay(1000);
+    logger.info("Queued verification email", { email, jobId }, LOG_SOURCE);
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    logger.info(
-      "Sent verification email",
-      { email, messageId: data?.id || "unknown" },
-      LOG_SOURCE
-    );
-
-    return { success: true, messageId: data?.id };
+    return { success: true, jobId };
   } catch (error) {
     logger.error(
-      "Failed to send verification email",
+      "Failed to queue verification email",
       {
         error: error instanceof Error ? error.message : "Unknown error",
         email,

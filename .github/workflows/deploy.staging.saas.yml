@@ -1,9 +1,9 @@
-name: Deploy to DigitalOcean Kubernetes
+name: Deploy to DigitalOcean Kubernetes (Staging)
 
 on:
   push:
     branches:
-      - main
+      - bullmq
   workflow_dispatch:
 
 jobs:
@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      NAMESPACE: fluid-calendar
+      NAMESPACE: fluid-calendar-staging
       INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
       PROJECT_ID: "f5cb049c-125e-47e7-a36f-d240bc870609"
-      INFISICAL_SECRET_ENV: "prod"
+      INFISICAL_SECRET_ENV: "staging"
       INFISICAL_API_URL: "https://infisical.hub.elitecoders.ai"
 
     steps:
@@ -49,8 +49,8 @@ jobs:
             INFISICAL_SECRET_ENV=${{ env.INFISICAL_SECRET_ENV }}
             INFISICAL_API_URL=${{ env.INFISICAL_API_URL }}
           tags: |
-            registry.digitalocean.com/curatedletters/fluid-calendar-website:${{ github.sha }}
-            registry.digitalocean.com/curatedletters/fluid-calendar-website:latest
+            registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:${{ github.sha }}
+            registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -79,7 +79,7 @@ jobs:
           kubectl delete job db-migrate -n $NAMESPACE --ignore-not-found
 
           # Apply and wait for the migration job
-          kubectl apply -f src/saas/k8s/deployment.yaml -n $NAMESPACE
+          kubectl apply -f src/saas/k8s/deployment.staging.saas.yaml -n $NAMESPACE
           kubectl wait --for=condition=complete job/db-migrate -n $NAMESPACE --timeout=2m
 
           # Check if migration was successful
@@ -92,7 +92,7 @@ jobs:
       - name: Deploy to DigitalOcean Kubernetes
         run: |
           # Apply deployment and force a rollout
-          kubectl apply -f src/saas/k8s/deployment.yaml -n $NAMESPACE
+          kubectl apply -f src/saas/k8s/deployment.staging.saas.yaml -n $NAMESPACE
           kubectl rollout restart deployment/fluid-calendar -n $NAMESPACE
           kubectl rollout restart deployment/fluid-calendar-worker -n $NAMESPACE
 

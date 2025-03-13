@@ -1,10 +1,11 @@
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
-export default function LandingLayout({
+export default function SAASLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ export default function LandingLayout({
           enableSystem={false}
         >
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

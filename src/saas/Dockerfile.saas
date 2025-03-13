@@ -19,11 +19,14 @@ RUN apk add --no-cache bash curl postgresql-client && \
 
 # Set environment variables
 ARG INFISICAL_TOKEN
+ARG PROJECT_ID="f5cb049c-125e-47e7-a36f-d240bc870609"
+ARG INFISICAL_SECRET_ENV="prod"
+ARG INFISICAL_API_URL="https://infisical.hub.elitecoders.ai"
 
 ENV INFISICAL_TOKEN=${INFISICAL_TOKEN}
-ENV PROJECT_ID="f5cb049c-125e-47e7-a36f-d240bc870609"
-ENV INFISICAL_SECRET_ENV="prod"
-ENV INFISICAL_API_URL="https://infisical.hub.elitecoders.ai"
+ENV PROJECT_ID=${PROJECT_ID}
+ENV INFISICAL_SECRET_ENV=${INFISICAL_SECRET_ENV}
+ENV INFISICAL_API_URL=${INFISICAL_API_URL}
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_ENABLE_SAAS_FEATURES=true
 
@@ -37,6 +40,13 @@ RUN infisical run --token="${INFISICAL_TOKEN}" --projectId="${PROJECT_ID}" --env
 # Build the application
 RUN infisical run --token="${INFISICAL_TOKEN}" --projectId="${PROJECT_ID}" --env="${INFISICAL_SECRET_ENV}" --domain="${INFISICAL_API_URL}" -- npm run build
 
+# Build the worker
+RUN npm run build:worker
+
+# Ensure worker alias file is compiled to the dist folder
+RUN cp src/saas/jobs/register-aliases.js dist/saas/jobs/register-aliases.js
+RUN cp src/saas/jobs/worker-with-aliases.js dist/saas/jobs/worker-with-aliases.js
+
 # Production image, copy all the files and run next
 FROM --platform=linux/amd64 base AS runner
 WORKDIR /app
@@ -46,6 +56,17 @@ ENV NEXT_TELEMETRY_DISABLED="1"
 ENV PORT="3000"
 ENV HOSTNAME="0.0.0.0"
 ENV NEXT_PUBLIC_ENABLE_SAAS_FEATURES=true
+
+# Pass build args to runner stage
+ARG INFISICAL_TOKEN
+ARG PROJECT_ID
+ARG INFISICAL_SECRET_ENV
+ARG INFISICAL_API_URL
+
+ENV INFISICAL_TOKEN=${INFISICAL_TOKEN}
+ENV PROJECT_ID=${PROJECT_ID}
+ENV INFISICAL_SECRET_ENV=${INFISICAL_SECRET_ENV}
+ENV INFISICAL_API_URL=${INFISICAL_API_URL}
 
 # Install Infisical CLI
 RUN apk add --no-cache bash curl postgresql-client && \
@@ -62,6 +83,13 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 
+# Copy worker build files
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/saas/jobs ./src/saas/jobs
+
+# Copy the lib directory for worker path alias resolution
+COPY --from=builder /app/src/lib ./src/lib
+
 # Set up .next directory
 RUN rm -rf .next && mkdir .next && chown nextjs:nodejs .next
 
@@ -74,4 +102,4 @@ USER nextjs
 EXPOSE 3000
 
 # Start the application with Infisical
-CMD ["sh", "-c", "infisical run --token=$INFISICAL_TOKEN --projectId=$PROJECT_ID --env=$INFISICAL_SECRET_ENV --domain=$INFISICAL_API_URL -- npm run start:prod"] 
+CMD ["npm", "run", "start:prod"]

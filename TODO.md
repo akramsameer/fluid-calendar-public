@@ -4,12 +4,12 @@
 - [ ] add a sidebar thingy in open to tell them to move to saas
 - [ ] auto schedule working hours in settings using 24 instead am/pm
 - [ ] improve auto scheduling performance
-- [ ] improve task lists and focus view
-  - [ ] add view for scheduled tasks and over due
-  - [ ] add more sortable headers
-- [ ] background jobs
+- [ ] improve task lists and focus view see [tasklist](docs/tasklist-enhancements.md)
+  - [ ] add view for scheduled tasks and over due or saved views
 - [ ] import outlook tasks not working
 - [ ] add a flag that auto schedule needs to run instead of automatically auto scheduling
+- [ ] add start date to tasks to hide them from view until start date
+- [ ] use task-reminder job for sending reminders
 
 # CalDAV Implementation
 ## Phase 1: Setup and Basic Structure ✅

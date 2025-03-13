@@ -1,11 +1,11 @@
-# Combined Kubernetes Configuration
+# Combined Kubernetes Configuration for Staging Environment
 
 ---
 # Namespace
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: fluid-calendar
+  name: fluid-calendar-staging
 
 ---
 # Service Account and RBAC
@@ -13,13 +13,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: fluid-calendar-sa
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: job-reader
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 rules:
 - apiGroups: ["batch"]
   resources: ["jobs"]
@@ -29,11 +29,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: fluid-calendar-job-reader
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 subjects:
 - kind: ServiceAccount
   name: fluid-calendar-sa
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 roleRef:
   kind: Role
   name: job-reader
@@ -45,7 +45,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: fluid-calendar
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 spec:
   selector:
     app: fluid-calendar
@@ -61,7 +61,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: redis
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 spec:
   serviceName: redis
   replicas: 1
@@ -116,7 +116,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 spec:
   selector:
     app: redis
@@ -132,7 +132,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: db-migrate
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 spec:
   backoffLimit: 4
   template:
@@ -141,7 +141,7 @@ spec:
         - name: do-registry-secret
       containers:
       - name: db-migrate
-        image: registry.digitalocean.com/curatedletters/fluid-calendar-website:latest
+        image: registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest
         imagePullPolicy: Always
         command: ["npm"]
         args: ["run", "prisma:update"]
@@ -174,7 +174,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fluid-calendar
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 spec:
   replicas: 1
   selector:
@@ -203,10 +203,10 @@ spec:
       initContainers:
       - name: wait-for-migration
         image: bitnami/kubectl:latest
-        command: ['sh', '-c', 'until kubectl get job db-migrate -n fluid-calendar -o jsonpath="{.status.succeeded}" | grep 1; do echo waiting for migration; sleep 2; done;']
+        command: ['sh', '-c', 'until kubectl get job db-migrate -n fluid-calendar-staging -o jsonpath="{.status.succeeded}" | grep 1; do echo waiting for migration; sleep 2; done;']
       containers:
       - name: fluid-calendar
-        image: registry.digitalocean.com/curatedletters/fluid-calendar-website:latest
+        image: registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest
         imagePullPolicy: Always
         env:
         - name: INFISICAL_TOKEN
@@ -261,7 +261,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fluid-calendar-worker
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 spec:
   replicas: 1
   selector:
@@ -272,15 +272,16 @@ spec:
       labels:
         app: fluid-calendar-worker
     spec:
+      serviceAccountName: fluid-calendar-sa
       imagePullSecrets:
         - name: do-registry-secret
       initContainers:
       - name: wait-for-migration
         image: bitnami/kubectl:latest
-        command: ['sh', '-c', 'until kubectl get job db-migrate -n fluid-calendar -o jsonpath="{.status.succeeded}" | grep 1; do echo waiting for migration; sleep 2; done;']
+        command: ['sh', '-c', 'until kubectl get job db-migrate -n fluid-calendar-staging -o jsonpath="{.status.succeeded}" | grep 1; do echo waiting for migration; sleep 2; done;']
       containers:
       - name: worker
-        image: registry.digitalocean.com/curatedletters/fluid-calendar-website:latest
+        image: registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest
         imagePullPolicy: Always
         command: ["npm"]
         args: ["run", "start:worker:prod"]
@@ -331,14 +332,14 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: fluid-calendar-hpa
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: fluid-calendar
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 2
   metrics:
   - type: Resource
     resource:
@@ -353,7 +354,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: fluid-calendar
-  namespace: fluid-calendar
+  namespace: fluid-calendar-staging
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -361,10 +362,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - fluidcalendar.com
-    secretName: fluid-calendar-tls
+    - staging.fluidcalendar.com
+    secretName: fluid-calendar-staging-tls
   rules:
-  - host: fluidcalendar.com
+  - host: staging.fluidcalendar.com
     http:
       paths:
       - path: /

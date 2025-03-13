@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { useAdmin } from "@/hooks/use-admin";
 import { Suspense } from "react";
+import { Button } from "@/components/ui/button";
 
 import dynamic from "next/dynamic";
 import { isSaasEnabled } from "@/lib/config";
@@ -43,7 +44,8 @@ type SettingsTab =
   | "logs"
   | "user-management"
   | "waitlist"
-  | "import-export";
+  | "import-export"
+  | "admin-dashboard";
 
 export default function SettingsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -73,6 +75,7 @@ export default function SettingsPage() {
           ...baseTabs,
           ...adminTabs,
           { id: "waitlist", label: "Beta Waitlist" },
+          { id: "admin-dashboard", label: "Admin Dashboard" },
         ] as const;
       }
 
@@ -101,6 +104,7 @@ export default function SettingsPage() {
         "user-management",
         "waitlist",
         "import-export",
+        "admin-dashboard",
       ];
 
       if (allPossibleTabIds.includes(hash)) {
@@ -130,7 +134,13 @@ export default function SettingsPage() {
 
   const renderContent = () => {
     // Admin-only tabs
-    const adminOnlyTabs = ["system", "logs", "user-management", "waitlist"];
+    const adminOnlyTabs = [
+      "system",
+      "logs",
+      "user-management",
+      "waitlist",
+      "admin-dashboard",
+    ];
 
     // If admin status is still loading and the active tab is admin-only, show loading state
     if (adminOnlyTabs.includes(activeTab) && isAdminLoading) {
@@ -177,6 +187,18 @@ export default function SettingsPage() {
           <Suspense fallback={<div>Loading...</div>}>
             <WaitlistPage />
           </Suspense>
+        );
+      case "admin-dashboard":
+        return (
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+            <p className="text-muted-foreground mb-4">
+              Access the full admin dashboard to manage the application.
+            </p>
+            <Button asChild>
+              <a href="/admin">Go to Admin Dashboard</a>
+            </Button>
+          </div>
         );
       default:
         return null;

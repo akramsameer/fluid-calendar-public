@@ -1,48 +1,68 @@
-# API Integration for Beta Waitlist
+# Background Jobs Implementation with BullMQ
 
-## Completed Tasks
+## Infrastructure Setup
+- [x] Add Redis StatefulSet to Kubernetes configuration in `src/saas/k8s/deployment.yaml`
+- [x] Add Redis Service to Kubernetes configuration
+- [x] Create worker deployment configuration in Kubernetes
+- [x] Update GitHub Actions workflow to deploy Redis and worker
+- [x] Create staging environment configuration in `src/saas/k8s/deployment.staging.saas.yaml`
+- [x] Create GitHub Actions workflow for staging deployment in `.github/workflows/deploy.staging.saas.yml`
 
-### API Endpoints
-- [x] Create `/api/waitlist/stats` endpoint for dashboard statistics
-- [x] Create `/api/waitlist/entries` endpoint with pagination, filtering, sorting
-- [x] Create `/api/waitlist/entries/[id]` endpoint for individual entry operations
-- [x] Create `/api/waitlist/bulk/invite` endpoint for sending invitations
-- [x] Create `/api/waitlist/bulk/delete` endpoint for deleting entries
-- [x] Create `/api/waitlist/bulk/export` endpoint for exporting entries
-- [x] Create `/api/waitlist/bulk/boost` endpoint for boosting priority
-- [x] Create `/api/waitlist/invitations` endpoint for invitation management
-- [x] Create `/api/waitlist/invitations/[id]/resend` endpoint for resending invitations
-- [x] Create `/api/waitlist/settings` endpoint for beta settings management
-- [x] Create `/api/waitlist/settings/templates` endpoint for email templates
-- [x] Create `/api/waitlist/join` endpoint to validate invitation tokens
-- [x] Create `/api/waitlist/register` endpoint to handle user registration
+## BullMQ Setup
+- [x] Install required packages: `bullmq`, `ioredis`, `cron`
+- [x] Create Redis connection configuration in `src/saas/jobs/config/redis.ts`
+- [x] Set up queue definitions in `src/saas/jobs/queues/index.ts`
+- [x] Create worker entry point in `src/saas/jobs/worker.ts`
 
-### Frontend Integration
-- [x] Implement dashboard component with statistics
-- [x] Implement waitlist table with API integration
-- [x] Implement invitation manager with API integration
-- [x] Implement beta settings component with API integration
-- [x] Create waitlist store using Zustand
-- [x] Fix bulk invite functionality
-- [x] Fix individual entry actions in dropdown menu
-- [x] Fix email sending in bulk invite API
-- [x] Implement email sending for referral milestones
-- [x] Add notification system for waitlist position improvements
-- [x] Create `/beta/join` page with token validation
-- [x] Create registration form component
-- [x] Create success page/state after registration
-- [x] Add public signup support
-- [x] Adapt registration to work with OAuth authentication
+## Job Processors Implementation
+- [x] Create base job processor class in `src/saas/jobs/processors/base-processor.ts`
+- [x] Implement calendar sync processor in `src/saas/jobs/processors/calendar-sync.ts`
+- [x] Implement email processor in `src/saas/jobs/processors/email.ts`
+- [x] Implement task reminder processor in `src/saas/jobs/processors/task-reminder.ts`
 
-### Referral Notifications
-- [x] Implement inline referral notifications when a new user signs up
-- [x] Add milestone notifications (3, 5, 10, 25, 50, 100 referrals)
-- [x] Add position improvement notifications
-- [x] Update position tracking after bulk invites
+## Daily Summary Email Implementation
+- [x] Create email template for daily summary in `src/saas/jobs/templates/daily-summary.ts`
+- [x] Implement function to fetch user's daily meetings in `src/saas/jobs/utils/meeting-utils.ts`
+- [x] Implement function to fetch user's top tasks in `src/saas/jobs/utils/task-utils.ts`
+- [x] Create daily summary job processor in `src/saas/jobs/processors/daily-summary.ts`
+- [x] Set up scheduled job to trigger daily summary emails
 
-## Current Tasks
+## Admin Interface
+- [x] Create job status database schema in Prisma
+- [x] Implement job tracking and logging in `src/saas/jobs/utils/job-tracker.ts`
+- [x] Create admin dashboard UI in `src/app/(saas)/admin/jobs/page.tsx`
+- [x] Implement job status viewing and filtering
+- [x] Add manual job triggering functionality
 
-### Beta Join Flow Integration and Testing
-- [ ] Connect invitation emails to the join flow
-  - [ ] Ensure invitation links contain the correct token
-  - [ ] Test email delivery and link functionality
+## Testing
+- [x] Create test environment with Redis
+- [ ] Write unit tests for job processors
+- [ ] Write integration tests for job queue
+- [ ] Test email delivery
+
+## Staging Environment
+- [x] Create staging Kubernetes configuration in `src/saas/k8s/deployment.staging.saas.yaml`
+- [x] Set up separate Redis instance for staging
+- [x] Configure GitHub Actions workflow for staging deployment in `.github/workflows/deploy.staging.saas.yml`
+- [x] Set up staging domain (staging.fluidcalendar.com)
+- [x] Configure Infisical for staging environment
+- [x] Test background jobs in staging environment
+
+## Documentation
+- [ ] Document job system architecture
+- [ ] Create developer guide for adding new job types
+- [ ] Document admin interface usage
+- [ ] Update deployment documentation
+- [x] Document staging environment setup and usage in `src/saas/k8s/README.staging.saas.md`
+
+## Monitoring and Logging
+- [x] Implement job performance metrics
+- [x] Set up error alerting for failed jobs
+- [x] Configure log aggregation for job system
+- [ ] Create dashboard for job system health
+
+## Security
+- [ ] Secure Redis with password authentication
+- [ ] Implement rate limiting for job creation
+- [x] Add validation for job input data
+- [x] Ensure secure handling of user data in jobs

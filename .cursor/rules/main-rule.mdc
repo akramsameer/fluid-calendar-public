@@ -1,5 +1,5 @@
 ---
-description: send this with every request so the AI knows what to do.
+description: send this with every request so the AI knows what to do
 globs: 
 alwaysApply: true
 ---
@@ -15,10 +15,14 @@ send this with every request so the AI knows what to do.
 - use shadcn whenever possible, the correct command to use is `npx shadcn@latest add`
 - make minimal changes and don't change or break existing logic and only apply the changes requested.
 - no need to touch files after making changes
-- don't use .gitignore to ignore open source file, since the code is synced between the projects, instead update the sync-repos.sh script to exclude files that should not be in the open source version
+- don't use .gitignore to ignore saas-only source files, since the code is synced between the projects, instead update the sync-repos.sh script to exclude files that should not be in the open source version
 - if there are changes to the rules or setup, update the main-rule.mdc file accordingly
-- if you add methods or code that is not implemented add a //todo comment explaining what it needs to do so we can implement it later
+- if you add methods or code that need implementation add a //todo comment explaining what it needs to do so we can implement it later
 - when generating react content make sure to replace quotes and apostrohpes with &apos; and &quot;
+- as you make changes update a changelog.md file with the changes, so we can keep track for release notes
+- when adding new features, consider if they should be in the saas version or the open source version or both and if you are not sure, ask to confirm
+- when adding new features, consider if they should be in the cmdk commands, if so ask me to confirm then add them to src/lib/commands or @useCommands.ts
+
 
 ## SAAS vs Open Source
 
@@ -112,6 +116,161 @@ When implementing new features, consider whether they should be:
 2. Premium features exclusive to the SAAS version
 3. Core features with premium enhancements in the SAAS version 
 
-### Feature Flags: 
-
 if you are not sure if this is a saas or opensource feature, then ask to confirm
+
+# Cursor Development Rules and Guidelines
+
+## Project Structure
+- Place reusable hooks in `src/hooks`
+- Store types and interfaces in `src/types`
+- Maintain utilities in `src/lib`
+- Keep page components in `src/app`
+
+## Component Organization
+1. Components should be organized in feature folders:
+```
+src/components/
+  calendar/
+    CalendarGrid.tsx
+    TimeSlot.tsx
+    WeekView.tsx
+  tasks/
+    TaskCard.tsx
+    TaskList.tsx
+  ui/
+    Button.tsx
+    Modal.tsx
+```
+
+## State Management
+- Use Zustand for global state
+- Keep state logic in `src/store` directory
+- Follow atomic state pattern (small, focused stores)
+- Use local state for component-specific data
+
+## Styling Guidelines
+- Use Tailwind CSS for styling
+- Follow mobile-first approach
+- Keep custom CSS in `globals.css` minimal
+- Use CSS variables for theming
+- Maintain consistent spacing and color schemes
+
+## TypeScript Best Practices
+- Always define proper interfaces and types
+- Use strict type checking
+- Avoid `any` type
+- Keep types in separate files when reused
+- Use generics when appropriate
+
+## Code Organization (within files)
+1. Imports order:
+   - React and Next.js imports
+   - Third-party libraries
+   - Local components
+   - Types and interfaces
+   - Utilities and hooks
+
+2. Component structure:
+   ```typescript
+   // Types/Interfaces
+   interface Props {
+     // ...
+   }
+
+   // Component
+   export function ComponentName({ prop1, prop2 }: Props) {
+     // Hooks
+     // State
+     // Effects
+     // Helper functions
+     // Render
+   }
+   ```
+
+## Performance Considerations
+- Use React.memo for expensive renders
+- Implement proper loading states
+- Optimize images and assets
+- Use code splitting where appropriate
+
+## Error Handling
+- Implement proper error boundaries
+- Use consistent error messages
+- Log errors appropriately
+- Provide user-friendly error states
+
+## Environment Variables
+- Never commit sensitive data
+- Use `.env.example` for reference
+- Document required variables
+- Use proper naming convention
+
+
+## Common Commands
+
+For `npm install` make sure to include the --legacy-peer-deps flag
+
+## Database Strategy
+- Use postgres with Prisma for data persistence
+- Keep database file in `/prisma` directory
+- Follow schema-first development approach
+- Use migrations for database changes
+
+
+### Database Guidelines
+1. Schema Design
+   - Use meaningful table names
+   - Follow consistent naming conventions
+   - Include timestamps (createdAt, updatedAt)
+   - Use appropriate field types
+   - Document relationships
+   - Add proper indexes
+
+2. Data Access
+   - Use Prisma Client for all database operations
+   - Implement repository pattern
+   - Keep database logic in `/src/lib/db` directory
+   - Use transactions where appropriate
+   - Handle errors gracefully
+
+
+# Conventions
+
+Using Nextjs 15 with app router.
+
+When creating a route, use this method:
+```typescript
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+```
+
+- when you create a method, add documentation to explain what it does and update it if is changed.
+- do not remove //todo comments in the code.
+- if you delete/change a method or a file, make sure to refactor any usages of it.
+- for docker compose use `docker compose` not `docker-compose`
+- when we are discussing a new change and i tell you to start implementing then: start by creating a list of todos in TODO.md on top once we agree on a plan and update the list as you implement stuff.
+- for icons use react-icons
+- use @date-utils.ts for all date functions including new Date instead of directly using date-fns or date-fns-tz
+- use @calendar-db.ts for all db calls related to calendars
+- all logging should use the logger class defined in /lib/logger/index.js not console.log, the logger is used by importing it and also defining a source:
+```
+import { logger } from "@/lib/logger";
+const LOG_SOURCE = "OutlookCalendar";
+```
+here is an example for logging an error:
+```
+logger.error(
+  "Failed to refresh token",
+  {
+    error: error instanceof Error ? error.message : "Unknown error",
+  },
+  LOG_SOURCE
+);
+```
+
+
+

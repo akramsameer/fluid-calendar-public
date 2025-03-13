@@ -79,6 +79,7 @@ model User {
   projects             Project[]
   connectedAccounts    ConnectedAccount[]
   tags                 Tag[]
+  JobRecord            JobRecord[]
 }
 
 model VerificationToken {
@@ -455,4 +456,39 @@ model BetaSettings {
   invitationEmailTemplate      String  @default("") @db.Text
   waitlistConfirmationTemplate String  @default("") @db.Text
   reminderEmailTemplate        String  @default("") @db.Text
+}
+
+// Job tracking models for BullMQ
+model JobRecord {
+  id          String    @id @default(cuid())
+  queueName   String
+  jobId       String
+  name        String
+  data        Json
+  status      JobStatus @default(PENDING)
+  result      Json?
+  error       String?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([queueName, jobId])
+  @@index([status])
+  @@index([queueName])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum JobStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  FAILED
+  DELAYED
+  PAUSED
 }

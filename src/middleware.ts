@@ -42,10 +42,7 @@ export async function middleware(request: NextRequest) {
 
   // If there's no token and we're on the root path in SAAS mode with landing page enabled,
   // redirect to the home page
-  if (
-    !token &&
-    pathname === "/" 
-  ) {
+  if (!token && pathname === "/") {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 

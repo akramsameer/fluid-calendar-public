@@ -55,3 +55,12 @@ diff.txt
 data/*
 scripts/import-resend-waitlist.js
 scripts/import-resend-waitlist.saas.js
+
+# new additions
+.git
+.turbo
+.cache
+.vscode
+*.log
+dist/
+Dockerfile.worker
