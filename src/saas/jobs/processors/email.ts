@@ -4,6 +4,7 @@ import { EmailJobData, QUEUE_NAMES } from "../queues";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
 import { EmailService } from "@/lib/email/email-service.saas";
+import { getRedisOptions } from "../config/redis";
 
 const LOG_SOURCE = "EmailProcessor";
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -16,7 +17,13 @@ export class EmailProcessor extends BaseProcessor<
   { success: boolean }
 > {
   constructor() {
-    super(QUEUE_NAMES.EMAIL);
+    super(QUEUE_NAMES.EMAIL, {
+      // Include Redis connection options
+      ...getRedisOptions(),
+      // Set concurrency to 2 to match our rate limiter (2 emails per second)
+      // This ensures we have enough workers to process at the rate we want
+      concurrency: 2,
+    });
   }
 
   /**
@@ -35,6 +42,8 @@ export class EmailProcessor extends BaseProcessor<
         subject,
         from: from || "default",
         hasAttachments: !!attachments && attachments.length > 0,
+        timestamp: new Date().toISOString(),
+        jobId: job.id || "unknown",
       },
       LOG_SOURCE
     );
@@ -75,6 +84,10 @@ export class EmailProcessor extends BaseProcessor<
           subject,
           from: fromEmail,
           resendId: data?.id || null,
+          timestamp: new Date().toISOString(),
+          processingTime: `${
+            Date.now() - new Date(job.processedOn || Date.now()).getTime()
+          }ms`,
         },
         LOG_SOURCE
       );

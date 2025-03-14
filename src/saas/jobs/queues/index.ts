@@ -34,12 +34,21 @@ const defaultQueueOptions = {
   },
 };
 
+// Email queue options with rate limiter (2 emails per second)
+const emailQueueOptions = {
+  ...defaultQueueOptions,
+  limiter: {
+    max: 2, // Maximum 2 jobs
+    duration: 1000, // Per 1 second (1000ms)
+  },
+};
+
 // Create queues
 export const calendarSyncQueue = new Queue(
   QUEUE_NAMES.CALENDAR_SYNC,
   defaultQueueOptions
 );
-export const emailQueue = new Queue(QUEUE_NAMES.EMAIL, defaultQueueOptions);
+export const emailQueue = new Queue(QUEUE_NAMES.EMAIL, emailQueueOptions);
 export const dailySummaryQueue = new Queue(
   QUEUE_NAMES.DAILY_SUMMARY,
   defaultQueueOptions

@@ -15,6 +15,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobRecord, JobStatus, User } from "@prisma/client";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type JobWithUser = JobRecord & {
   user: Pick<User, "name" | "email"> | null;
@@ -34,43 +41,47 @@ export default function JobsPage() {
   const [failedJobs, setFailedJobs] = useState<JobWithUser[]>([]);
   const [pendingJobs, setPendingJobs] = useState<JobWithUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  async function fetchData() {
+    if (!isAdmin) return;
+
+    try {
+      setIsRefreshing(true);
+
+      // Fetch job stats
+      const statsResponse = await fetch("/api/admin/jobs/stats");
+      const statsData = await statsResponse.json();
+      setStats(statsData);
+
+      // Fetch recent jobs
+      const recentResponse = await fetch("/api/admin/jobs/recent");
+      const recentData = await recentResponse.json();
+      setRecentJobs(recentData);
+
+      // Fetch failed jobs
+      const failedResponse = await fetch(
+        "/api/admin/jobs/recent?status=FAILED"
+      );
+      const failedData = await failedResponse.json();
+      setFailedJobs(failedData);
+
+      // Fetch pending jobs
+      const pendingResponse = await fetch(
+        "/api/admin/jobs/recent?status=PENDING"
+      );
+      const pendingData = await pendingResponse.json();
+      setPendingJobs(pendingData);
+    } catch (error) {
+      console.error("Failed to fetch job data:", error);
+      toast.error("Failed to fetch job data");
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      if (!isAdmin) return;
-
-      try {
-        // Fetch job stats
-        const statsResponse = await fetch("/api/admin/jobs/stats");
-        const statsData = await statsResponse.json();
-        setStats(statsData);
-
-        // Fetch recent jobs
-        const recentResponse = await fetch("/api/admin/jobs/recent");
-        const recentData = await recentResponse.json();
-        setRecentJobs(recentData);
-
-        // Fetch failed jobs
-        const failedResponse = await fetch(
-          "/api/admin/jobs/recent?status=FAILED"
-        );
-        const failedData = await failedResponse.json();
-        setFailedJobs(failedData);
-
-        // Fetch pending jobs
-        const pendingResponse = await fetch(
-          "/api/admin/jobs/recent?status=PENDING"
-        );
-        const pendingData = await pendingResponse.json();
-        setPendingJobs(pendingData);
-      } catch (error) {
-        console.error("Failed to fetch job data:", error);
-        toast.error("Failed to fetch job data");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
     fetchData();
   }, [isAdmin]);
 
@@ -253,77 +264,169 @@ export default function JobsPage() {
           <TabsTrigger value="pending">Pending Jobs</TabsTrigger>
         </TabsList>
 
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchData}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? "Refreshing..." : "Refresh Jobs"}
+          </Button>
+        </div>
+
         <TabsContent value="recent">
-          <JobsTable jobs={recentJobs} />
+          <JobsTable jobs={recentJobs} onRetrySuccess={fetchData} />
         </TabsContent>
 
         <TabsContent value="failed">
-          <JobsTable jobs={failedJobs} />
+          <JobsTable jobs={failedJobs} onRetrySuccess={fetchData} />
         </TabsContent>
 
         <TabsContent value="pending">
-          <JobsTable jobs={pendingJobs} />
+          <JobsTable jobs={pendingJobs} onRetrySuccess={fetchData} />
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-function JobsTable({ jobs }: { jobs: JobWithUser[] }) {
+function JobsTable({
+  jobs,
+  onRetrySuccess,
+}: {
+  jobs: JobWithUser[];
+  onRetrySuccess: () => void;
+}) {
+  const [isRetrying, setIsRetrying] = useState<Record<string, boolean>>({});
+  const [selectedJob, setSelectedJob] = useState<JobWithUser | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  async function retryJob(jobId: string, queueName: string) {
+    if (isRetrying[jobId]) return;
+
+    setIsRetrying((prev) => ({ ...prev, [jobId]: true }));
+
+    try {
+      const response = await fetch("/api/admin/jobs/retry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jobId, queueName }),
+      });
+
+      if (response.ok) {
+        await response.json();
+        toast.success(`Job retried successfully`);
+        onRetrySuccess(); // Refresh the job list
+      } else {
+        const error = await response.json();
+        toast.error(`Failed to retry job: ${error.error}`);
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? `Error: ${error.message}`
+          : "Failed to retry job"
+      );
+    } finally {
+      setIsRetrying((prev) => ({ ...prev, [jobId]: false }));
+    }
+  }
+
+  function viewJobDetails(job: JobWithUser) {
+    setSelectedJob(job);
+    setIsDetailsModalOpen(true);
+  }
+
+  function closeDetailsModal() {
+    setIsDetailsModalOpen(false);
+    setSelectedJob(null);
+  }
+
   if (jobs.length === 0) {
     return <p className="text-center py-8 text-gray-500">No jobs found</p>;
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="px-4 py-2 text-left">ID</th>
-            <th className="px-4 py-2 text-left">Queue</th>
-            <th className="px-4 py-2 text-left">Name</th>
-            <th className="px-4 py-2 text-left">Status</th>
-            <th className="px-4 py-2 text-left">User</th>
-            <th className="px-4 py-2 text-left">Created</th>
-            <th className="px-4 py-2 text-left">Attempts</th>
-          </tr>
-        </thead>
-        <tbody>
-          {jobs.map((job) => (
-            <tr key={job.id} className="border-b hover:bg-gray-50">
-              <td className="px-4 py-2 font-mono text-xs">{job.jobId}</td>
-              <td className="px-4 py-2">{job.queueName}</td>
-              <td className="px-4 py-2">{job.name}</td>
-              <td className="px-4 py-2">
-                <StatusBadge status={job.status} />
-              </td>
-              <td className="px-4 py-2">
-                {job.user ? (
-                  <div>
-                    <div>{job.user.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {job.user.email}
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-gray-400">-</span>
-                )}
-              </td>
-              <td className="px-4 py-2">
-                <div title={new Date(job.createdAt).toLocaleString()}>
-                  {formatDistanceToNow(new Date(job.createdAt), {
-                    addSuffix: true,
-                  })}
-                </div>
-              </td>
-              <td className="px-4 py-2">
-                {job.attempts}/{job.maxAttempts}
-              </td>
+    <>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="px-4 py-2 text-left">ID</th>
+              <th className="px-4 py-2 text-left">Queue</th>
+              <th className="px-4 py-2 text-left">Name</th>
+              <th className="px-4 py-2 text-left">Status</th>
+              <th className="px-4 py-2 text-left">User</th>
+              <th className="px-4 py-2 text-left">Created</th>
+              <th className="px-4 py-2 text-left">Attempts</th>
+              <th className="px-4 py-2 text-left">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {jobs.map((job) => (
+              <tr key={job.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-2 font-mono text-xs">{job.jobId}</td>
+                <td className="px-4 py-2">{job.queueName}</td>
+                <td className="px-4 py-2">{job.name}</td>
+                <td className="px-4 py-2">
+                  <StatusBadge status={job.status} />
+                </td>
+                <td className="px-4 py-2">
+                  {job.user ? (
+                    <div>
+                      <div>{job.user.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {job.user.email}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </td>
+                <td className="px-4 py-2">
+                  <div title={new Date(job.createdAt).toLocaleString()}>
+                    {formatDistanceToNow(new Date(job.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </div>
+                </td>
+                <td className="px-4 py-2">
+                  {job.attempts}/{job.maxAttempts}
+                </td>
+                <td className="px-4 py-2 space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => viewJobDetails(job)}
+                  >
+                    View
+                  </Button>
+                  {job.status === JobStatus.FAILED && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => retryJob(job.jobId, job.queueName)}
+                      disabled={isRetrying[job.jobId]}
+                    >
+                      {isRetrying[job.jobId] ? "Retrying..." : "Retry"}
+                    </Button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <JobDetailsModal
+        job={selectedJob}
+        isOpen={isDetailsModalOpen}
+        onClose={closeDetailsModal}
+      />
+    </>
   );
 }
 
@@ -349,4 +452,113 @@ function StatusBadge({ status }: { status: JobStatus }) {
   }
 
   return <Badge variant={variant}>{status}</Badge>;
+}
+
+interface JobDetailsModalProps {
+  job: JobWithUser | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModalProps) {
+  if (!job) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Job Details</DialogTitle>
+          <DialogDescription>
+            Detailed information about job {job.jobId}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium">ID</h4>
+            <p className="text-sm font-mono break-all">{job.jobId}</p>
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium">Queue</h4>
+            <p className="text-sm">{job.queueName}</p>
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium">Name</h4>
+            <p className="text-sm">{job.name}</p>
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium">Status</h4>
+            <StatusBadge status={job.status} />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium">Created</h4>
+            <p className="text-sm">
+              {new Date(job.createdAt).toLocaleString()}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium">Updated</h4>
+            <p className="text-sm">
+              {new Date(job.updatedAt).toLocaleString()}
+            </p>
+          </div>
+          {job.startedAt && (
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium">Started</h4>
+              <p className="text-sm">
+                {new Date(job.startedAt).toLocaleString()}
+              </p>
+            </div>
+          )}
+          {job.finishedAt && (
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium">Finished</h4>
+              <p className="text-sm">
+                {new Date(job.finishedAt).toLocaleString()}
+              </p>
+            </div>
+          )}
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium">Attempts</h4>
+            <p className="text-sm">
+              {job.attempts}/{job.maxAttempts}
+            </p>
+          </div>
+          {job.user && (
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium">User</h4>
+              <p className="text-sm">
+                {job.user.name} ({job.user.email})
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">Data</h4>
+          <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto text-xs">
+            {JSON.stringify(job.data, null, 2)}
+          </pre>
+        </div>
+
+        {job.result && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Result</h4>
+            <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto text-xs">
+              {JSON.stringify(job.result, null, 2)}
+            </pre>
+          </div>
+        )}
+
+        {job.error && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Error</h4>
+            <div className="bg-red-50 p-4 rounded-md text-red-800 text-sm">
+              {job.error}
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }
