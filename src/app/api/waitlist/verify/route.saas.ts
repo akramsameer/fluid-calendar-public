@@ -103,6 +103,7 @@ export async function GET(request: NextRequest) {
         referredBy: referrerId,
         status: "WAITING",
         priorityScore: 0, // Will be updated based on referrals
+        interestedInLifetime: pendingVerification.interestedInLifetime || false,
       },
     });
 

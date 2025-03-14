@@ -24,6 +24,7 @@ const formSchema = z.object({
   acceptTerms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and privacy policy",
   }),
+  interestedInLifetime: z.boolean().optional(),
   website: z.string().refine((val) => val === "", {
     message: "This field should be left empty",
   }),
@@ -51,6 +52,7 @@ export default function WaitlistForm() {
       email: "",
       name: "",
       acceptTerms: false,
+      interestedInLifetime: false,
       website: "",
     },
   });
@@ -63,6 +65,7 @@ export default function WaitlistForm() {
         name: data.name || undefined,
         referralCode: referralCode || null,
         acceptTerms: data.acceptTerms,
+        interestedInLifetime: data.interestedInLifetime,
         website: data.website,
       });
 
@@ -76,6 +79,7 @@ export default function WaitlistForm() {
           name: data.name || undefined,
           referralCode: referralCode || null,
           acceptTerms: data.acceptTerms,
+          interestedInLifetime: data.interestedInLifetime,
           website: data.website,
         }),
       });
@@ -224,6 +228,28 @@ export default function WaitlistForm() {
           {errors.acceptTerms && (
             <p className="text-sm text-red-500">{errors.acceptTerms.message}</p>
           )}
+        </div>
+      </div>
+
+      <div className="flex items-start space-x-2">
+        <Checkbox
+          id="interestedInLifetime"
+          checked={!!watch("interestedInLifetime")}
+          onCheckedChange={(checked) => {
+            setValue("interestedInLifetime", checked === true);
+          }}
+        />
+        <div className="grid gap-1.5 leading-none">
+          <Label
+            htmlFor="interestedInLifetime"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            I&apos;m interested in a lifetime subscription to support open
+            source development and get immediate beta access
+            <span className="ml-2 text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full">
+              $200 (50% off)
+            </span>
+          </Label>
         </div>
       </div>
 

@@ -8,9 +8,14 @@ All notable changes to this project will be documented in this file.
 - Added additional logging to email processor to monitor rate limiting effectiveness
 - Added ability to manually retry failed jobs from the admin jobs interface
 - Added View Details button to jobs in the admin interface to inspect job data, results, and errors
+- Added lifetime subscription interest tracking to waitlist system
+  - Implemented `interestedInLifetime` flag in Waitlist and PendingWaitlist models
+  - Added admin notification emails when users express interest in lifetime subscription
+  - Updated waitlist API to handle lifetime subscription interest
 
 ### Changed
 - Modified job retry functionality to update existing job records instead of creating new ones
+- Updated email templates to use "FluidCalendar" instead of "Fluid Calendar" for consistent branding
 
 ### Fixed
 - Fixed type errors in the job retry API by using the correct compound unique key (queueName + jobId)

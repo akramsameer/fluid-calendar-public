@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import WaitlistForm from "./waitlist-form";
 import { BetaHero } from "./beta-hero";
 import { BetaFeatures } from "./beta-features";
+import { LifetimeOffer } from "./lifetime-offer";
 
 export const metadata: Metadata = {
   title: "Join the FluidCalendar Beta",
@@ -37,6 +38,20 @@ export default function BetaPage() {
                 }
               >
                 <WaitlistForm />
+              </Suspense>
+            </div>
+
+            <div className="mt-8">
+              <Suspense
+                fallback={
+                  <div className="p-4 border rounded animate-pulse">
+                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                  </div>
+                }
+              >
+                <LifetimeOffer />
               </Suspense>
             </div>
           </div>

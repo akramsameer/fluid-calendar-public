@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { logger } from "@/lib/logger";
 import { sendVerificationEmail } from "@/lib/email/waitlist.saas";
+import { EmailService } from "@/lib/email/email-service.saas";
 
 const LOG_SOURCE = "WaitlistAPI";
 const prisma = new PrismaClient();
@@ -14,6 +15,7 @@ const waitlistSchema = z.object({
   name: z.string().optional().nullable(),
   referralCode: z.string().optional().nullable(),
   acceptTerms: z.boolean().optional(),
+  interestedInLifetime: z.boolean().optional(),
   // Honeypot field - should be empty
   website: z.string().optional(),
 });
@@ -37,7 +39,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, name, referralCode, website } = result.data;
+    const { email, name, referralCode, website, interestedInLifetime } =
+      result.data;
+    const userName = name || "Not provided"; // Ensure name is not undefined
 
     // Bot detection: Check if honeypot field is filled
     if (website && website.length > 0) {
@@ -61,6 +65,37 @@ export async function POST(request: NextRequest) {
     const existingEntry = await prisma.waitlist.findUnique({
       where: { email },
     });
+
+    // If user expressed interest in lifetime subscription, send notification
+    if (interestedInLifetime) {
+      // Send notification email to admin using the EmailService
+      const html = `
+        <h1>New Lifetime Subscription Interest</h1>
+        <p>A user has expressed interest in the lifetime subscription offer during waitlist signup:</p>
+        <ul>
+          <li><strong>Email:</strong> ${email}</li>
+          <li><strong>Name:</strong> ${userName}</li>
+          <li><strong>Date:</strong> ${new Date().toLocaleString()}</li>
+          <li><strong>Waitlist Status:</strong> ${
+            existingEntry ? "Already on waitlist" : "New signup"
+          }</li>
+        </ul>
+      `;
+
+      // Queue the email using EmailService
+      const { jobId } = await EmailService.sendEmail({
+        from: EmailService.formatSender("FluidCalendar"),
+        to: process.env.ADMIN_EMAIL || "emad@fluidcalendar.com",
+        subject: "New Lifetime Subscription Interest",
+        html,
+      });
+
+      logger.info(
+        "Lifetime interest notification queued during waitlist signup",
+        { email, name: userName, jobId },
+        LOG_SOURCE
+      );
+    }
 
     if (existingEntry) {
       // If user is already on the waitlist, return their status
@@ -94,6 +129,8 @@ export async function POST(request: NextRequest) {
           referralCode: referralCode || pendingVerification.referralCode,
           verificationToken,
           verificationExpiry: expirationDate,
+          interestedInLifetime:
+            interestedInLifetime || pendingVerification.interestedInLifetime,
           updatedAt: now,
         },
       });
@@ -130,6 +167,7 @@ export async function POST(request: NextRequest) {
         referralCode,
         verificationToken,
         verificationExpiry: expirationDate,
+        interestedInLifetime: interestedInLifetime || false,
       },
     });
 

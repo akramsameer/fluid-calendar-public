@@ -50,7 +50,6 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /logs/
-/blog/
 diff.txt
 data/*
 scripts/import-resend-waitlist.js
