@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { logger } from "@/lib/logger";
 import { sendVerificationEmail } from "@/lib/email/waitlist.saas";
 import { EmailService } from "@/lib/email/email-service.saas";
 
 const LOG_SOURCE = "WaitlistAPI";
-const prisma = new PrismaClient();
 
 // Input validation schema
 const waitlistSchema = z.object({

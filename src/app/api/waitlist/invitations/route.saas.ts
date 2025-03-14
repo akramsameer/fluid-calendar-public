@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { requireAdmin } from "@/lib/auth/api-auth";
 import { z } from "zod";
@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 import { sendInvitationEmail } from "@/lib/email/waitlist.saas";
 
 const LOG_SOURCE = "InvitationsAPI";
-const prisma = new PrismaClient();
 
 // Validation schema for scheduling invitations
 const scheduleInvitationsSchema = z.object({

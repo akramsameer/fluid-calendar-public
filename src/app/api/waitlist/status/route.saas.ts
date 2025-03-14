@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { getWaitlistPosition } from "@/lib/waitlist/position";
 
 const LOG_SOURCE = "WaitlistStatusAPI";
-const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {

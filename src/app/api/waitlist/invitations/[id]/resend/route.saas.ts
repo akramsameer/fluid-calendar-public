@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { requireAdmin } from "@/lib/auth/api-auth";
 import { sendInvitationEmail } from "@/lib/email/waitlist.saas";
 import { v4 as uuidv4 } from "uuid";
 
 const LOG_SOURCE = "ResendInvitationAPI";
-const prisma = new PrismaClient();
 
 /**
  * POST /api/waitlist/invitations/[id]/resend

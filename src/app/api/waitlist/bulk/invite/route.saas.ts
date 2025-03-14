@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { requireAdmin } from "@/lib/auth/api-auth";
 import { z } from "zod";
@@ -10,7 +10,6 @@ import {
 } from "@/lib/email/waitlist.saas";
 
 const LOG_SOURCE = "BulkInviteAPI";
-const prisma = new PrismaClient();
 
 // Validation schema for bulk invite request
 const bulkInviteSchema = z.object({

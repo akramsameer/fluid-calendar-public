@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { requireAdmin } from "@/lib/auth/api-auth";
 
 const LOG_SOURCE = "WaitlistEntriesAPI";
-const prisma = new PrismaClient();
 
 /**
  * GET /api/waitlist/entries

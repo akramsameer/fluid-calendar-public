@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobRecord, JobStatus, User } from "@prisma/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -43,7 +43,7 @@ export default function JobsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     if (!isAdmin) return;
 
     try {
@@ -79,11 +79,11 @@ export default function JobsPage() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }
+  }, [isAdmin]);
 
   useEffect(() => {
     fetchData();
-  }, [isAdmin]);
+  }, [fetchData]);
 
   async function triggerDailySummary(formData: FormData) {
     const userId = formData.get("userId") as string;

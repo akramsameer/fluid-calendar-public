@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { requireAdmin } from "@/lib/auth/api-auth";
 import { z } from "zod";
 
 const LOG_SOURCE = "WaitlistEntryAPI";
-const prisma = new PrismaClient();
 
 // Validation schema for updating a waitlist entry
 const updateEntrySchema = z.object({

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const LOG_SOURCE = "WaitlistJoinAPI";
-const prisma = new PrismaClient();
 
 // Validation schema for token validation request
 const tokenValidationSchema = z.object({

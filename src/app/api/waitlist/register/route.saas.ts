@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { hash } from "bcrypt";
 
 const LOG_SOURCE = "WaitlistRegisterAPI";
-const prisma = new PrismaClient();
 
 // Validation schema for registration request
 const registrationSchema = z.object({

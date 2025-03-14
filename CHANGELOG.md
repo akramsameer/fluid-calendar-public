@@ -19,6 +19,11 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Fixed type errors in the job retry API by using the correct compound unique key (queueName + jobId)
+- Fixed database connection exhaustion issue in task scheduling:
+  - Refactored SchedulingService to use the global Prisma instance instead of creating new connections
+  - Updated CalendarServiceImpl and TimeSlotManagerImpl to use the global Prisma instance
+  - Added proper cleanup of resources in task scheduling API route
+  - Resolved "Too many database connections" errors in production
 
 ## [1.2.1] 2025-03-13
 ### Added
