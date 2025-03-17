@@ -13,6 +13,8 @@ export const QUEUE_NAMES = {
   DAILY_SUMMARY: "daily-summary",
   TASK_REMINDER: "task-reminder",
   MAINTENANCE: "maintenance",
+  TASK_SCHEDULE: "task-schedule",
+  TEST_CRON: "test-cron",
 };
 
 // Queue options
@@ -61,6 +63,14 @@ export const maintenanceQueue = new Queue(
   QUEUE_NAMES.MAINTENANCE,
   defaultQueueOptions
 );
+export const taskScheduleQueue = new Queue(
+  QUEUE_NAMES.TASK_SCHEDULE,
+  defaultQueueOptions
+);
+export const testCronQueue = new Queue(
+  QUEUE_NAMES.TEST_CRON,
+  defaultQueueOptions
+);
 
 // Queue map for easy access
 export const queues = {
@@ -69,6 +79,8 @@ export const queues = {
   [QUEUE_NAMES.DAILY_SUMMARY]: dailySummaryQueue,
   [QUEUE_NAMES.TASK_REMINDER]: taskReminderQueue,
   [QUEUE_NAMES.MAINTENANCE]: maintenanceQueue,
+  [QUEUE_NAMES.TASK_SCHEDULE]: taskScheduleQueue,
+  [QUEUE_NAMES.TEST_CRON]: testCronQueue,
 };
 
 // Initialize all queues
@@ -146,6 +158,17 @@ export interface TaskReminderJobData {
 
 export interface MaintenanceJobData {
   olderThanHours?: number; // Default could be 24
+}
+
+export interface TaskScheduleJobData {
+  userId: string;
+  settings: Record<string, unknown>;
+  [key: string]: unknown; // Add index signature to satisfy JobData constraint
+}
+
+export interface TestCronJobData {
+  timestamp: string;
+  email: string;
 }
 
 // Helper functions to add jobs to queues
@@ -276,4 +299,98 @@ export async function scheduleDailySummaryEmails() {
   // This will be implemented later when we create the scheduler
   logger.info("Scheduling daily summary emails", {}, LOG_SOURCE);
   // TODO: Fetch all users and schedule daily summary emails
+}
+
+export async function addTaskScheduleJob(
+  data: TaskScheduleJobData,
+  options?: JobsOptions
+) {
+  try {
+    // Create a base job ID for the user
+    const baseJobId = `schedule-tasks-${data.userId}`;
+
+    // Check if a job with this base ID already exists and is waiting, active, or delayed
+    const existingJobs = await taskScheduleQueue.getJobs([
+      "waiting",
+      "active",
+      "delayed",
+    ]);
+    const existingJob = existingJobs.find((job) =>
+      job.id?.startsWith(baseJobId)
+    );
+
+    if (existingJob) {
+      logger.info(
+        "Task scheduling job already exists for this user, skipping",
+        { userId: data.userId },
+        LOG_SOURCE
+      );
+      return existingJob;
+    }
+
+    // Create a unique job ID with timestamp to ensure uniqueness
+    const timestamp = new Date().getTime();
+    const jobId = `${baseJobId}-${timestamp}`;
+
+    await trackJobCreation(
+      QUEUE_NAMES.TASK_SCHEDULE,
+      jobId,
+      "schedule-tasks",
+      data,
+      data.userId
+    );
+
+    // Add the job with a delay to allow for batching multiple task changes
+    const job = await taskScheduleQueue.add("schedule-tasks", data, {
+      jobId,
+      delay: 5000, // 5 second delay to allow for batching
+      ...options,
+    });
+
+    logger.info(
+      "Added task scheduling job with debounce",
+      {
+        userId: data.userId,
+        jobId: job.id || "unknown",
+      },
+      LOG_SOURCE
+    );
+
+    return job;
+  } catch (error) {
+    logger.error(
+      "Error adding task scheduling job",
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+        userId: data.userId,
+      },
+      LOG_SOURCE
+    );
+    throw error;
+  }
+}
+
+export async function addTestCronJob(
+  data: TestCronJobData,
+  options?: JobsOptions
+) {
+  // Generate a UUID for the job ID to ensure uniqueness across queues
+  const jobId = uuidv4();
+
+  // Track the job in the database FIRST
+  await trackJobCreation(
+    QUEUE_NAMES.TEST_CRON,
+    jobId,
+    "send",
+    data,
+    undefined // Test cron jobs might not have a userId
+  );
+
+  // Then add the job to the queue
+  const job = await testCronQueue.add("send", data, {
+    ...options,
+    jobId, // Use the generated UUID as the job ID
+  });
+
+  return job;
 }

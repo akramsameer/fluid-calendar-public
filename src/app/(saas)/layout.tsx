@@ -38,7 +38,9 @@ export default function SAASLayout({
           forcedTheme="light"
           enableSystem={false}
         >
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            {children}
+          </SessionProvider>
           <Toaster />
         </ThemeProvider>
       </body>
