@@ -128,7 +128,44 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
-          7. Children&apos;s Privacy
+          7. Data Retention and Deletion
+        </h2>
+        <p>
+          We retain your personal data for as long as necessary to provide you
+          with our services and as required to fulfill our legal obligations.
+        </p>
+        <p>For Google user data specifically:</p>
+        <ul className="mt-4 space-y-2 list-disc list-inside">
+          <li>
+            Calendar data is stored in our database for the purpose of providing
+            the service and is retained for as long as you maintain an active
+            account.
+          </li>
+          <li>
+            Authentication tokens are stored securely and refreshed as needed to
+            maintain calendar synchronization.
+          </li>
+          <li>
+            When you disconnect a Google Calendar, we delete the associated
+            authentication tokens.
+          </li>
+          <li>
+            When you delete your account, we permanently delete all your
+            personal data, including Google Calendar data and authentication
+            tokens, within 30 days.
+          </li>
+          <li>
+            You can request immediate deletion of your data at any time by
+            contacting us at privacy@fluidcalendar.com.
+          </li>
+        </ul>
+        <p>
+          We may retain certain information in anonymized or aggregated form,
+          but not in a way that would identify you personally.
+        </p>
+
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+          8. Children&apos;s Privacy
         </h2>
         <p>
           Our Service is not intended for children under the age of 13. We do
@@ -138,7 +175,7 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
-          8. Third-Party Services
+          9. Third-Party Services
         </h2>
         <p>
           Our Service may contain links to third-party websites or services that
@@ -148,7 +185,7 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
-          9. Changes to This Privacy Policy
+          10. Changes to This Privacy Policy
         </h2>
         <p>
           We may update our Privacy Policy from time to time. We will notify you
@@ -162,7 +199,7 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
-          10. Contact Us
+          11. Contact Us
         </h2>
         <p>
           If you have any questions about this Privacy Policy, please contact us
