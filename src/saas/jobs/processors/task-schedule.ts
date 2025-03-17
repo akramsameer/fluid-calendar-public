@@ -32,20 +32,8 @@ export class TaskScheduleProcessor extends BaseProcessor<
     );
 
     try {
-      // Get user's auto-schedule settings
-      const userSettings = await prisma.autoScheduleSettings.findUnique({
-        where: { userId: userId as string },
-      });
-
-      if (!userSettings) {
-        throw new Error(`Auto-schedule settings not found for user ${userId}`);
-      }
-
-      // Use the common function to schedule all tasks
-      const updatedTasks = await scheduleAllTasksForUser(
-        userId as string,
-        userSettings
-      );
+      // Use the simplified function to schedule all tasks
+      const updatedTasks = await scheduleAllTasksForUser(userId as string);
 
       // Create result object
       const result = {

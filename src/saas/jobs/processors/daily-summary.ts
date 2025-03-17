@@ -15,6 +15,7 @@ import {
 import { logger } from "@/lib/logger";
 import { prisma } from "../utils/prisma-utils";
 import { parseISO, toZonedTime, newDate, format } from "@/lib/date-utils";
+import { scheduleAllTasksForUser } from "@/services/scheduling/TaskSchedulingService";
 
 const LOG_SOURCE = "DailySummaryProcessor";
 
@@ -74,7 +75,26 @@ export class DailySummaryProcessor extends BaseProcessor<
       const parsedDate = parseISO(targetDate);
       const zonedDate = toZonedTime(parsedDate, timezone);
 
-      // Fetch meetings and tasks
+      // Reschedule all tasks for the user before generating the summary
+      try {
+        await scheduleAllTasksForUser(userId);
+      } catch (scheduleError) {
+        // Log the error but continue with the daily summary
+        logger.error(
+          `Error rescheduling tasks for user ${userId}`,
+          {
+            userId,
+            error:
+              scheduleError instanceof Error
+                ? scheduleError.message
+                : "Unknown error",
+          },
+          LOG_SOURCE
+        );
+        // Don't throw here, continue with the daily summary
+      }
+
+      // Fetch meetings and tasks (after rescheduling to get the updated task data)
       const [meetings, tasks] = await Promise.all([
         getUserDailyMeetings(userId, targetDate),
         getUserTopTasks(userId, targetDate),
