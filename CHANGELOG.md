@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
   - Created SSE (Server-Sent Events) endpoint with Redis-backed notifications
   - Integrated with existing notification system for toast messages
   - Added fallback to direct scheduling for open source version without Redis
+- Added data retention and deletion information to privacy policy to comply with Google's app verification requirements
+- Added documentation of Google OAuth scopes used in the application
 
 ### Changed
 - Modified job retry functionality to update existing job records instead of creating new ones
