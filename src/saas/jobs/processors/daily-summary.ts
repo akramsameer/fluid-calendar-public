@@ -14,7 +14,13 @@ import {
 } from "../templates/daily-summary";
 import { logger } from "@/lib/logger";
 import { prisma } from "../utils/prisma-utils";
-import { parseISO, toZonedTime, newDate, format } from "@/lib/date-utils";
+import {
+  parseISO,
+  toZonedTime,
+  newDate,
+  format,
+  newDateFromYMD,
+} from "@/lib/date-utils";
 import { scheduleAllTasksForUser } from "@/services/scheduling/TaskSchedulingService";
 
 const LOG_SOURCE = "DailySummaryProcessor";
@@ -75,6 +81,40 @@ export class DailySummaryProcessor extends BaseProcessor<
       const parsedDate = parseISO(targetDate);
       const zonedDate = toZonedTime(parsedDate, timezone);
 
+      // Determine if we should show today or tomorrow based on current time in user's timezone
+      const currentTimeInUserTz = toZonedTime(newDate(), timezone);
+      const currentHourInUserTz = currentTimeInUserTz.getHours();
+
+      // If it's before 8am in user's timezone, show today; otherwise show tomorrow
+      const showTomorrow = currentHourInUserTz >= 8;
+
+      // Calculate the forecast date based on the determination above
+      const forecastDate = format(
+        toZonedTime(
+          newDateFromYMD(
+            zonedDate.getFullYear(),
+            zonedDate.getMonth(),
+            zonedDate.getDate() + (showTomorrow ? 1 : 0)
+          ),
+          timezone
+        ),
+        "yyyy-MM-dd"
+      );
+
+      // Log which day we're showing
+      logger.info(
+        `Generating ${
+          showTomorrow ? "tomorrow's" : "today's"
+        } summary for user ${userId}`,
+        {
+          userId,
+          currentHourInUserTz,
+          showingTomorrow: showTomorrow,
+          forecastDate,
+        },
+        LOG_SOURCE
+      );
+
       // Reschedule all tasks for the user before generating the summary
       try {
         await scheduleAllTasksForUser(userId);
@@ -94,10 +134,10 @@ export class DailySummaryProcessor extends BaseProcessor<
         // Don't throw here, continue with the daily summary
       }
 
-      // Fetch meetings and tasks (after rescheduling to get the updated task data)
+      // Fetch meetings and tasks for the forecast date
       const [meetings, tasks] = await Promise.all([
-        getUserDailyMeetings(userId, targetDate),
-        getUserTopTasks(userId, targetDate),
+        getUserDailyMeetings(userId, forecastDate),
+        getUserTopTasks(userId, forecastDate),
       ]);
 
       logger.info(
@@ -110,24 +150,26 @@ export class DailySummaryProcessor extends BaseProcessor<
         LOG_SOURCE
       );
 
-      // Generate email content
+      // Generate email content with the forecast date
+      const forecastDateObj = toZonedTime(parseISO(forecastDate), timezone);
+
       const html = generateDailySummaryHtml(
         user.name || "User",
-        zonedDate,
+        forecastDateObj,
         meetings,
         tasks
       );
       const text = generateDailySummaryText(
         user.name || "User",
-        zonedDate,
+        forecastDateObj,
         meetings,
         tasks
       );
 
-      // Queue email job
+      // Queue email job with appropriate subject
       await addEmailJob({
         to: email || user.email || "",
-        subject: `Your Daily Summary for ${format(zonedDate, "MMMM d, yyyy")}`,
+        subject: `Your Today's Agenda for ${format(forecastDateObj, "MMMM d, yyyy")}`,
         html,
         text,
       });
