@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [unreleased]
+
+## [1.2.2] 2025-03-18
 ### Added
 - Added rate limiting to email queue to limit processing to 2 emails per second
 - Added additional logging to email processor to monitor rate limiting effectiveness
