@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 ### Added
+- Added week start day setting to Calendar Settings UI to allow users to choose between Monday and Sunday as the first day of the week
 
 ### Changed
 - Replaced Google Fonts CDN with self-hosted Inter font to fix intermittent build failures
