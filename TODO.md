@@ -18,6 +18,7 @@
 - [ ] share availability
 - [ ] use SSE throughout to improve sync performance
 - [ ] setup a hosted runner on my mac to speed up arm64 builds for the open source project
+- [ ] use database for sysconfig instead of infisical
 
 # CalDAV Implementation
 ## Phase 3: Calendar Synchronization (Pending)
