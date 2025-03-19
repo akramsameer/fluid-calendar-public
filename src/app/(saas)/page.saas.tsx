@@ -57,7 +57,7 @@ export default function Home() {
 
   const handleLogin = () => {
     if (session) {
-      router.push("/");
+      router.push("/calendar");
     } else {
       router.push("/auth/signin");
     }
