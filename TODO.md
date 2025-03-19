@@ -1,7 +1,6 @@
 # FluidCalendar Implementation Plan
 # Random Tasks
 - [ ] add a calculator comparing motion to FC
-- [ ] add more time zones
 - [ ] add a sidebar thingy in open to tell them to move to saas
 - [ ] auto schedule working hours in settings using 24 instead am/pm
 - [ ] improve task lists and focus view see [tasklist](docs/tasklist-enhancements.md)

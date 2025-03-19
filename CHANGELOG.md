@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [unreleased]
 ### Added
 - Added week start day setting to Calendar Settings UI to allow users to choose between Monday and Sunday as the first day of the week
+- Expanded timezone options in user settings to include a more comprehensive global list fixes #68
 
 ### Changed
 - Replaced Google Fonts CDN with self-hosted Inter font to fix intermittent build failures
