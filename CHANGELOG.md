@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Replaced Google Fonts CDN with self-hosted Inter font to fix intermittent build failures
 
 ### Fixed
+- Fixed all-day events appearing on the wrong day for Google Calendar events due to timezone handling issues
 - Fixed startDate handling for recurring tasks, ensuring the time interval between start date and due date is preserved when creating new instances
 - Fixed timezone inconsistency in task list display for start dates and due dates
 - Fixed DatePicker showing incorrect dates (off by one day) when inline editing due dates and start dates
