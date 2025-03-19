@@ -1,6 +1,5 @@
 # FluidCalendar Implementation Plan
 # Random Tasks
-- [ ] all-day multi-day editing is not working (google)
 - [ ] add a calculator comparing motion to FC
 - [ ] add a sidebar thingy in open to tell them to move to saas
 - [ ] auto schedule working hours in settings using 24 instead am/pm
