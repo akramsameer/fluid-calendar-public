@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Fixed startDate handling for recurring tasks, ensuring the time interval between start date and due date is preserved when creating new instances
 - Fixed timezone inconsistency in task list display for start dates and due dates
 - Fixed DatePicker showing incorrect dates (off by one day) when inline editing due dates and start dates
+- Fixed CalDAV all-day event creation failing with "invalid date-time value" error by properly using ICAL.Time.fromDateString instead of raw string dates
 
 ## [1.2.2] 2025-03-18
 ### Added
