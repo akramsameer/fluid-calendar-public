@@ -1,9 +1,5 @@
 import { logger } from "@/lib/logger";
 import {
-  format,
-  startOfDay,
-  endOfDay,
-  parseISO,
   toZonedTime,
 } from "@/lib/date-utils";
 import { prisma } from "./prisma-utils";
@@ -30,18 +26,31 @@ export interface Meeting {
 export async function getUserDailyMeetings(userId: string, targetDate: string) {
   try {
     const userTimezone = await getUserTimezone(userId);
-    const date = parseISO(targetDate);
-    const zonedDate = toZonedTime(date, userTimezone);
 
-    const dayStart = startOfDay(zonedDate);
-    const dayEnd = endOfDay(zonedDate);
+    // Parse the date components directly to avoid timezone issues
+    const [year, month, day] = targetDate.split("-").map(Number);
+
+    // Create date objects for start and end of day in the user's timezone
+    // Use the date components to create a Date in the user's timezone
+    const dayStart = toZonedTime(
+      new Date(year, month - 1, day, 0, 0, 0, 0),
+      userTimezone
+    );
+
+    const dayEnd = toZonedTime(
+      new Date(year, month - 1, day, 23, 59, 59, 999),
+      userTimezone
+    );
 
     logger.info(
-      `Getting meetings for user ${userId} on ${format(
-        zonedDate,
-        "yyyy-MM-dd"
-      )} (${userTimezone})`,
-      { dayStart: dayStart.toISOString(), dayEnd: dayEnd.toISOString() },
+      `Getting meetings for user ${userId} on ${targetDate} (${userTimezone})`,
+      {
+        userId,
+        targetDate,
+        dayStart: dayStart.toISOString(),
+        dayEnd: dayEnd.toISOString(),
+        dateComponents: [year.toString(), month.toString(), day.toString()],
+      },
       LOG_SOURCE
     );
 
@@ -86,7 +95,7 @@ export async function getUserDailyMeetings(userId: string, targetDate: string) {
       `Found ${meetings.length} meetings for user ${userId}`,
       {
         userId,
-        date: format(zonedDate, "yyyy-MM-dd"),
+        date: targetDate,
         meetingCount: meetings.length,
       },
       LOG_SOURCE
