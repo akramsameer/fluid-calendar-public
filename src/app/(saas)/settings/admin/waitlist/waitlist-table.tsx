@@ -56,6 +56,7 @@ export function WaitlistTable() {
     boostEntries,
     exportEntries,
     inviteSpecificEntries,
+    resendInvitations,
   } = useWaitlistStore();
 
   // Fetch entries on component mount
@@ -103,6 +104,21 @@ export function WaitlistTable() {
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to send invitation"
+      );
+    }
+  };
+
+  const handleResendInvitation = async (entryId: string) => {
+    try {
+      const result = await resendInvitations([entryId]);
+      if (result.resendCount > 0) {
+        toast.success(`Invitation resent successfully`);
+      } else {
+        toast.error("Failed to resend invitation");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to resend invitation"
       );
     }
   };
@@ -158,6 +174,33 @@ export function WaitlistTable() {
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to send invitations"
+      );
+    }
+  };
+
+  // Count selected entries by status
+  const countSelectedByStatus = (status: string) => {
+    return selectedEntries.filter(
+      (id) => entries.find((entry) => entry.id === id)?.status === status
+    ).length;
+  };
+
+  const handleBulkResend = async () => {
+    const invitedEntries = selectedEntries.filter(
+      (id) => entries.find((entry) => entry.id === id)?.status === "INVITED"
+    );
+
+    if (invitedEntries.length === 0) {
+      toast.error("No invited users selected");
+      return;
+    }
+
+    try {
+      const result = await resendInvitations(invitedEntries);
+      toast.success(`Resent ${result.resendCount} invitations successfully`);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to resend invitations"
       );
     }
   };
@@ -340,6 +383,20 @@ export function WaitlistTable() {
               >
                 <Mail className="h-4 w-4" />
                 <span>Invite</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkResend}
+                className="flex items-center gap-1"
+              >
+                <Mail className="h-4 w-4" />
+                <span>
+                  Resend{" "}
+                  {countSelectedByStatus("INVITED") > 0
+                    ? `(${countSelectedByStatus("INVITED")})`
+                    : ""}
+                </span>
               </Button>
               <Button
                 variant="outline"
@@ -531,6 +588,12 @@ export function WaitlistTable() {
                           disabled={entry.status !== "WAITING"}
                         >
                           Invite
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleResendInvitation(entry.id)}
+                          disabled={entry.status !== "INVITED"}
+                        >
+                          Resend Invitation
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleBoostEntry(entry.id)}

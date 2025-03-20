@@ -12,9 +12,12 @@ All notable changes to this project will be documented in this file.
   - Ability to sort and filter by start date
 - Added week start day setting to Calendar Settings UI to allow users to choose between Monday and Sunday as the first day of the week
 - Expanded timezone options in user settings to include a more comprehensive global list fixes #68
+- Bulk resend invitations functionality for users with INVITED status
+- Added "Resend Invitation" button to individual user actions in waitlist management
 
 ### Changed
 - Replaced Google Fonts CDN with self-hosted Inter font to fix intermittent build failures
+- Updated waitlist entries sorting to include secondary sorting by priorityScore and createdAt
 
 ### Fixed
 - Fixed all-day events appearing on the wrong day for Google Calendar events due to timezone handling issues

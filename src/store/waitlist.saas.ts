@@ -110,6 +110,7 @@ interface WaitlistState {
     message?: string
   ) => Promise<{ invitedCount: number }>;
   resendInvitation: (id: string) => Promise<void>;
+  resendInvitations: (ids: string[]) => Promise<{ resendCount: number }>;
   deleteEntries: (ids: string[]) => Promise<void>;
   boostEntries: (ids: string[], amount: number) => Promise<void>;
   exportEntries: (ids: string[]) => Promise<void>;
@@ -489,6 +490,61 @@ export const useWaitlistStore = create<WaitlistState>((set, get) => ({
             : "Failed to resend invitation",
         invitationsLoading: false,
       });
+    }
+  },
+
+  resendInvitations: async (ids: string[]) => {
+    try {
+      set({ entriesLoading: true, entriesError: null });
+
+      if (ids.length === 0) {
+        return { resendCount: 0 };
+      }
+
+      // Use the bulk resend API endpoint
+      const response = await fetch("/api/waitlist/bulk/resend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to resend invitations: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Refresh entries and invitations
+      await get().fetchEntries();
+      await get().fetchInvitations();
+
+      logger.info(
+        "Resent invitations in bulk",
+        { totalAttempted: ids.length, successfulResends: data.resendCount },
+        LOG_SOURCE
+      );
+
+      set({ entriesLoading: false });
+      return { resendCount: data.resendCount };
+    } catch (error) {
+      logger.error(
+        "Error resending invitations in bulk",
+        {
+          error: error instanceof Error ? error.message : "Unknown error",
+          ids,
+        },
+        LOG_SOURCE
+      );
+      set({
+        entriesError:
+          error instanceof Error
+            ? error.message
+            : "Failed to resend invitations in bulk",
+        entriesLoading: false,
+      });
+      return { resendCount: 0 };
     }
   },
 
