@@ -1,8 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-
 ## [unreleased]
+
+## [1.2.3]
 ### Added
 - Added task start date feature to specify when a task should become active
   - Tasks with future start dates won't appear in focus mode
