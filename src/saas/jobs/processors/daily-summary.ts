@@ -89,14 +89,12 @@ export class DailySummaryProcessor extends BaseProcessor<
       const showTomorrow = currentHourInUserTz >= 8;
 
       // Calculate the forecast date based on the determination above
+      // Use the current time in user's timezone as the base date to calculate tomorrow
       const forecastDate = format(
-        toZonedTime(
-          newDateFromYMD(
-            zonedDate.getFullYear(),
-            zonedDate.getMonth(),
-            zonedDate.getDate() + (showTomorrow ? 1 : 0)
-          ),
-          timezone
+        newDateFromYMD(
+          currentTimeInUserTz.getFullYear(),
+          currentTimeInUserTz.getMonth(),
+          currentTimeInUserTz.getDate() + (showTomorrow ? 1 : 0)
         ),
         "yyyy-MM-dd"
       );
@@ -117,6 +115,7 @@ export class DailySummaryProcessor extends BaseProcessor<
           parsedDate: parsedDate.toISOString(),
           zonedDate: zonedDate.toISOString(),
           newDate: newDate().toISOString(),
+          currentTimeInUserTz: currentTimeInUserTz.toISOString(),
         },
         LOG_SOURCE
       );
