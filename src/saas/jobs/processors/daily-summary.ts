@@ -174,10 +174,7 @@ export class DailySummaryProcessor extends BaseProcessor<
       // Queue email job with appropriate subject
       await addEmailJob({
         to: email || user.email || "",
-        subject: `Your Today's Agenda for ${format(
-          forecastDateObj,
-          "MMMM d, yyyy"
-        )}`,
+        subject: `Agenda for ${format(forecastDateObj, "EEEE, MMMM do")}`,
         html,
         text,
       });

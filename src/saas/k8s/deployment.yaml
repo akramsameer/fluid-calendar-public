@@ -363,9 +363,20 @@ spec:
   tls:
   - hosts:
     - fluidcalendar.com
+    - www.fluidcalendar.com
     secretName: fluid-calendar-tls
   rules:
   - host: fluidcalendar.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: fluid-calendar
+            port:
+              number: 80
+  - host: www.fluidcalendar.com
     http:
       paths:
       - path: /
