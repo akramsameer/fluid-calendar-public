@@ -22,7 +22,7 @@ export class EmailProcessor extends BaseProcessor<
       ...getRedisOptions(),
       // Set concurrency to 2 to match our rate limiter (2 emails per second)
       // This ensures we have enough workers to process at the rate we want
-      concurrency: 2,
+      concurrency: 1,
     });
   }
 

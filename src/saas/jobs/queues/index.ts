@@ -40,7 +40,7 @@ const defaultQueueOptions = {
 const emailQueueOptions = {
   ...defaultQueueOptions,
   limiter: {
-    max: 2, // Maximum 2 jobs
+    max: 1, // Maximum 2 jobs
     duration: 1000, // Per 1 second (1000ms)
   },
 };
