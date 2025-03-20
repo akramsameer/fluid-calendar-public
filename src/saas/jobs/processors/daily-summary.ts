@@ -111,6 +111,12 @@ export class DailySummaryProcessor extends BaseProcessor<
           currentHourInUserTz,
           showingTomorrow: showTomorrow,
           forecastDate,
+          timezone,
+          date: date || null,
+          targetDate,
+          parsedDate: parsedDate.toISOString(),
+          zonedDate: zonedDate.toISOString(),
+          newDate: newDate().toISOString(),
         },
         LOG_SOURCE
       );
@@ -169,7 +175,10 @@ export class DailySummaryProcessor extends BaseProcessor<
       // Queue email job with appropriate subject
       await addEmailJob({
         to: email || user.email || "",
-        subject: `Your Today's Agenda for ${format(forecastDateObj, "MMMM d, yyyy")}`,
+        subject: `Your Today's Agenda for ${format(
+          forecastDateObj,
+          "MMMM d, yyyy"
+        )}`,
         html,
         text,
       });
@@ -179,6 +188,7 @@ export class DailySummaryProcessor extends BaseProcessor<
         {
           userId,
           email: email || user.email,
+          forecastDateObj: forecastDateObj.toISOString(),
         },
         LOG_SOURCE
       );
