@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 ## [unreleased]
+### Added
 
+### Changed
+
+### Fixed
+- Fixed conversion rate calculation in waitlist management to prevent exceeding 100%
 ## [1.2.3]
 ### Added
 - Added task start date feature to specify when a task should become active
@@ -29,6 +34,7 @@ All notable changes to this project will be documented in this file.
 - Fixed timezone inconsistency in task list display for start dates and due dates
 - Fixed DatePicker showing incorrect dates (off by one day) when inline editing due dates and start dates
 - Fixed CalDAV all-day event creation failing with "invalid date-time value" error by properly using ICAL.Time.fromDateString instead of raw string dates
+
 
 ## [1.2.2] 2025-03-18
 ### Added

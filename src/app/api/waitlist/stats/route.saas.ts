@@ -38,9 +38,14 @@ export async function GET(request: NextRequest) {
       where: { status: "REGISTERED" },
     });
 
-    // Calculate conversion rate (registered / invited)
+    // Count total users who ever received an invitation (current INVITED + REGISTERED)
+    const totalInvitedEver = invitedUsers + registeredUsers;
+
+    // Calculate conversion rate (registered / total invited ever)
     const conversionRate =
-      invitedUsers > 0 ? Math.round((registeredUsers / invitedUsers) * 100) : 0;
+      totalInvitedEver > 0
+        ? Math.round((registeredUsers / totalInvitedEver) * 100)
+        : 0;
 
     // Get count of users who joined in the last 30 days
     const lastMonthJoined = await prisma.waitlist.count({
