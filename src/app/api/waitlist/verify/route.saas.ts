@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
         referralCode: uuidv4().substring(0, 8), // Generate a unique referral code
         referredBy: referrerId,
         status: "WAITING",
-        priorityScore: 0, // Will be updated based on referrals
+        priorityScore: pendingVerification.interestedInLifetime ? 1 : 0, // +1 for lifetime interest
         interestedInLifetime: pendingVerification.interestedInLifetime || false,
       },
     });

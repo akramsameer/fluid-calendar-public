@@ -58,12 +58,14 @@ export async function GET(request: NextRequest) {
     // Count total entries matching the filter
     const total = await prisma.waitlist.count({ where });
 
-    // Fetch paginated entries
+    // Fetch paginated entries with primary and secondary sort fields
     const entries = await prisma.waitlist.findMany({
       where,
-      orderBy: {
-        [sortField]: sortDirection,
-      },
+      orderBy: [
+        { [sortField]: sortDirection },
+        { priorityScore: "desc" },
+        { createdAt: "asc" },
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
