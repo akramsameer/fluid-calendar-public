@@ -156,7 +156,28 @@ export class DailySummaryProcessor extends BaseProcessor<
       );
 
       // Generate email content with the forecast date
-      const forecastDateObj = toZonedTime(parseISO(forecastDate), timezone);
+      // Create forecastDateObj directly from the components of the forecastDate
+      const [year, month, day] = forecastDate.split("-").map(Number);
+      const forecastDateObj = newDateFromYMD(year, month - 1, day); // month is 0-indexed in JS Date
+
+      // Add additional log to debug the forecastDateObj
+      logger.info(
+        `Debug forecastDateObj for user ${userId}`,
+        {
+          userId,
+          forecastDate,
+          forecastDateObj: forecastDateObj.toISOString(),
+          forecastDateObjYear: forecastDateObj.getFullYear(),
+          forecastDateObjMonth: forecastDateObj.getMonth() + 1, // Add 1 to match 1-indexed month display
+          forecastDateObjDate: forecastDateObj.getDate(),
+          forecastDateComponents: [
+            year.toString(),
+            month.toString(),
+            day.toString(),
+          ],
+        },
+        LOG_SOURCE
+      );
 
       const html = generateDailySummaryHtml(
         user.name || "User",
