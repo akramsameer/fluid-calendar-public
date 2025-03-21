@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 ## [unreleased]
 ### Added
+- Added system setting to disable the homepage and redirect to login/calendar
+  - Admin-configurable option in System Settings
+  - Redirects unauthenticated users to login page
+  - Redirects authenticated users to calendar view
+  - Default is off (homepage is shown)
+  - Added database migration to add the disableHomepage field to SystemSettings
+  - Uses direct API calls for real-time setting changes with no caching
 
 ### Changed
 
