@@ -1,8 +1,21 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [unreleased]
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
 ### Added
+- Task synchronization system (Phase 1)
+  - Added database schema for task providers and task list mappings
+  - Created core interfaces for task synchronization
+  - Implemented task sync job processor and queue management
+  - Added foundation for multi-provider task synchronization
+  - Added API endpoints for managing task providers and mappings
+  - Implemented Outlook tasks provider with one-way sync
+- Outlook tasks integration improvements (migration to new task synchronization system)
 
 ### Changed
 

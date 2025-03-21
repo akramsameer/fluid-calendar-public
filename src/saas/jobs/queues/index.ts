@@ -15,6 +15,7 @@ export const QUEUE_NAMES = {
   MAINTENANCE: "maintenance",
   TASK_SCHEDULE: "task-schedule",
   TEST_CRON: "test-cron",
+  TASK_SYNC: "task-sync",
 };
 
 // Queue options
@@ -71,6 +72,17 @@ export const testCronQueue = new Queue(
   QUEUE_NAMES.TEST_CRON,
   defaultQueueOptions
 );
+export const taskSyncQueue = new Queue<TaskSyncJobData>(QUEUE_NAMES.TASK_SYNC, {
+  ...defaultQueueOptions,
+  defaultJobOptions: {
+    ...defaultQueueOptions.defaultJobOptions,
+    attempts: 5, // More attempts for task sync due to possible API limits
+    backoff: {
+      type: "exponential",
+      delay: 5000, // Start with 5 seconds, then exponential backoff
+    },
+  },
+});
 
 // Queue map for easy access
 export const queues = {
@@ -81,6 +93,7 @@ export const queues = {
   [QUEUE_NAMES.MAINTENANCE]: maintenanceQueue,
   [QUEUE_NAMES.TASK_SCHEDULE]: taskScheduleQueue,
   [QUEUE_NAMES.TEST_CRON]: testCronQueue,
+  [QUEUE_NAMES.TASK_SYNC]: taskSyncQueue,
 };
 
 // Initialize all queues
@@ -169,6 +182,15 @@ export interface TaskScheduleJobData {
 export interface TestCronJobData {
   timestamp: string;
   email: string;
+}
+
+export interface TaskSyncJobData {
+  userId?: string;
+  providerId?: string;
+  mappingId?: string;
+  fullSync?: boolean;
+  syncAll?: boolean; // If true, sync all mappings for a user
+  [key: string]: unknown; // Add index signature to satisfy JobData constraint
 }
 
 // Helper functions to add jobs to queues
@@ -388,6 +410,34 @@ export async function addTestCronJob(
 
   // Then add the job to the queue
   const job = await testCronQueue.add("send", data, {
+    ...options,
+    jobId, // Use the generated UUID as the job ID
+  });
+
+  return job;
+}
+
+/**
+ * Add a task sync job to synchronize a specific task mapping or all mappings for a user
+ */
+export async function addTaskSyncJob(
+  data: TaskSyncJobData,
+  options?: JobsOptions
+) {
+  // Generate a UUID for the job ID to ensure uniqueness across queues
+  const jobId = uuidv4();
+
+  // Track the job in the database FIRST
+  await trackJobCreation(
+    QUEUE_NAMES.TASK_SYNC,
+    jobId,
+    "sync",
+    data,
+    data.userId || undefined // Task sync jobs may not have a userId
+  );
+
+  // Then add the job to the queue
+  const job = await taskSyncQueue.add("sync", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });

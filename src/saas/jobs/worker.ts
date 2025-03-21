@@ -11,9 +11,10 @@ import { maintenanceProcessor } from "./processors/maintenance";
 import { taskReminderProcessor } from "./processors/task-reminder";
 import { CronJob } from "cron";
 import { ensurePrismaConnection, disconnectPrisma } from "./utils/prisma-utils";
-import { addCleanupOrphanedRecordsJob } from "./queues";
+import { addCleanupOrphanedRecordsJob, addTaskSyncJob } from "./queues";
 import { taskScheduleProcessor } from "./processors/task-schedule";
 import { testCronProcessor, TestCronProcessor } from "./processors/test-cron";
+import { taskSyncProcessor } from "./processors/task-sync";
 
 const LOG_SOURCE = "Worker";
 
@@ -26,6 +27,7 @@ const processors = {
   taskReminder: taskReminderProcessor,
   taskSchedule: taskScheduleProcessor,
   testCron: testCronProcessor,
+  taskSync: taskSyncProcessor,
   // Add other processors here as they are implemented
 };
 
@@ -126,6 +128,38 @@ export async function setupScheduledJobs() {
   );
   console.log("Test cron job created");
 
+  // Schedule task synchronization jobs
+  const taskSyncJob = new CronJob(
+    "*/15 * * * *", // Every 15 minutes
+    async () => {
+      try {
+        logger.info("Starting scheduled task sync job", {}, LOG_SOURCE);
+
+        // Schedule a sync job for all users with enabled task providers
+        await addTaskSyncJob({
+          syncAll: true,
+        });
+
+        logger.info(
+          "Scheduled task sync for all users with enabled providers",
+          {},
+          LOG_SOURCE
+        );
+      } catch (error) {
+        logger.error(
+          "Failed to schedule task sync jobs",
+          {
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+          LOG_SOURCE
+        );
+      }
+    },
+    null,
+    true,
+    "UTC"
+  );
+
   // Add other scheduled jobs here
   console.log("CRON JOBS SET UP");
   logger.info("Scheduled jobs set up", {}, LOG_SOURCE);
@@ -134,6 +168,7 @@ export async function setupScheduledJobs() {
     dailySummaryJob,
     cleanupOrphanedRecordsJob,
     testCronJob,
+    taskSync: taskSyncJob,
     // Add other jobs here
   };
 }

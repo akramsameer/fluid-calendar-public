@@ -80,6 +80,7 @@ model User {
   connectedAccounts    ConnectedAccount[]
   tags                 Tag[]
   JobRecord            JobRecord[]
+  taskProviders        TaskProvider[]
 }
 
 model VerificationToken {
@@ -154,13 +155,19 @@ model CalendarEvent {
 }
 
 model Project {
-  id              String                   @id @default(cuid())
-  name            String
-  description     String?
-  color           String?
-  status          String                   @default("active") // enum: 'active', 'archived'
-  tasks           Task[]
-  outlookMappings OutlookTaskListMapping[]
+  id               String                   @id @default(cuid())
+  name             String
+  description      String?
+  color            String?
+  status           String                   @default("active") // enum: 'active', 'archived'
+  tasks            Task[]
+  outlookMappings  OutlookTaskListMapping[]
+  taskListMappings TaskListMapping[]
+
+  // External sync fields
+  externalId     String?
+  externalSource String?
+  lastSyncedAt   DateTime?
 
   // User relationship
   userId String?
@@ -172,6 +179,7 @@ model Project {
 
   @@index([status])
   @@index([userId])
+  @@index([externalId, externalSource])
 }
 
 model Task {
@@ -211,6 +219,15 @@ model Task {
   source         String?
   lastSyncedAt   DateTime?
 
+  // Enhanced sync fields
+  externalListId    String? // The external list/folder ID this task belongs to
+  externalCreatedAt DateTime? // When the task was created in the external system
+  externalUpdatedAt DateTime? // When the task was last updated in the external system
+  syncStatus        String? // 'synced', 'pending', 'error', etc.
+  syncError         String? // Error message if sync failed
+  syncHash          String? // Hash of task data for detecting changes
+  skipSync          Boolean   @default(false) // Flag to skip syncing this task
+
   // User relationship
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
@@ -234,6 +251,9 @@ model Task {
   @@index([source])
   @@index([postponedUntil])
   @@index([userId])
+  @@index([externalTaskId, source])
+  @@index([syncStatus])
+  @@index([externalListId])
 }
 
 model Tag {
@@ -495,4 +515,54 @@ enum JobStatus {
   FAILED
   DELAYED
   PAUSED
+}
+
+// New models for task synchronization
+model TaskProvider {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String // 'outlook', 'google', etc.
+  name         String
+  enabled      Boolean           @default(true)
+  syncEnabled  Boolean           @default(true)
+  syncInterval String            @default("hourly") // 'hourly', 'daily', 'manual'
+  lastSyncedAt DateTime?
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  settings     Json? // Provider-specific settings
+  mappings     TaskListMapping[]
+  error        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([userId, type])
+  @@index([userId])
+  @@index([type])
+}
+
+model TaskListMapping {
+  id               String       @id @default(cuid())
+  providerId       String
+  provider         TaskProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  projectId        String
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  externalListId   String // ID of the external task list
+  externalListName String // Name of the external task list
+  direction        String       @default("incoming") // 'incoming', 'outgoing', 'bidirectional'
+  isDefault        Boolean      @default(false)
+  syncEnabled      Boolean      @default(true)
+  isAutoScheduled  Boolean      @default(true)
+  lastSyncedAt     DateTime?
+  syncStatus       String?
+  lastError        String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([providerId, projectId])
+  @@unique([providerId, externalListId])
+  @@index([providerId])
+  @@index([projectId])
+  @@index([externalListId])
 }

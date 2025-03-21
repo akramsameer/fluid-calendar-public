@@ -1,5 +1,57 @@
+# Task Synchronization Phase 1 Implementation
+
+Phase 1 focuses on building the foundation for a scalable task synchronization system that will support two-way sync with multiple providers.
+
+## Task Sync Phase 1 Tasks
+
+1. **Database Schema Changes**
+   - [x] Create the `TaskProvider` model in schema.prisma
+   - [x] Create the `TaskListMapping` model to replace `OutlookTaskListMapping`
+   - [x] Update the `Task` model with additional sync fields
+   - [x] Update the `Project` model with sync-related fields
+   - [x] Create a migration for the schema changes
+  
+2. **Core Interfaces and Classes**
+   - [x] Create `src/lib/task-sync/providers/task-provider.interface.ts`
+   - [x] Create `src/lib/task-sync/task-sync-manager.ts`
+   - [x] Create `src/lib/task-sync/task-change-tracker.ts`
+   - [x] Create helper utilities for mapping between providers
+   - [x] Fix TypeScript type issues in task sync related files
+
+3. **Outlook Provider Implementation**
+   - [x] Create `src/lib/task-sync/providers/outlook-provider.ts`
+   - [x] Port existing functionality from `OutlookTasksService`
+   - [x] Implement the one-way sync from Outlook to FluidCalendar
+   - [ ] Add support for task list mapping
+
+4. **API Endpoints**
+   - [x] Create provider management endpoints
+   - [x] Create mapping management endpoints
+   - [x] Create sync trigger endpoints
+
+5. **Background Jobs**
+   - [x] Set up BullMQ job queue for task synchronization
+   - [x] Create job processor for task sync operations
+   - [ ] Implement scheduler for periodic sync jobs
+
+6. **UI Components**
+   - [ ] Create provider management UI in settings
+   - [ ] Create task list mapping UI
+   - [ ] Create sync status indicator components
+
+7. **Data Migration**
+   - [ ] Write migration script to move existing Outlook task mappings
+   - [ ] Test data migration process
+
+8. **Next Steps**
+   - [ ] Build UI components for task sync management
+   - [ ] Implement periodic sync scheduler
+   - [ ] Finish data migration for existing Outlook tasks
+   - [ ] Test the complete workflow from adding a provider to auto-syncing tasks
+
 # FluidCalendar Implementation Plan
 # Random Tasks
+- [ ] 2-way task sync see [sync document](docs/task-sync.md)
 - [ ] add a calculator comparing motion to FC
 - [ ] add a sidebar thingy in open to tell them to move to saas
 - [ ] auto schedule working hours in settings using 24 instead am/pm
