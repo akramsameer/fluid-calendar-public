@@ -89,6 +89,7 @@ export interface SystemSettings {
   logLevel: "none" | "debug";
   logRetention?: LogRetention; // Retention periods per log level
   logDestination?: string; // "db", "file", or "both"
+  disableHomepage?: boolean; // Whether to disable the homepage and redirect to login/calendar
 }
 
 export interface Settings {

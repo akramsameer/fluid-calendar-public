@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added system setting to disable the homepage and redirect to login/calendar
+  - Admin-configurable option in System Settings
+  - Redirects unauthenticated users to login page
+  - Redirects authenticated users to calendar view
+  - Default is off (homepage is shown)
+  - Added database migration to add the disableHomepage field to SystemSettings
+  - Uses direct API calls for real-time setting changes with no caching
 - Task synchronization system (Phase 1)
   - Added database schema for task providers and task list mappings
   - Created core interfaces for task synchronization
