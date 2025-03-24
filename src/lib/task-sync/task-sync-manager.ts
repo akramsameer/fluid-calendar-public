@@ -15,13 +15,16 @@ import {
   TaskProvider as DbTaskProvider,
   TaskListMapping,
 } from "@prisma/client";
-import { Task, TaskStatus, Priority } from "@/types/task";
 import {
   TaskProviderInterface,
-  TaskToCreate,
-  TaskUpdates,
+  ExternalTask,
 } from "./providers/task-provider.interface";
 import { newDate } from "@/lib/date-utils";
+import { TaskChangeTracker } from "./task-change-tracker";
+import { TaskStatus } from "@/types/task";
+import { FieldMapper } from "./field-mapper";
+import { OutlookFieldMapper } from "./providers/outlook-field-mapper";
+import { SyncResult, TaskWithSync } from "./types";
 
 // Import provider implementations
 import { OutlookTaskProvider } from "./providers/outlook-provider";
@@ -33,22 +36,6 @@ import { getMsGraphClient } from "@/lib/outlook-utils";
 const LOG_SOURCE = "TaskSyncManager";
 
 /**
- * Result of a synchronization operation
- */
-export interface SyncResult {
-  mappingId: string;
-  providerId: string;
-  providerType: string;
-  success: boolean;
-  imported: number;
-  updated: number;
-  deleted: number;
-  skipped: number;
-  errors: Array<{ taskId: string; error: string }>;
-  timestamp: Date;
-}
-
-/**
  * Options for conflict resolution
  */
 export type ConflictResolution =
@@ -57,6 +44,22 @@ export type ConflictResolution =
   | { strategy: "MERGE"; fields: Record<string, "LOCAL" | "REMOTE"> };
 
 export class TaskSyncManager {
+  /**
+   * Get an appropriate field mapper for a provider type
+   *
+   * @param providerType The type of provider
+   * @returns A field mapper for the provider
+   */
+  getFieldMapper(providerType: string): FieldMapper {
+    switch (providerType.toUpperCase()) {
+      case "OUTLOOK":
+        return new OutlookFieldMapper();
+      // Add cases for other provider types
+      default:
+        return new FieldMapper();
+    }
+  }
+
   /**
    * Initialize a provider based on its type
    *
@@ -99,112 +102,110 @@ export class TaskSyncManager {
   /**
    * Synchronize tasks for a specific mapping between a project and external task list
    *
-   * @param mappingId The ID of the TaskListMapping to sync
+   * @param mapping The TaskListMapping to sync with its provider
    * @returns Result of the sync operation
    */
-  async syncTaskList(mappingId: string): Promise<SyncResult> {
-    logger.info(`Starting sync for mapping ${mappingId}`, {}, LOG_SOURCE);
+  async syncTaskList(
+    mappingId: string | (TaskListMapping & { provider: DbTaskProvider })
+  ): Promise<SyncResult> {
+    let mapping: TaskListMapping & { provider: DbTaskProvider };
 
-    // Initialize result object
+    // If mappingId is a string, fetch the mapping with its provider
+    if (typeof mappingId === "string") {
+      const foundMapping = await prisma.taskListMapping.findUnique({
+        where: { id: mappingId },
+        include: { provider: true },
+      });
+
+      if (!foundMapping) {
+        throw new Error(`Task list mapping not found: ${mappingId}`);
+      }
+
+      mapping = foundMapping;
+    } else {
+      // If mappingId is already a mapping object, use it directly
+      mapping = mappingId;
+    }
+
+    const provider = await this.getProvider(mapping.providerId);
+    const fieldMapper = this.getFieldMapper(mapping.provider.type);
+
+    // Initialize sync result
     const result: SyncResult = {
-      mappingId,
-      providerId: "",
-      providerType: "",
+      mappingId: mapping.id,
+      providerId: mapping.providerId,
+      providerType: mapping.provider.type,
       success: false,
       imported: 0,
       updated: 0,
       deleted: 0,
       skipped: 0,
+      direction: "bidirectional",
       errors: [],
-      timestamp: newDate(),
     };
 
     try {
-      // Get mapping details
-      const mapping = await prisma.taskListMapping.findUnique({
-        where: { id: mappingId },
-        include: { provider: true },
-      });
-
-      if (!mapping) {
-        throw new Error(`Mapping not found: ${mappingId}`);
-      }
-
-      result.providerId = mapping.providerId;
-      result.providerType = mapping.provider.type;
-
-      // Initialize provider
-      const provider = await this.getProvider(mapping.providerId);
-
-      // Update mapping status
+      // Update the mapping status
       await prisma.taskListMapping.update({
-        where: { id: mappingId },
+        where: { id: mapping.id },
         data: {
           syncStatus: "SYNCING",
-          // The schema needs to include errorMessage
-          errorMessage: null as unknown as undefined,
+          lastError: null,
         },
       });
 
-      // Perform one-way sync from external to local in Phase 1
-      // This will be expanded to two-way sync in Phase 2
-      await this.syncFromExternalToLocal(provider, mapping, result);
+      // Get the tracker instance
+      const tracker = new TaskChangeTracker();
 
-      // Update mapping with success status
+      // Implement true bidirectional sync
+      await this.syncBidirectional(
+        provider,
+        mapping,
+        result,
+        fieldMapper,
+        tracker
+      );
+
+      // Update the mapping with success status
       await prisma.taskListMapping.update({
-        where: { id: mappingId },
+        where: { id: mapping.id },
         data: {
-          syncStatus: "OK",
           lastSyncedAt: newDate(),
-          // The schema needs to include errorMessage
-          errorMessage: null as unknown as undefined,
+          syncStatus: "OK",
+          lastError: null,
         },
       });
 
       result.success = true;
-      logger.info(
-        `Sync completed for mapping ${mappingId}`,
-        {
-          imported: result.imported,
-          updated: result.updated,
-          deleted: result.deleted,
-          skipped: result.skipped,
-          errors: result.errors.length,
-        },
-        LOG_SOURCE
-      );
 
       return result;
     } catch (error) {
-      // Update mapping with error status
-      if (result.providerId) {
-        await prisma.taskListMapping.update({
-          where: { id: mappingId },
-          data: {
-            syncStatus: "ERROR",
-            // The schema needs to include errorMessage
-            errorMessage: (error instanceof Error
-              ? error.message
-              : "Unknown error") as unknown as undefined,
-          },
-        });
-      }
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
 
       logger.error(
-        `Sync failed for mapping ${mappingId}`,
+        `Sync failed for task list ${mapping.externalListName}`,
         {
-          error: error instanceof Error ? error.message : "Unknown error",
+          mappingId: mapping.id,
+          error: errorMessage,
         },
         LOG_SOURCE
       );
 
-      result.success = false;
-      result.errors.push({
-        taskId: "general",
-        error: error instanceof Error ? error.message : "Unknown error",
+      // Update the mapping with error status
+      await prisma.taskListMapping.update({
+        where: { id: mapping.id },
+        data: {
+          syncStatus: "ERROR",
+          lastError: errorMessage,
+        },
       });
 
-      return result;
+      result.errors.push({
+        taskId: "general",
+        error: errorMessage,
+      });
+      throw error;
     }
   }
 
@@ -215,12 +216,6 @@ export class TaskSyncManager {
    * @returns Results of all sync operations
    */
   async syncAllForUser(userId: string): Promise<SyncResult[]> {
-    logger.info(
-      `Starting sync for all providers for user ${userId}`,
-      {},
-      LOG_SOURCE
-    );
-
     const results: SyncResult[] = [];
 
     try {
@@ -233,12 +228,13 @@ export class TaskSyncManager {
             syncEnabled: true,
           },
         },
+        include: { provider: true },
       });
 
       // Sync each mapping
       for (const mapping of mappings) {
         try {
-          const result = await this.syncTaskList(mapping.id);
+          const result = await this.syncTaskList(mapping);
           results.push(result);
         } catch (error) {
           logger.error(
@@ -258,13 +254,13 @@ export class TaskSyncManager {
             updated: 0,
             deleted: 0,
             skipped: 0,
+            direction: "bidirectional",
             errors: [
               {
                 taskId: "general",
                 error: error instanceof Error ? error.message : "Unknown error",
               },
             ],
-            timestamp: newDate(),
           });
         }
       }
@@ -284,83 +280,345 @@ export class TaskSyncManager {
   }
 
   /**
-   * Internal method to sync tasks from external provider to local database
-   * This is used in Phase 1 for one-way sync
+   * Bidirectional sync implementation that compares timestamps
+   * to determine which version (local or external) is more recent
+   *
+   * @param provider The task provider
+   * @param mapping The task list mapping
+   * @param result The sync result tracker
+   * @param fieldMapper The field mapper for this provider type
+   * @param tracker The change tracker
    */
-  private async syncFromExternalToLocal(
+  private async syncBidirectional(
     provider: TaskProviderInterface,
     mapping: TaskListMapping & { provider: DbTaskProvider },
-    result: SyncResult
+    result: SyncResult,
+    fieldMapper: FieldMapper,
+    tracker: TaskChangeTracker
   ): Promise<void> {
     try {
-      // Get tasks from external provider
+      // Step 1: Fetch tasks from both sources
       const externalTasks = await provider.getTasks(mapping.externalListId);
 
-      // Get existing tasks in our database for this mapping
-      const existingTasks = await prisma.task.findMany({
+      // Get all DELETE changes specifically (both synced and unsynced)
+      // These need special handling since the tasks might already be gone
+      const deleteChanges = await prisma.taskChange.findMany({
         where: {
-          projectId: mapping.projectId,
-          // We need to update the task schema to include providerId
-          providerId: mapping.providerId as unknown as undefined,
-          source: mapping.provider.type,
+          mappingId: mapping.id,
+          changeType: "DELETE",
+          // Only look for recent changes
+          timestamp: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+          },
+        },
+        orderBy: {
+          timestamp: "desc",
         },
       });
 
-      // Create a map of existing tasks by externalTaskId for efficient lookup
-      const existingTaskMap = new Map(
-        existingTasks.map((task) => [task.externalTaskId, task])
+      // Create a set of external IDs that were recently deleted locally
+      const recentlyDeletedExternalIds = new Set<string>();
+
+      // Process any unsynced DELETE changes immediately
+      const deleteSuccessIds: string[] = [];
+
+      for (const change of deleteChanges) {
+        if (change.changeData) {
+          const changeData = change.changeData as Record<string, unknown>;
+          const externalTaskId = changeData.externalTaskId as
+            | string
+            | undefined;
+          const externalListId = changeData.externalListId as
+            | string
+            | undefined;
+
+          if (externalTaskId) {
+            // Add to our tracking set regardless of sync status
+            recentlyDeletedExternalIds.add(externalTaskId);
+
+            // Process unsynced changes immediately
+            if (!change.synced && externalListId) {
+              try {
+                // Try to delete the task from the external system
+                await provider.deleteTask(externalListId, externalTaskId);
+
+                // Mark this change as successfully processed
+                deleteSuccessIds.push(change.id);
+                result.deleted++;
+              } catch (error) {
+                // Log error but continue - we'll try again next sync if needed
+                logger.error(
+                  `Failed to delete task in external system from DELETE change`,
+                  {
+                    changeId: change.id,
+                    taskId: change.taskId,
+                    externalTaskId,
+                    error:
+                      error instanceof Error ? error.message : "Unknown error",
+                  },
+                  LOG_SOURCE
+                );
+              }
+            }
+          }
+        }
+      }
+
+      // Mark successful DELETE changes as synced
+      if (deleteSuccessIds.length > 0) {
+        await tracker.markAsSynced(deleteSuccessIds);
+      }
+
+      logger.info(
+        `Processed ${deleteSuccessIds.length} DELETE changes and collected ${recentlyDeletedExternalIds.size} deleted task IDs`,
+        {
+          processedCount: deleteSuccessIds.length,
+          deletedIdsCount: recentlyDeletedExternalIds.size,
+        },
+        LOG_SOURCE
       );
 
-      // Process each external task
+      const localTasks = (
+        await prisma.task.findMany({
+          where: {
+            projectId: mapping.projectId,
+          },
+          include: {
+            tags: true,
+            project: true,
+          },
+        })
+      ).map((task) => ({
+        ...task,
+        tags: task.tags || [],
+        project: task.project || null,
+        isRecurring: task.isRecurring || false,
+        isAutoScheduled: task.isAutoScheduled || false,
+        scheduleLocked: task.scheduleLocked || false,
+      })) as unknown as TaskWithSync[];
+
+      // Create lookup maps for tasks
+      // We'll use localTaskByExternalId to find local tasks by their external ID
+      const localTaskByExternalId = new Map(
+        localTasks
+          .filter((t) => t.externalTaskId && t.source === mapping.provider.type)
+          .map((t) => [t.externalTaskId as string, t])
+      );
+
+      // Unlinked local tasks (tasks without external IDs that may need to be linked)
+      let localUnlinkedTasks = localTasks.filter(
+        (task) => !task.externalTaskId || task.source !== mapping.provider.type
+      );
+
+      // Step 2: Handle unsynced local changes first
+      const changes = await tracker.getUnsyncedChanges(mapping.id);
+
+      if (changes.length > 0) {
+        const successfulChanges: string[] = [];
+        // Keep track of tasks that were processed by CREATE changes
+        const processedTaskIds = new Set<string>();
+
+        for (const change of changes) {
+          try {
+            if (change.changeType === "CREATE") {
+              await this.processCreateChange(
+                change.taskId,
+                provider,
+                mapping,
+                fieldMapper
+              );
+              processedTaskIds.add(change.taskId);
+              result.imported++;
+            } else if (change.changeType === "UPDATE") {
+              await this.processUpdateChange(
+                change.taskId,
+                provider,
+                mapping,
+                fieldMapper
+              );
+              result.updated++;
+            } else if (change.changeType === "DELETE") {
+              await this.processDeleteChange(change.taskId, provider, mapping);
+              result.deleted++;
+            }
+
+            successfulChanges.push(change.id);
+          } catch (error) {
+            result.errors.push({
+              taskId: change.taskId,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+            result.skipped++;
+          }
+        }
+
+        // Mark changes as synced
+        if (successfulChanges.length > 0) {
+          await tracker.markAsSynced(successfulChanges);
+        }
+
+        // Refresh local tasks data if we processed any changes
+        if (processedTaskIds.size > 0) {
+          // Get the updated task data for tasks we just processed
+          const refreshedTasks = await prisma.task.findMany({
+            where: {
+              id: {
+                in: Array.from(processedTaskIds),
+              },
+            },
+            include: {
+              tags: true,
+              project: true,
+            },
+          });
+
+          // Converted refreshed tasks to TaskWithSync
+          const refreshedTasksWithSync = refreshedTasks.map((task) => ({
+            ...task,
+            tags: task.tags || [],
+            project: task.project || null,
+            isRecurring: task.isRecurring || false,
+            isAutoScheduled: task.isAutoScheduled || false,
+            scheduleLocked: task.scheduleLocked || false,
+          })) as unknown as TaskWithSync[];
+
+          // Update the localTaskByExternalId map with refreshed data
+          for (const task of refreshedTasksWithSync) {
+            if (task.externalTaskId && task.source === mapping.provider.type) {
+              localTaskByExternalId.set(task.externalTaskId, task);
+            }
+          }
+
+          // Remove processed tasks from localUnlinkedTasks
+          localUnlinkedTasks = localUnlinkedTasks.filter(
+            (task) => !processedTaskIds.has(task.id)
+          );
+        }
+      }
+
+      // Step 3: Process each external task
       for (const externalTask of externalTasks) {
         try {
-          const existingTask = existingTaskMap.get(externalTask.id);
-
-          if (existingTask) {
-            // Task exists - update it if needed
-            // In Phase 1, we'll always update local tasks with external data
-            // In Phase 2, we'll implement conflict detection and resolution
-
-            // Map external task to our internal format
-            const updatedTaskData = provider.mapToInternalTask(
-              externalTask,
-              mapping.projectId
+          // Skip if this task was deleted locally recently
+          if (recentlyDeletedExternalIds.has(externalTask.id)) {
+            logger.info(
+              `Skipping external task that was deleted locally: ${externalTask.id}`,
+              {
+                externalTaskId: externalTask.id,
+                title: externalTask.title,
+              },
+              LOG_SOURCE
             );
 
-            // Update the task
-            await prisma.task.update({
-              where: { id: existingTask.id },
-              data: {
-                ...updatedTaskData,
-                lastSyncedAt: newDate(),
-                syncStatus: "SYNCED",
-              },
-            });
+            // Try to delete it from external system (again, to be sure)
+            try {
+              await provider.deleteTask(
+                mapping.externalListId,
+                externalTask.id
+              );
 
+              logger.info(
+                `Deleted task from external system that was deleted locally: ${externalTask.id}`,
+                { externalTaskId: externalTask.id },
+                LOG_SOURCE
+              );
+              continue; // Skip further processing
+            } catch (error) {
+              logger.error(
+                `Failed to delete task from external system: ${externalTask.id}`,
+                {
+                  externalTaskId: externalTask.id,
+                  error:
+                    error instanceof Error ? error.message : "Unknown error",
+                },
+                LOG_SOURCE
+              );
+              // Even if deletion fails, skip further processing
+              continue;
+            }
+          }
+
+          // Find corresponding local task
+          const localTask = localTaskByExternalId.get(externalTask.id);
+
+          if (localTask) {
+            // Task exists in both systems - resolve based on update timestamps
+            await this.resolveTaskConflict(
+              localTask,
+              externalTask,
+              provider,
+              mapping,
+              fieldMapper
+            );
             result.updated++;
           } else {
-            // New task - create it
-            const newTaskData = provider.mapToInternalTask(
+            // External task not found locally - check if it matches an unlinked local task
+            const matchedTask = this.findMatchingLocalTask(
               externalTask,
-              mapping.projectId
+              localUnlinkedTasks
             );
 
-            await prisma.task.create({
-              data: {
-                ...newTaskData,
-                isAutoScheduled: mapping.isAutoScheduled,
-                scheduleLocked: false,
-                source: mapping.provider.type,
-                // We need to update the task schema to include providerId
-                providerId: mapping.providerId as unknown as undefined,
-                externalTaskId: externalTask.id,
-                lastSyncedAt: newDate(),
-                syncStatus: "SYNCED",
-                userId: mapping.provider.userId,
-              },
-            });
+            if (matchedTask) {
+              // Link the local task to the external one
+              await this.linkTasks(
+                matchedTask,
+                externalTask,
+                mapping,
+                provider.getType()
+              );
 
-            result.imported++;
+              // Remove from unlinked collection to prevent double-processing
+              const index = localUnlinkedTasks.indexOf(matchedTask);
+              if (index !== -1) {
+                localUnlinkedTasks.splice(index, 1);
+              }
+
+              result.updated++;
+            } else {
+              // Create a new local task for this external task
+              const internalTask = fieldMapper.mapToInternalTask(
+                externalTask,
+                mapping.projectId
+              );
+
+              await prisma.task.create({
+                data: {
+                  title: internalTask.title || "Untitled Task",
+                  description: internalTask.description,
+                  status: internalTask.status || TaskStatus.TODO,
+                  dueDate: internalTask.dueDate,
+                  startDate: internalTask.startDate,
+                  duration: internalTask.duration,
+                  priority: internalTask.priority,
+                  energyLevel: internalTask.energyLevel,
+                  preferredTime: internalTask.preferredTime,
+                  isRecurring: internalTask.isRecurring || false,
+                  recurrenceRule: internalTask.recurrenceRule,
+                  isAutoScheduled: mapping.isAutoScheduled,
+                  scheduleLocked: false,
+                  source: mapping.provider.type,
+                  externalListId: mapping.externalListId,
+                  externalTaskId: externalTask.id,
+                  lastSyncedAt: newDate(),
+                  syncStatus: "SYNCED",
+                  userId: mapping.provider.userId,
+                  projectId: mapping.projectId,
+                  externalUpdatedAt: externalTask.lastModified
+                    ? newDate(externalTask.lastModified)
+                    : externalTask.lastModifiedDateTime
+                    ? newDate(externalTask.lastModifiedDateTime)
+                    : new Date(),
+                  syncHash: tracker.generateTaskHash({
+                    title: internalTask.title,
+                    description: internalTask.description,
+                    status: internalTask.status,
+                    dueDate: internalTask.dueDate,
+                  }),
+                },
+              });
+
+              result.imported++;
+            }
           }
         } catch (error) {
           result.errors.push({
@@ -371,11 +629,82 @@ export class TaskSyncManager {
         }
       }
 
-      // In Phase 2, we'll implement handling deleted tasks in the external system
-      // For now, we just import and update
+      // Step 4: Process unlinked local tasks to create in external system
+      for (const localTask of localUnlinkedTasks) {
+        try {
+          // Skip tasks that have a source set but not matching this provider
+          if (localTask.source && localTask.source !== mapping.provider.type) {
+            continue;
+          }
+
+          // Create in external system
+          const externalTask = fieldMapper.mapToExternalTask(localTask);
+          const createdTask = await provider.createTask(
+            mapping.externalListId,
+            externalTask
+          );
+
+          // Update local task with external reference
+          await prisma.task.update({
+            where: { id: localTask.id },
+            data: {
+              externalTaskId: createdTask.id,
+              externalListId: mapping.externalListId,
+              source: mapping.provider.type,
+              lastSyncedAt: newDate(),
+              syncStatus: "SYNCED",
+              externalUpdatedAt: createdTask.lastModified
+                ? newDate(createdTask.lastModified)
+                : createdTask.lastModifiedDateTime
+                ? newDate(createdTask.lastModifiedDateTime)
+                : new Date(),
+              syncHash: tracker.generateTaskHash(localTask),
+            },
+          });
+
+          result.imported++;
+        } catch (error) {
+          result.errors.push({
+            taskId: localTask.id,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+          result.skipped++;
+        }
+      }
+
+      // Step 5: Handle tasks that exist locally but have been deleted externally
+      // Get all local tasks with external IDs from this provider
+      const localTaskIds = new Set(localTaskByExternalId.keys());
+      const externalTaskIds = new Set(externalTasks.map((task) => task.id));
+
+      // Find tasks that exist locally but not externally
+      const deletedTaskExternalIds = Array.from(localTaskIds).filter(
+        (id) => !externalTaskIds.has(id)
+      );
+
+      for (const externalId of deletedTaskExternalIds) {
+        const localTask = localTaskByExternalId.get(externalId);
+
+        if (!localTask) continue;
+
+        try {
+          // Delete the local task
+          await prisma.task.delete({
+            where: { id: localTask.id },
+          });
+
+          result.deleted++;
+        } catch (error) {
+          result.errors.push({
+            taskId: localTask.id,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+          result.skipped++;
+        }
+      }
     } catch (error) {
       logger.error(
-        `Failed to sync from external to local`,
+        `Failed to sync bidirectionally`,
         {
           mappingId: mapping.id,
           error: error instanceof Error ? error.message : "Unknown error",
@@ -387,44 +716,444 @@ export class TaskSyncManager {
     }
   }
 
-  // These methods will be implemented in Phase 2
-
   /**
-   * Placeholder for creating a task that triggers sync
-   * This will be implemented in Phase 2
+   * Process a CREATE change
    */
-  async createTask(_task: TaskToCreate): Promise<Task> {
-    // TODO: Implement in Phase 2
-    throw new Error("Not implemented in Phase 1");
+  private async processCreateChange(
+    taskId: string,
+    provider: TaskProviderInterface,
+    mapping: TaskListMapping & { provider: DbTaskProvider },
+    fieldMapper: FieldMapper
+  ): Promise<void> {
+    // Get the task details
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        tags: true,
+        project: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found for CREATE change`);
+    }
+
+    // Convert to TaskWithSync
+    const taskWithSync = {
+      ...task,
+      tags: task.tags || [],
+      project: task.project || null,
+      isRecurring: task.isRecurring || false,
+      isAutoScheduled: task.isAutoScheduled || false,
+      scheduleLocked: task.scheduleLocked || false,
+    } as unknown as TaskWithSync;
+
+    // Skip tasks that already have an external ID for this provider
+    if (
+      taskWithSync.externalTaskId &&
+      taskWithSync.source === mapping.provider.type
+    ) {
+      return;
+    }
+
+    // Convert to the provider's format
+    const taskToCreate = fieldMapper.mapToExternalTask(taskWithSync);
+
+    // Create the task in the external system
+    const createdTask = await provider.createTask(
+      mapping.externalListId,
+      taskToCreate
+    );
+
+    // Update the local task with the external ID
+    await prisma.task.update({
+      where: { id: task.id },
+      data: {
+        externalTaskId: createdTask.id,
+        externalListId: mapping.externalListId,
+        source: mapping.provider.type,
+        externalUpdatedAt: createdTask.lastModified
+          ? newDate(createdTask.lastModified)
+          : createdTask.lastModifiedDateTime
+          ? newDate(createdTask.lastModifiedDateTime)
+          : new Date(),
+        lastSyncedAt: newDate(),
+        syncStatus: "SYNCED",
+        syncHash: new TaskChangeTracker().generateTaskHash(taskWithSync),
+      },
+    });
   }
 
   /**
-   * Placeholder for updating a task that triggers sync
-   * This will be implemented in Phase 2
+   * Process an UPDATE change
    */
-  async updateTask(_taskId: string, _updates: TaskUpdates): Promise<Task> {
-    // TODO: Implement in Phase 2
-    throw new Error("Not implemented in Phase 1");
+  private async processUpdateChange(
+    taskId: string,
+    provider: TaskProviderInterface,
+    mapping: TaskListMapping & { provider: DbTaskProvider },
+    fieldMapper: FieldMapper
+  ): Promise<void> {
+    // Get the task details
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        tags: true,
+        project: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found for UPDATE change`);
+    }
+
+    // Convert to TaskWithSync
+    const taskWithSync = {
+      ...task,
+      tags: task.tags || [],
+      project: task.project || null,
+      isRecurring: task.isRecurring || false,
+      isAutoScheduled: task.isAutoScheduled || false,
+      scheduleLocked: task.scheduleLocked || false,
+    } as unknown as TaskWithSync;
+
+    // Skip tasks that don't have an external ID for this provider
+    if (
+      !taskWithSync.externalTaskId ||
+      taskWithSync.source !== mapping.provider.type
+    ) {
+      return;
+    }
+
+    // Map the local task to the provider's format
+    const taskToUpdate = fieldMapper.mapToExternalTaskUpdates(taskWithSync);
+
+    // Update the task in the external system
+    const updatedTask = await provider.updateTask(
+      mapping.externalListId,
+      taskWithSync.externalTaskId as string,
+      taskToUpdate
+    );
+
+    // Update the local task with sync metadata
+    await prisma.task.update({
+      where: { id: task.id },
+      data: {
+        externalUpdatedAt: updatedTask.lastModified
+          ? newDate(updatedTask.lastModified)
+          : updatedTask.lastModifiedDateTime
+          ? newDate(updatedTask.lastModifiedDateTime)
+          : new Date(),
+        lastSyncedAt: newDate(),
+        syncStatus: "SYNCED",
+        syncHash: new TaskChangeTracker().generateTaskHash(taskWithSync),
+      },
+    });
   }
 
   /**
-   * Placeholder for deleting a task that triggers sync
-   * This will be implemented in Phase 2
+   * Process a DELETE change
    */
-  async deleteTask(_taskId: string): Promise<void> {
-    // TODO: Implement in Phase 2
-    throw new Error("Not implemented in Phase 1");
+  private async processDeleteChange(
+    taskId: string,
+    provider: TaskProviderInterface,
+    mapping: TaskListMapping & { provider: DbTaskProvider }
+  ): Promise<void> {
+    // Get the task details - for DELETE changes, the task might already be deleted
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        tags: true,
+        project: true,
+      },
+    });
+
+    // If the task is already deleted from the local database,
+    // check if we have the externalTaskId and externalListId in the change data
+    if (!task) {
+      // Try to get the change record to find the external IDs
+      const change = await prisma.taskChange.findFirst({
+        where: {
+          taskId: taskId,
+          changeType: "DELETE",
+          synced: false,
+        },
+        orderBy: {
+          timestamp: "desc",
+        },
+      });
+
+      if (!change || !change.changeData) {
+        logger.warn(
+          `Task ${taskId} not found and no change data available for DELETE change`,
+          { taskId },
+          LOG_SOURCE
+        );
+        return;
+      }
+
+      // Parse the change data to get the external IDs
+      // Use a properly typed approach to avoid 'any'
+      const changeData = change.changeData as Record<string, unknown>;
+      const externalTaskId = changeData.externalTaskId as string | undefined;
+      const source = changeData.source as string | undefined;
+      const externalListId = changeData.externalListId as string | undefined;
+
+      // Validate that we have the required data and it's for this provider
+      if (
+        !externalTaskId ||
+        source !== mapping.provider.type ||
+        !externalListId
+      ) {
+        logger.warn(
+          `Cannot delete task in external system: missing external ID, list ID, or incorrect source`,
+          {
+            taskId,
+            externalTaskId: externalTaskId || "undefined",
+            externalListId: externalListId || "undefined",
+            source: source || "undefined",
+            providerType: mapping.provider.type,
+          },
+          LOG_SOURCE
+        );
+        return;
+      }
+
+      try {
+        // Delete the task from the external system using the externalListId from change data
+        await provider.deleteTask(externalListId, externalTaskId);
+
+        logger.info(
+          `Deleted task in external system (task already deleted locally)`,
+          {
+            taskId,
+            externalTaskId,
+            externalListId,
+          },
+          LOG_SOURCE
+        );
+      } catch (error) {
+        // Log but don't throw, as we want to mark the change as synced anyway
+        logger.error(
+          `Failed to delete task in external system`,
+          {
+            taskId,
+            externalTaskId,
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+          LOG_SOURCE
+        );
+      }
+
+      return;
+    }
+
+    // Convert to TaskWithSync
+    const taskWithSync = {
+      ...task,
+      tags: task.tags || [],
+      project: task.project || null,
+      isRecurring: task.isRecurring || false,
+      isAutoScheduled: task.isAutoScheduled || false,
+      scheduleLocked: task.scheduleLocked || false,
+    } as unknown as TaskWithSync;
+
+    // Skip tasks that don't have an external ID for this provider
+    if (
+      !taskWithSync.externalTaskId ||
+      taskWithSync.source !== mapping.provider.type ||
+      !taskWithSync.externalListId
+    ) {
+      logger.warn(
+        `Task ${taskId} has no external ID or list ID for this provider, skipping deletion`,
+        {
+          taskId,
+          externalTaskId: taskWithSync.externalTaskId || "undefined",
+          source: taskWithSync.source || "undefined",
+          providerType: mapping.provider.type,
+          externalListId: taskWithSync.externalListId || "undefined",
+        },
+        LOG_SOURCE
+      );
+      return;
+    }
+
+    try {
+      // Delete the task from the external system
+      await provider.deleteTask(
+        taskWithSync.externalListId,
+        taskWithSync.externalTaskId as string
+      );
+
+      logger.info(
+        `Deleted task in external system`,
+        {
+          taskId,
+          externalTaskId: taskWithSync.externalTaskId,
+          externalListId: taskWithSync.externalListId,
+        },
+        LOG_SOURCE
+      );
+    } catch (error) {
+      logger.error(
+        `Failed to delete task in external system`,
+        {
+          taskId,
+          externalTaskId: taskWithSync.externalTaskId,
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
+        LOG_SOURCE
+      );
+      throw error; // Re-throw to mark this change as failed
+    }
+
+    // Note: We don't delete the local task here because it should have already
+    // been deleted when the DELETE change was tracked
   }
 
   /**
-   * Placeholder for resolving conflicts between local and remote tasks
-   * This will be implemented in Phase 2
+   * Find a matching local task based on title and other properties
    */
-  async resolveConflict(
-    _taskId: string,
-    _resolution: ConflictResolution
-  ): Promise<Task> {
-    // TODO: Implement in Phase 2
-    throw new Error("Not implemented in Phase 1");
+  private findMatchingLocalTask(
+    externalTask: ExternalTask,
+    localTasks: TaskWithSync[]
+  ): TaskWithSync | undefined {
+    // Find a match based on title (case-insensitive) as the primary match criteria
+    return localTasks.find((localTask) => {
+      const titleMatch =
+        localTask.title.toLowerCase() ===
+        (externalTask.title || "").toLowerCase();
+
+      // Use due date as a secondary match criterion
+      let dueDateMatch = true;
+      if (localTask.dueDate && externalTask.dueDate) {
+        const localDate = newDate(localTask.dueDate)
+          .toISOString()
+          .split("T")[0];
+        const externalDate = newDate(externalTask.dueDate)
+          .toISOString()
+          .split("T")[0];
+        dueDateMatch = localDate === externalDate;
+      }
+
+      return titleMatch && dueDateMatch;
+    });
+  }
+
+  /**
+   * Link a local task to an external task
+   */
+  private async linkTasks(
+    localTask: TaskWithSync,
+    externalTask: ExternalTask,
+    mapping: TaskListMapping & { provider: DbTaskProvider },
+    providerType: string
+  ): Promise<void> {
+    await prisma.task.update({
+      where: { id: localTask.id },
+      data: {
+        externalTaskId: externalTask.id,
+        externalListId: mapping.externalListId,
+        source: providerType,
+        lastSyncedAt: newDate(),
+        syncStatus: "SYNCED",
+        externalUpdatedAt: externalTask.lastModified
+          ? newDate(externalTask.lastModified)
+          : externalTask.lastModifiedDateTime
+          ? newDate(externalTask.lastModifiedDateTime)
+          : new Date(),
+      },
+    });
+  }
+
+  /**
+   * Resolve conflicts between local and external task versions
+   */
+  private async resolveTaskConflict(
+    localTask: TaskWithSync,
+    externalTask: ExternalTask,
+    provider: TaskProviderInterface,
+    mapping: TaskListMapping & { provider: DbTaskProvider },
+    fieldMapper: FieldMapper
+  ): Promise<void> {
+    // Get timestamps to compare
+    const localUpdatedAt = localTask.updatedAt;
+    const externalUpdatedAt = externalTask.lastModified
+      ? newDate(externalTask.lastModified)
+      : externalTask.lastModifiedDateTime
+      ? newDate(externalTask.lastModifiedDateTime)
+      : new Date();
+
+    // Map external task to internal format
+    const mappedExternalTask = fieldMapper.mapToInternalTask(
+      externalTask,
+      mapping.projectId
+    );
+
+    // Compare timestamps to decide which version to use
+    if (
+      !localTask.externalUpdatedAt ||
+      (externalUpdatedAt && externalUpdatedAt > localTask.externalUpdatedAt)
+    ) {
+      // External is newer - update local with external data
+      // But preserve any local fields that weren't changed in external
+
+      // Merge the tasks
+      const mergedData = fieldMapper.mergeTaskData(
+        localTask,
+        mappedExternalTask
+      );
+
+      // Extract and remove nested objects that can't be used directly in the update
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { tags, project, ...updateData } = mergedData;
+
+      // Update local task with the merged data
+      await prisma.task.update({
+        where: { id: localTask.id },
+        data: {
+          // Use type assertion to handle the TaskUpdateInput type
+          ...updateData,
+          externalUpdatedAt: externalUpdatedAt,
+          lastSyncedAt: newDate(),
+          syncStatus: "SYNCED",
+          syncHash: new TaskChangeTracker().generateTaskHash(localTask),
+        },
+      });
+    } else if (localUpdatedAt > (localTask.externalUpdatedAt || new Date(0))) {
+      // Local is newer - update external with local data
+      logger.debug(
+        `Local task ${localTask.id} is newer, updating external task`,
+        {
+          localUpdatedAt: localTask.updatedAt.toISOString(),
+          externalUpdatedAt: externalUpdatedAt.toISOString(),
+          taskId: localTask.id,
+          externalTaskId: localTask.externalTaskId || null,
+        },
+        LOG_SOURCE
+      );
+
+      // Update the external task with the local data
+      const updatedTask = await provider.updateTask(
+        mapping.externalListId,
+        localTask.externalTaskId as string,
+        fieldMapper.mapToExternalTaskUpdates(localTask)
+      );
+
+      // Update local task's external metadata
+      await prisma.task.update({
+        where: { id: localTask.id },
+        data: {
+          externalUpdatedAt: updatedTask.lastModified
+            ? newDate(updatedTask.lastModified)
+            : updatedTask.lastModifiedDateTime
+            ? newDate(updatedTask.lastModifiedDateTime)
+            : new Date(),
+          lastSyncedAt: newDate(),
+          syncStatus: "SYNCED",
+          syncHash: new TaskChangeTracker().generateTaskHash(localTask),
+        },
+      });
+    }
+    // If timestamps are equal, no update needed
   }
 }

@@ -1,7 +1,9 @@
 import { Client } from "@microsoft/microsoft-graph-client";
 import { logger } from "@/lib/logger";
 import { newDate } from "@/lib/date-utils";
-import { convertOutlookRecurrenceToRRule } from "@/lib/outlook-calendar";
+import { RecurrenceConverterFactory } from "../recurrence/recurrence-converter-factory";
+import { OutlookTaskRecurrence } from "../recurrence/recurrence-types";
+import { PartialTaskWithSync } from "../types";
 import {
   TaskProviderInterface,
   ExternalTaskList,
@@ -42,6 +44,7 @@ interface PatternedRecurrence {
   range: RecurrenceRange;
 }
 
+// Define OutlookTask interface
 interface OutlookTask {
   id: string;
   title: string;
@@ -61,6 +64,30 @@ interface OutlookTask {
   };
   categories?: string[];
   recurrence?: PatternedRecurrence;
+}
+
+// Define Outlook updates interface
+interface OutlookTaskUpdates {
+  title?: string;
+  body?: {
+    content: string;
+    contentType: string;
+  };
+  importance?: string;
+  status?: string;
+  dueDateTime?: {
+    dateTime: string;
+    timeZone: string;
+  } | null;
+  startDateTime?: {
+    dateTime: string;
+    timeZone: string;
+  } | null;
+  completedDateTime?: {
+    dateTime: string;
+    timeZone: string;
+  };
+  recurrence?: OutlookTaskRecurrence | null;
 }
 
 interface OutlookTaskListResponse {
@@ -205,7 +232,7 @@ export class OutlookTaskProvider implements TaskProviderInterface {
   async createTask(listId: string, task: TaskToCreate): Promise<ExternalTask> {
     try {
       // Map our task format to Outlook's format
-      const outlookTask = {
+      const outlookTask: OutlookTaskUpdates = {
         title: task.title,
         body: task.description
           ? {
@@ -213,8 +240,8 @@ export class OutlookTaskProvider implements TaskProviderInterface {
               contentType: "text",
             }
           : undefined,
-        importance: this.mapPriorityToOutlook(task.priority),
-        status: this.mapStatusToOutlook(task.status),
+        importance: this.mapPriorityToOutlookString(task.priority),
+        status: this.mapStatusToOutlookString(task.status),
         dueDateTime: task.dueDate
           ? {
               dateTime: new Date(task.dueDate).toISOString(),
@@ -228,6 +255,16 @@ export class OutlookTaskProvider implements TaskProviderInterface {
             }
           : undefined,
       };
+
+      // Add recurrence if specified
+      if (task.recurrenceRule) {
+        // Use our recurrence converter to convert from RRule to Outlook format
+        const recurrenceConverter =
+          RecurrenceConverterFactory.getConverter("OUTLOOK");
+        outlookTask.recurrence = recurrenceConverter.convertFromRRule(
+          task.recurrenceRule
+        ) as OutlookTaskRecurrence;
+      }
 
       // Create the task in Outlook
       const response = await this.client
@@ -254,9 +291,9 @@ export class OutlookTaskProvider implements TaskProviderInterface {
   /**
    * Updates an existing task in Outlook
    *
-   * @param listId The ID of the task list the task belongs to
+   * @param listId The ID of the task list containing the task
    * @param taskId The ID of the task to update
-   * @param updates The task data to update
+   * @param updates The updates to apply to the task
    */
   async updateTask(
     listId: string,
@@ -265,8 +302,7 @@ export class OutlookTaskProvider implements TaskProviderInterface {
   ): Promise<ExternalTask> {
     try {
       // Map our updates to Outlook's format
-      // Define the type instead of using any
-      const outlookUpdates: Record<string, unknown> = {};
+      const outlookUpdates: OutlookTaskUpdates = {};
 
       if (updates.title !== undefined) {
         outlookUpdates.title = updates.title;
@@ -274,17 +310,27 @@ export class OutlookTaskProvider implements TaskProviderInterface {
 
       if (updates.description !== undefined) {
         outlookUpdates.body = {
-          content: updates.description,
+          content: updates.description || "",
           contentType: "text",
         };
       }
 
       if (updates.priority !== undefined) {
-        outlookUpdates.importance = this.mapPriorityToOutlook(updates.priority);
+        outlookUpdates.importance = this.mapPriorityToOutlookString(
+          updates.priority
+        );
       }
 
       if (updates.status !== undefined) {
-        outlookUpdates.status = this.mapStatusToOutlook(updates.status);
+        outlookUpdates.status = this.mapStatusToOutlookString(updates.status);
+
+        // If completing the task, set the completedDateTime
+        if (this.mapStatusToOutlookString(updates.status) === "completed") {
+          outlookUpdates.completedDateTime = {
+            dateTime: new Date().toISOString(),
+            timeZone: "UTC",
+          };
+        }
       }
 
       if (updates.dueDate !== undefined) {
@@ -305,12 +351,19 @@ export class OutlookTaskProvider implements TaskProviderInterface {
           : null;
       }
 
-      // If task is completed, set completedDateTime
-      if (updates.status === TaskStatus.COMPLETED || updates.completedDate) {
-        outlookUpdates.completedDateTime = {
-          dateTime: new Date(updates.completedDate || new Date()).toISOString(),
-          timeZone: "UTC",
-        };
+      // Handle recurrence updates
+      if (updates.recurrenceRule !== undefined) {
+        if (updates.recurrenceRule) {
+          // Use our recurrence converter to convert from RRule to Outlook format
+          const recurrenceConverter =
+            RecurrenceConverterFactory.getConverter("OUTLOOK");
+          outlookUpdates.recurrence = recurrenceConverter.convertFromRRule(
+            updates.recurrenceRule
+          ) as OutlookTaskRecurrence;
+        } else {
+          // If recurrenceRule is null, remove recurrence
+          outlookUpdates.recurrence = null;
+        }
       }
 
       // Update the task in Outlook
@@ -327,8 +380,7 @@ export class OutlookTaskProvider implements TaskProviderInterface {
           error: error instanceof Error ? error.message : "Unknown error",
           listId,
           taskId,
-          // Fix logging issue by stringifying the updates
-          updatesData: JSON.stringify(updates),
+          updates: JSON.stringify(updates),
         },
         LOG_SOURCE
       );
@@ -337,9 +389,9 @@ export class OutlookTaskProvider implements TaskProviderInterface {
   }
 
   /**
-   * Deletes a task from Outlook
+   * Deletes a task in Outlook
    *
-   * @param listId The ID of the task list the task belongs to
+   * @param listId The ID of the task list containing the task
    * @param taskId The ID of the task to delete
    */
   async deleteTask(listId: string, taskId: string): Promise<void> {
@@ -347,9 +399,18 @@ export class OutlookTaskProvider implements TaskProviderInterface {
       await this.client
         .api(`/me/todo/lists/${listId}/tasks/${taskId}`)
         .delete();
+
+      logger.info(
+        `Deleted task ${taskId} from list ${listId}`,
+        {
+          taskId,
+          listId,
+        },
+        LOG_SOURCE
+      );
     } catch (error) {
       logger.error(
-        "Failed to delete task from Outlook",
+        "Failed to delete task in Outlook",
         {
           error: error instanceof Error ? error.message : "Unknown error",
           listId,
@@ -437,9 +498,9 @@ export class OutlookTaskProvider implements TaskProviderInterface {
   mapToInternalTask(
     externalTask: ExternalTask,
     projectId: string
-  ): Partial<Task> {
+  ): PartialTaskWithSync {
     // Create a task object with the Task type fields
-    return {
+    const mappedTask: PartialTaskWithSync = {
       title: externalTask.title,
       description: externalTask.description || null,
       status: this.mapStatusFromExternal(externalTask.status),
@@ -448,30 +509,18 @@ export class OutlookTaskProvider implements TaskProviderInterface {
       dueDate: externalTask.dueDate || null,
       startDate: externalTask.startDate || null,
       completedAt: externalTask.completedDate || null, // Use completedAt instead of completedDate
-      duration: externalTask.duration || null,
       isRecurring: externalTask.isRecurring || false,
       recurrenceRule: externalTask.recurrenceRule || null,
-      externalTaskId: externalTask.id,
-      externalUrl: externalTask.url || null,
       source: this.getType(),
-      lastSyncedAt: new Date(),
-      externalUpdatedAt: externalTask.lastModified || null,
-      syncStatus: "SYNCED",
-      providerId: null, // Will be set by the TaskSyncManager
       isAutoScheduled: false, // Will be determined by TaskSyncManager based on mapping
       scheduleLocked: false,
-      scheduledStart: null,
-      scheduledEnd: null,
-      scheduleScore: null,
-      lastScheduled: null,
-      postponedUntil: null,
       tags: [], // Required by Task interface
       project: null, // Required by Task interface
       energyLevel: null,
       preferredTime: null,
-      focusMode: false,
-      lastCompletedDate: externalTask.completedDate || null,
     };
+
+    return mappedTask;
   }
 
   /**
@@ -481,14 +530,62 @@ export class OutlookTaskProvider implements TaskProviderInterface {
    */
   mapToExternalTask(task: Partial<Task>): TaskToCreate {
     return {
-      title: task.title!,
-      description: task.description || undefined,
-      status: task.status,
-      priority: task.priority,
+      title: task.title || "",
+      description: task.description || "",
+      status: this.mapStatusToOutlookString(task.status as TaskStatus),
+      priority: task.priority || "medium",
       dueDate: task.dueDate,
       startDate: task.startDate,
-      duration: task.duration,
+      recurrenceRule: task.recurrenceRule,
     };
+  }
+
+  /**
+   * Maps internal task status to Outlook status string
+   */
+  private mapStatusToOutlookString(
+    status?: TaskStatus | string | null
+  ): string {
+    if (!status) return "notStarted";
+
+    // Convert string status to TaskStatus enum if needed
+    const taskStatus =
+      typeof status === "string"
+        ? (status as TaskStatus) // Type assertion for string literals
+        : status;
+
+    switch (taskStatus) {
+      case TaskStatus.COMPLETED:
+        return "completed";
+      case TaskStatus.IN_PROGRESS:
+        return "inProgress";
+      default:
+        return "notStarted";
+    }
+  }
+
+  /**
+   * Maps priority to Outlook importance string
+   */
+  private mapPriorityToOutlookString(
+    priority?: Priority | string | null
+  ): string {
+    if (!priority) return "normal";
+
+    // Convert string priority to Priority enum if needed
+    const taskPriority =
+      typeof priority === "string"
+        ? (priority as Priority) // Type assertion for string literals
+        : priority;
+
+    switch (taskPriority) {
+      case Priority.HIGH:
+        return "high";
+      case Priority.LOW:
+        return "low";
+      default:
+        return "normal";
+    }
   }
 
   /**
@@ -511,6 +608,7 @@ export class OutlookTaskProvider implements TaskProviderInterface {
       lastModified: outlookTask.lastModifiedDateTime
         ? new Date(outlookTask.lastModifiedDateTime)
         : undefined,
+      lastModifiedDateTime: outlookTask.lastModifiedDateTime,
       url: `https://outlook.office.com/tasks/id/${outlookTask.id}`,
     };
 
@@ -530,7 +628,11 @@ export class OutlookTaskProvider implements TaskProviderInterface {
     // Handle recurrence if present
     if (outlookTask.recurrence) {
       task.isRecurring = true;
-      task.recurrenceRule = convertOutlookRecurrenceToRRule({
+
+      // Use our recurrence converter to convert from Outlook to RRule format
+      const recurrenceConverter =
+        RecurrenceConverterFactory.getConverter("OUTLOOK");
+      task.recurrenceRule = recurrenceConverter.convertToRRule({
         pattern: outlookTask.recurrence.pattern,
         range: outlookTask.recurrence.range,
       });
@@ -542,22 +644,6 @@ export class OutlookTaskProvider implements TaskProviderInterface {
     }
 
     return task;
-  }
-
-  /**
-   * Maps our priority to Outlook importance
-   */
-  private mapPriorityToOutlook(priority?: Priority | null): string {
-    if (!priority) return "normal";
-
-    switch (priority) {
-      case Priority.HIGH:
-        return "high";
-      case Priority.LOW:
-        return "low";
-      default:
-        return "normal";
-    }
   }
 
   /**
@@ -577,22 +663,6 @@ export class OutlookTaskProvider implements TaskProviderInterface {
   }
 
   /**
-   * Maps our status to Outlook status
-   */
-  private mapStatusToOutlook(status?: TaskStatus | null): string {
-    if (!status) return "notStarted";
-
-    switch (status) {
-      case TaskStatus.COMPLETED:
-        return "completed";
-      case TaskStatus.IN_PROGRESS:
-        return "inProgress";
-      default:
-        return "notStarted";
-    }
-  }
-
-  /**
    * Maps Outlook status to our status
    */
   private mapStatusFromExternal(status?: string | null): TaskStatus {
@@ -606,5 +676,41 @@ export class OutlookTaskProvider implements TaskProviderInterface {
       default:
         return TaskStatus.TODO;
     }
+  }
+
+  /**
+   * Maps updated external tasks to internal task changes
+   *
+   * @param externalTasks Array of external tasks that have been updated
+   * @param projectId The project ID to associate the tasks with
+   */
+  mapUpdatedTasksToInternalChanges(
+    externalTasks: ExternalTask[],
+    projectId: string
+  ): TaskChange[] {
+    return externalTasks.map((externalTask) => {
+      const mappedTask: PartialTaskWithSync = this.mapToInternalTask(
+        externalTask,
+        projectId
+      );
+
+      return {
+        id: `change-${externalTask.id}-${Date.now()}`, // Generate unique ID for the change
+        taskId: "", // This will be determined by TaskSyncManager
+        listId: externalTask.listId,
+        type: "UPDATE", // This is an update from external source
+        timestamp: externalTask.lastModified || new Date(), // Use lastModified or current time
+        changes: {
+          taskId: null, // Will be determined by TaskSyncManager
+          externalTaskId: externalTask.id,
+          externalId: externalTask.id,
+          updates: mappedTask,
+          externalTask: externalTask,
+          metadata: {
+            lastModifiedDateTime: externalTask.lastModifiedDateTime,
+          },
+        },
+      };
+    });
   }
 }

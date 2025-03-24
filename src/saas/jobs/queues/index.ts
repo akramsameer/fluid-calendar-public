@@ -190,6 +190,7 @@ export interface TaskSyncJobData {
   mappingId?: string;
   fullSync?: boolean;
   syncAll?: boolean; // If true, sync all mappings for a user
+  direction?: "incoming" | "outgoing" | "bidirectional"; // Controls sync direction
   [key: string]: unknown; // Add index signature to satisfy JobData constraint
 }
 

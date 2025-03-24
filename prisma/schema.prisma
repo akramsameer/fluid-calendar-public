@@ -25,8 +25,9 @@ model ConnectedAccount {
   caldavUsername String? // Username for Basic Auth
 
   // User relationship
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
+  userId       String?
+  user         User?          @relation(fields: [userId], references: [id])
+  TaskProvider TaskProvider[]
 
   @@unique([userId, provider, email])
   @@index([userId])
@@ -81,6 +82,7 @@ model User {
   tags                 Tag[]
   JobRecord            JobRecord[]
   taskProviders        TaskProvider[]
+  TaskChange           TaskChange[]
 }
 
 model VerificationToken {
@@ -155,13 +157,12 @@ model CalendarEvent {
 }
 
 model Project {
-  id               String                   @id @default(cuid())
+  id               String            @id @default(cuid())
   name             String
   description      String?
   color            String?
-  status           String                   @default("active") // enum: 'active', 'archived'
+  status           String            @default("active") // enum: 'active', 'archived'
   tasks            Task[]
-  outlookMappings  OutlookTaskListMapping[]
   taskListMappings TaskListMapping[]
 
   // External sync fields
@@ -227,6 +228,9 @@ model Task {
   syncError         String? // Error message if sync failed
   syncHash          String? // Hash of task data for detecting changes
   skipSync          Boolean   @default(false) // Flag to skip syncing this task
+
+  // Change tracking relation
+  changes TaskChange[]
 
   // User relationship
   userId String?
@@ -398,20 +402,6 @@ model SystemSettings {
   updatedAt           DateTime @updatedAt
 }
 
-model OutlookTaskListMapping {
-  id              String   @id @default(cuid())
-  externalListId  String
-  projectId       String
-  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  lastImported    DateTime
-  name            String
-  isAutoScheduled Boolean  @default(true)
-
-  @@unique([externalListId, projectId])
-  @@index([externalListId])
-  @@index([projectId])
-}
-
 model Log {
   id        String   @id @default(cuid())
   timestamp DateTime @default(now())
@@ -520,23 +510,27 @@ enum JobStatus {
 
 // New models for task synchronization
 model TaskProvider {
-  id           String            @id @default(cuid())
-  userId       String
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type         String // 'outlook', 'google', etc.
-  name         String
-  enabled      Boolean           @default(true)
-  syncEnabled  Boolean           @default(true)
-  syncInterval String            @default("hourly") // 'hourly', 'daily', 'manual'
-  lastSyncedAt DateTime?
-  accessToken  String?
-  refreshToken String?
-  expiresAt    DateTime?
-  settings     Json? // Provider-specific settings
-  mappings     TaskListMapping[]
-  error        String?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id               String            @id @default(cuid())
+  userId           String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type             String // 'outlook', 'google', etc.
+  name             String
+  enabled          Boolean           @default(true)
+  syncEnabled      Boolean           @default(true)
+  syncInterval     String            @default("hourly") // 'hourly', 'daily', 'manual'
+  lastSyncedAt     DateTime?
+  accessToken      String?
+  refreshToken     String?
+  expiresAt        DateTime?
+  accountId        String? // References a ConnectedAccount
+  account          ConnectedAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  defaultProjectId String? // Default project for tasks without a list mapping
+  settings         Json? // Provider-specific settings
+  mappings         TaskListMapping[]
+  error            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  TaskChange       TaskChange[]
 
   @@unique([userId, type])
   @@index([userId])
@@ -560,10 +554,37 @@ model TaskListMapping {
   lastError        String?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+  TaskChange       TaskChange[]
 
   @@unique([providerId, projectId])
   @@unique([providerId, externalListId])
   @@index([providerId])
   @@index([projectId])
   @@index([externalListId])
+}
+
+// New model for task change tracking
+model TaskChange {
+  id         String           @id @default(cuid())
+  taskId     String? // ID of the task that changed
+  task       Task?            @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  providerId String? // ID of the provider if this is related to a sync
+  provider   TaskProvider?    @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  mappingId  String? // ID of the mapping if this is related to a list sync
+  mapping    TaskListMapping? @relation(fields: [mappingId], references: [id], onDelete: SetNull)
+  changeType String // 'CREATE', 'UPDATE', 'DELETE'
+  changeData Json? // The actual changes, as a diff
+  synced     Boolean          @default(false) // Whether this change has been synced
+  timestamp  DateTime         @default(now())
+  userId     String // User who made the change
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime         @default(now())
+
+  @@index([taskId])
+  @@index([providerId])
+  @@index([mappingId])
+  @@index([changeType])
+  @@index([synced])
+  @@index([timestamp])
+  @@index([userId])
 }

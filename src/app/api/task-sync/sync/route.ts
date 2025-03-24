@@ -1,165 +1,229 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { authenticateRequest } from "@/lib/auth/api-auth";
+import { prisma } from "@/lib/prisma";
 import { addTaskSyncJob } from "@/saas/jobs/queues";
 
-const LOG_SOURCE = "task-sync-api";
+// Log source for this file
+const LOG_SOURCE = "TaskSyncAPI";
 
-// Schema for triggering a sync
-const syncSchema = z.object({
-  mappingId: z.string().optional(),
+// Schema for validating the sync request
+const syncRequestSchema = z.object({
+  // Either providerId or mappingId must be provided
   providerId: z.string().optional(),
-  fullSync: z.boolean().optional().default(false),
+  mappingId: z.string().optional(),
+  // Optional direction parameter
+  direction: z
+    .enum(["incoming", "outgoing", "bidirectional"])
+    .optional()
+    .default("bidirectional"),
 });
+
+// Add a utility function to validate the direction parameter
+function isValidDirection(
+  direction: string
+): direction is "incoming" | "outgoing" | "bidirectional" {
+  return ["incoming", "outgoing", "bidirectional"].includes(direction);
+}
 
 /**
  * POST /api/task-sync/sync
- * Trigger a task synchronization
+ * Triggers a sync for a specific provider or mapping
  */
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate the request
     const auth = await authenticateRequest(request, LOG_SOURCE);
     if ("response" in auth) {
-      return auth.response;
+      // If response exists, authentication failed
+      return auth.response as NextResponse;
     }
 
     const userId = auth.userId;
 
-    // Parse and validate the request body
+    // Parse the request body
     const body = await request.json();
-    const validatedData = syncSchema.parse(body);
+    const parseResult = syncRequestSchema.safeParse(body);
 
-    // If neither mappingId nor providerId is provided, sync all for the user
-    if (!validatedData.mappingId && !validatedData.providerId) {
-      // Get all providers for the user
-      const providers = await prisma.taskProvider.findMany({
-        where: {
-          userId,
-          syncEnabled: true,
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid request",
+          message: "Please provide either providerId or mappingId",
+          details: parseResult.error.format(),
         },
-        select: {
-          id: true,
-        },
-      });
-
-      // Add a sync job for each provider
-      for (const provider of providers) {
-        await addTaskSyncJob({
-          userId,
-          providerId: provider.id,
-          syncAll: true,
-          fullSync: validatedData.fullSync,
-        });
-      }
-
-      return NextResponse.json({
-        message: "Sync jobs added for all providers",
-        count: providers.length,
-      });
+        { status: 400 }
+      );
     }
 
-    // If providerId is provided, sync all mappings for that provider
-    if (validatedData.providerId) {
-      // Verify the provider exists and belongs to the user
-      const provider = await prisma.taskProvider.findUnique({
+    const { providerId, mappingId } = parseResult.data;
+    let { direction } = parseResult.data;
+
+    // Validate the direction parameter
+    if (direction && !isValidDirection(direction)) {
+      return NextResponse.json(
+        {
+          error: "Invalid direction",
+          message:
+            "Direction must be 'incoming', 'outgoing', or 'bidirectional'",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Ensure at least one of providerId or mappingId is provided
+    if (!providerId && !mappingId) {
+      return NextResponse.json(
+        {
+          error: "Invalid request",
+          message: "Please provide either providerId or mappingId",
+        },
+        { status: 400 }
+      );
+    }
+
+    // If providerId is provided, check if the provider belongs to the user
+    if (providerId) {
+      const provider = await prisma.taskProvider.findFirst({
         where: {
-          id: validatedData.providerId,
+          id: providerId,
           userId,
         },
       });
 
       if (!provider) {
         return NextResponse.json(
-          { error: "Provider not found or does not belong to the user" },
+          {
+            error: "Not found",
+            message: "Provider not found or does not belong to you",
+          },
           { status: 404 }
         );
       }
-
-      // Add the sync job
-      await addTaskSyncJob({
-        userId,
-        providerId: validatedData.providerId,
-        syncAll: true,
-        fullSync: validatedData.fullSync,
-      });
-
-      return NextResponse.json({
-        message: "Sync job added for provider",
-        providerId: validatedData.providerId,
-      });
     }
 
-    // If mappingId is provided, sync just that mapping
-    if (validatedData.mappingId) {
-      // Verify the mapping exists and belongs to the user (via provider)
-      const mapping = await prisma.taskListMapping.findUnique({
+    // If mappingId is provided, check if the mapping belongs to the user
+    if (mappingId) {
+      const mapping = await prisma.taskListMapping.findFirst({
         where: {
-          id: validatedData.mappingId,
-        },
-        include: {
+          id: mappingId,
           provider: {
-            select: {
-              id: true,
-              userId: true,
-            },
+            userId,
           },
         },
       });
 
       if (!mapping) {
         return NextResponse.json(
-          { error: "Mapping not found" },
+          {
+            error: "Not found",
+            message: "Task list mapping not found or does not belong to you",
+          },
           { status: 404 }
         );
       }
 
-      if (mapping.provider.userId !== userId) {
-        return NextResponse.json(
-          { error: "Unauthorized access to mapping" },
-          { status: 403 }
-        );
+      // Use the mapping's direction if not explicitly provided
+      if (!direction) {
+        direction = mapping.direction as
+          | "incoming"
+          | "outgoing"
+          | "bidirectional";
       }
-
-      // Add the sync job
-      await addTaskSyncJob({
-        userId,
-        providerId: mapping.provider.id,
-        mappingId: validatedData.mappingId,
-        syncAll: false,
-        fullSync: validatedData.fullSync,
-      });
-
-      return NextResponse.json({
-        message: "Sync job added for mapping",
-        mappingId: validatedData.mappingId,
-      });
     }
 
-    // This should never be reached due to the validations above
-    return NextResponse.json(
-      { error: "Invalid request - missing required parameters" },
-      { status: 400 }
+    // Add a job to the task sync queue
+    const job = await addTaskSyncJob({
+      userId,
+      providerId,
+      mappingId,
+      direction,
+    });
+
+    logger.info(
+      `Manual sync requested by user ${userId}`,
+      {
+        userId,
+        providerId: providerId || null,
+        mappingId: mappingId || null,
+        jobId: job.id || null,
+        direction,
+      },
+      LOG_SOURCE
     );
+
+    return NextResponse.json({
+      message: "Sync job scheduled",
+      jobId: job.id,
+    });
   } catch (error) {
     logger.error(
-      "Failed to trigger task sync",
+      "Error triggering manual sync",
       {
         error: error instanceof Error ? error.message : "Unknown error",
       },
       LOG_SOURCE
     );
 
-    if (error instanceof z.ZodError) {
+    return NextResponse.json(
+      {
+        error: "Server error",
+        message: "Failed to schedule sync job",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET /api/task-sync/sync/status?jobId=xxx
+ * Gets the status of a sync job
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  try {
+    // Authenticate the request
+    const auth = await authenticateRequest(request, LOG_SOURCE);
+    if ("response" in auth) {
+      // If response exists, authentication failed
+      return auth.response as NextResponse;
+    }
+
+    // Get the job ID from the query params
+    const { searchParams } = new URL(request.url);
+    const jobId = searchParams.get("jobId");
+
+    if (!jobId) {
       return NextResponse.json(
-        { error: "Invalid data", details: error.errors },
+        {
+          error: "Invalid request",
+          message: "Please provide a jobId",
+        },
         { status: 400 }
       );
     }
 
+    // Get the job status from Redis
+    // In Phase 1, we just return a generic status since we don't track job status
+    return NextResponse.json({
+      status: "Processing",
+      message: "Sync job is in progress or completed",
+      jobId,
+    });
+  } catch (error) {
+    logger.error(
+      "Error getting sync job status",
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      LOG_SOURCE
+    );
+
     return NextResponse.json(
-      { error: "Failed to trigger task sync" },
+      {
+        error: "Server error",
+        message: "Failed to get sync job status",
+      },
       { status: 500 }
     );
   }

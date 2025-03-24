@@ -13,7 +13,10 @@ const createMappingSchema = z.object({
   externalListName: z.string().min(1),
   projectId: z.string().min(1),
   syncEnabled: z.boolean().optional().default(true),
-  settings: z.record(z.unknown()).optional(),
+  direction: z
+    .enum(["incoming", "outgoing", "bidirectional"])
+    .optional()
+    .default("incoming"),
 });
 
 /**
@@ -75,7 +78,6 @@ export async function GET(request: NextRequest) {
         projectColor: mapping.project.color,
         syncEnabled: mapping.syncEnabled,
         lastSyncedAt: mapping.lastSyncedAt,
-        settings: mapping.settings,
         createdAt: mapping.createdAt,
         updatedAt: mapping.updatedAt,
       })),
@@ -166,7 +168,7 @@ export async function POST(request: NextRequest) {
         externalListName: validatedData.externalListName,
         projectId: validatedData.projectId,
         syncEnabled: validatedData.syncEnabled,
-        settings: validatedData.settings || {},
+        direction: validatedData.direction,
       },
       include: {
         provider: {
@@ -197,7 +199,7 @@ export async function POST(request: NextRequest) {
         projectColor: mapping.project.color,
         syncEnabled: mapping.syncEnabled,
         lastSyncedAt: mapping.lastSyncedAt,
-        settings: mapping.settings,
+        direction: mapping.direction,
         createdAt: mapping.createdAt,
         updatedAt: mapping.updatedAt,
       },

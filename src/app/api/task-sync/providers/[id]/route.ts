@@ -16,7 +16,7 @@ const updateProviderSchema = z.object({
 
 /**
  * GET /api/task-sync/providers/[id]
- * Get a specific task provider
+ * Get a task provider by ID
  */
 export async function GET(
   request: NextRequest,
@@ -30,7 +30,7 @@ export async function GET(
 
     const userId = auth.userId;
 
-    // Get the provider
+    // Get the provider with the account and mappings
     const provider = await prisma.taskProvider.findUnique({
       where: {
         id: params.id,
@@ -40,7 +40,6 @@ export async function GET(
         account: {
           select: {
             provider: true,
-            providerAccountId: true,
           },
         },
         mappings: true,
@@ -54,19 +53,22 @@ export async function GET(
       );
     }
 
+    // Create a properly typed response object
+    const responseProvider = {
+      id: provider.id,
+      name: provider.name,
+      type: provider.type,
+      syncEnabled: provider.syncEnabled,
+      defaultProjectId: provider.defaultProjectId,
+      accountId: provider.accountId,
+      createdAt: provider.createdAt,
+      updatedAt: provider.updatedAt,
+      accountProvider: provider.account?.provider,
+      mappingsCount: provider.mappings.length,
+    };
+
     return NextResponse.json({
-      provider: {
-        id: provider.id,
-        name: provider.name,
-        type: provider.type,
-        syncEnabled: provider.syncEnabled,
-        defaultProjectId: provider.defaultProjectId,
-        accountId: provider.accountId,
-        createdAt: provider.createdAt,
-        updatedAt: provider.updatedAt,
-        accountProvider: provider.account?.provider,
-        mappingsCount: provider.mappings.length,
-      },
+      provider: responseProvider,
     });
   } catch (error) {
     logger.error(
@@ -100,17 +102,26 @@ export async function PATCH(
 
     const userId = auth.userId;
 
-    // Verify the provider exists and belongs to the user
-    const existingProvider = await prisma.taskProvider.findUnique({
+    // Validate the provider ID
+    const providerId = params.id;
+    if (!providerId) {
+      return NextResponse.json(
+        { error: "Provider ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if the provider exists and belongs to the user
+    const provider = await prisma.taskProvider.findUnique({
       where: {
-        id: params.id,
+        id: providerId,
         userId,
       },
     });
 
-    if (!existingProvider) {
+    if (!provider) {
       return NextResponse.json(
-        { error: "Provider not found" },
+        { error: "Provider not found or does not belong to the user" },
         { status: 404 }
       );
     }
@@ -120,33 +131,19 @@ export async function PATCH(
     const validatedData = updateProviderSchema.parse(body);
 
     // Update the provider
-    const provider = await prisma.taskProvider.update({
+    const updatedProvider = await prisma.taskProvider.update({
       where: {
-        id: params.id,
+        id: providerId,
       },
       data: {
-        ...(validatedData.name && { name: validatedData.name }),
-        ...(validatedData.syncEnabled !== undefined && {
-          syncEnabled: validatedData.syncEnabled,
-        }),
-        ...(validatedData.defaultProjectId && {
-          defaultProjectId: validatedData.defaultProjectId,
-        }),
-        ...(validatedData.settings && { settings: validatedData.settings }),
+        name: validatedData.name,
+        syncEnabled: validatedData.syncEnabled,
+        defaultProjectId: validatedData.defaultProjectId,
       },
     });
 
     return NextResponse.json({
-      provider: {
-        id: provider.id,
-        name: provider.name,
-        type: provider.type,
-        syncEnabled: provider.syncEnabled,
-        defaultProjectId: provider.defaultProjectId,
-        accountId: provider.accountId,
-        createdAt: provider.createdAt,
-        updatedAt: provider.updatedAt,
-      },
+      provider: updatedProvider,
     });
   } catch (error) {
     logger.error(

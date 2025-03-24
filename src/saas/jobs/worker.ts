@@ -11,10 +11,11 @@ import { maintenanceProcessor } from "./processors/maintenance";
 import { taskReminderProcessor } from "./processors/task-reminder";
 import { CronJob } from "cron";
 import { ensurePrismaConnection, disconnectPrisma } from "./utils/prisma-utils";
-import { addCleanupOrphanedRecordsJob, addTaskSyncJob } from "./queues";
+import { addCleanupOrphanedRecordsJob } from "./queues";
 import { taskScheduleProcessor } from "./processors/task-schedule";
 import { testCronProcessor, TestCronProcessor } from "./processors/test-cron";
 import { taskSyncProcessor } from "./processors/task-sync";
+import { TaskSyncScheduler } from "./processors/task-sync-scheduler";
 
 const LOG_SOURCE = "Worker";
 
@@ -135,14 +136,11 @@ export async function setupScheduledJobs() {
       try {
         logger.info("Starting scheduled task sync job", {}, LOG_SOURCE);
 
-        // Schedule a sync job for all users with enabled task providers
-        await addTaskSyncJob({
-          syncAll: true,
-        });
+        const jobsScheduled = await TaskSyncScheduler.scheduleAllSyncJobs();
 
         logger.info(
-          "Scheduled task sync for all users with enabled providers",
-          {},
+          "Scheduled task sync jobs",
+          { count: jobsScheduled },
           LOG_SOURCE
         );
       } catch (error) {

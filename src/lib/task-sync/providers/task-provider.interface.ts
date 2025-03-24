@@ -6,7 +6,7 @@
  * to interact with various external task services (Outlook, Asana, CalDAV, etc.)
  */
 
-import { Task, TaskStatus, Priority } from "@/types/task";
+import { Task } from "@/types/task";
 
 /**
  * Represents a task list/project in an external system
@@ -22,41 +22,37 @@ export interface ExternalTaskList {
 }
 
 /**
- * Represents a task in an external system
+ * Represents a task from an external system
  */
 export interface ExternalTask {
   id: string;
   title: string;
-  description?: string;
+  description?: string | null;
   status?: string;
   priority?: string;
   dueDate?: Date | null;
   startDate?: Date | null;
   completedDate?: Date | null;
-  duration?: number | null;
-  recurrenceRule?: string | null;
-  isRecurring?: boolean;
   listId: string;
+  isRecurring?: boolean;
+  recurrenceRule?: string | null;
   tags?: string[];
-  url?: string;
   lastModified?: Date;
-  // Provider-specific data as JSON
-  metadata?: Record<string, unknown>;
+  lastModifiedDateTime?: string;
+  url?: string;
 }
 
 /**
- * Parameters for creating a task in an external system
+ * Represents a task that should be created in an external system
  */
 export interface TaskToCreate {
   title: string;
-  description?: string;
-  status?: TaskStatus;
-  priority?: Priority;
+  description?: string | null;
+  status?: string | null;
+  priority?: string | null;
   dueDate?: Date | null;
   startDate?: Date | null;
-  duration?: number | null;
-  // Additional fields needed by provider
-  metadata?: Record<string, unknown>;
+  recurrenceRule?: string | null;
 }
 
 /**
@@ -64,13 +60,14 @@ export interface TaskToCreate {
  */
 export interface TaskUpdates {
   title?: string;
-  description?: string;
-  status?: TaskStatus;
-  priority?: Priority;
+  description?: string | null;
+  status?: string | null;
+  priority?: string | null;
   dueDate?: Date | null;
   startDate?: Date | null;
   duration?: number | null;
   completedDate?: Date | null;
+  recurrenceRule?: string | null;
   // Additional fields needed by provider
   metadata?: Record<string, unknown>;
 }

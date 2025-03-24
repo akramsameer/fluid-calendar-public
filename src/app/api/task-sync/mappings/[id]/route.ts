@@ -6,12 +6,11 @@ import { authenticateRequest } from "@/lib/auth/api-auth";
 
 const LOG_SOURCE = "task-sync-mapping-api";
 
-// Schema for updating a task list mapping
-const updateMappingSchema = z.object({
-  externalListName: z.string().min(1).optional(),
-  projectId: z.string().min(1).optional(),
-  syncEnabled: z.boolean().optional(),
-  settings: z.record(z.unknown()).optional(),
+// Schema for mapping patch requests
+const mappingPatchSchema = z.object({
+  projectId: z.string().uuid().optional(),
+  direction: z.enum(["incoming", "outgoing", "bidirectional"]).optional(),
+  isAutoScheduled: z.boolean().optional(),
 });
 
 /**
@@ -22,10 +21,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
   try {
     const auth = await authenticateRequest(request, LOG_SOURCE);
     if ("response" in auth) {
-      return auth.response;
+      return auth.response as NextResponse;
     }
 
     const userId = auth.userId;
@@ -33,7 +33,7 @@ export async function GET(
     // Get the mapping
     const mapping = await prisma.taskListMapping.findUnique({
       where: {
-        id: params.id,
+        id: id,
       },
       include: {
         provider: {
@@ -83,7 +83,6 @@ export async function GET(
         projectColor: mapping.project.color,
         syncEnabled: mapping.syncEnabled,
         lastSyncedAt: mapping.lastSyncedAt,
-        settings: mapping.settings,
         createdAt: mapping.createdAt,
         updatedAt: mapping.updatedAt,
       },
@@ -93,7 +92,7 @@ export async function GET(
       "Failed to get task list mapping",
       {
         error: error instanceof Error ? error.message : "Unknown error",
-        mappingId: params.id,
+        mappingId: id,
       },
       LOG_SOURCE
     );
@@ -107,125 +106,96 @@ export async function GET(
 
 /**
  * PATCH /api/task-sync/mappings/[id]
- * Update a task list mapping
+ * Updates a specific task list mapping
  */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
+  const paramData = await params;
+
   try {
+    // Authenticate the request
     const auth = await authenticateRequest(request, LOG_SOURCE);
     if ("response" in auth) {
-      return auth.response;
+      return auth.response as NextResponse;
     }
 
     const userId = auth.userId;
+    const mappingId = paramData.id;
 
-    // Get the existing mapping
-    const existingMapping = await prisma.taskListMapping.findUnique({
+    // Get the mapping to check ownership
+    const mapping = await prisma.taskListMapping.findFirst({
       where: {
-        id: params.id,
+        id: mappingId,
+        provider: {
+          userId,
+        },
       },
       include: {
-        provider: {
-          select: {
-            userId: true,
-          },
-        },
-        project: {
-          select: {
-            userId: true,
-          },
-        },
+        provider: true,
       },
     });
 
-    if (!existingMapping) {
-      return NextResponse.json({ error: "Mapping not found" }, { status: 404 });
-    }
-
-    // Verify the mapping belongs to the user (via provider and project)
-    if (
-      existingMapping.provider.userId !== userId ||
-      existingMapping.project.userId !== userId
-    ) {
+    if (!mapping) {
       return NextResponse.json(
-        { error: "Unauthorized access to mapping" },
-        { status: 403 }
+        { error: "Task list mapping not found" },
+        { status: 404 }
       );
     }
 
-    // Parse and validate the request body
+    // Parse request body
     const body = await request.json();
-    const validatedData = updateMappingSchema.parse(body);
+    const validatedData = mappingPatchSchema.parse(body);
 
-    // If projectId is changing, verify it belongs to the user
-    if (
-      validatedData.projectId &&
-      validatedData.projectId !== existingMapping.projectId
-    ) {
-      const project = await prisma.project.findUnique({
-        where: {
-          id: validatedData.projectId,
-          userId,
-        },
-      });
+    // Create an update object only with fields that are provided
+    type UpdateData = {
+      projectId?: string;
+      direction?: "incoming" | "outgoing" | "bidirectional";
+      isAutoScheduled?: boolean;
+    };
 
-      if (!project) {
-        return NextResponse.json(
-          { error: "Project not found or does not belong to the user" },
-          { status: 404 }
-        );
-      }
+    const updateData: UpdateData = {};
+    if (validatedData.projectId !== undefined) {
+      updateData.projectId = validatedData.projectId;
+    }
+    if (validatedData.direction !== undefined) {
+      updateData.direction = validatedData.direction;
+    }
+    if (validatedData.isAutoScheduled !== undefined) {
+      updateData.isAutoScheduled = validatedData.isAutoScheduled;
     }
 
-    // Update the mapping
-    const mapping = await prisma.taskListMapping.update({
+    // Update the mapping with only the provided fields
+    const updatedMapping = await prisma.taskListMapping.update({
       where: {
-        id: params.id,
+        id: mappingId,
       },
-      data: {
-        ...(validatedData.externalListName && {
-          externalListName: validatedData.externalListName,
-        }),
-        ...(validatedData.projectId && { projectId: validatedData.projectId }),
-        ...(validatedData.syncEnabled !== undefined && {
-          syncEnabled: validatedData.syncEnabled,
-        }),
-        ...(validatedData.settings && { settings: validatedData.settings }),
-      },
-      include: {
-        provider: {
-          select: {
-            name: true,
-            type: true,
-          },
-        },
-        project: {
-          select: {
-            name: true,
-            color: true,
-          },
-        },
-      },
+      data: updateData,
     });
 
+    logger.info(
+      `Updated task list mapping ${mappingId}`,
+      {
+        mappingId,
+        userId,
+        projectId: validatedData.projectId || null,
+        direction: validatedData.direction || null,
+      },
+      LOG_SOURCE
+    );
+
     return NextResponse.json({
+      message: "Task list mapping updated",
       mapping: {
-        id: mapping.id,
-        providerId: mapping.providerId,
-        providerName: mapping.provider.name,
-        providerType: mapping.provider.type,
-        externalListId: mapping.externalListId,
-        externalListName: mapping.externalListName,
-        projectId: mapping.projectId,
-        projectName: mapping.project.name,
-        projectColor: mapping.project.color,
-        syncEnabled: mapping.syncEnabled,
-        lastSyncedAt: mapping.lastSyncedAt,
-        settings: mapping.settings,
-        createdAt: mapping.createdAt,
-        updatedAt: mapping.updatedAt,
+        ...updatedMapping,
+        projectName: updatedMapping.projectId
+          ? (
+              await prisma.project.findUnique({
+                where: { id: updatedMapping.projectId },
+              })
+            )?.name
+          : null,
       },
     });
   } catch (error) {
@@ -233,7 +203,7 @@ export async function PATCH(
       "Failed to update task list mapping",
       {
         error: error instanceof Error ? error.message : "Unknown error",
-        mappingId: params.id,
+        mappingId: paramData.id,
       },
       LOG_SOURCE
     );
@@ -260,10 +230,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
+
   try {
     const auth = await authenticateRequest(request, LOG_SOURCE);
     if ("response" in auth) {
-      return auth.response;
+      return auth.response as NextResponse;
     }
 
     const userId = auth.userId;
@@ -271,7 +243,7 @@ export async function DELETE(
     // Get the existing mapping
     const existingMapping = await prisma.taskListMapping.findUnique({
       where: {
-        id: params.id,
+        id: id,
       },
       include: {
         provider: {
@@ -297,7 +269,7 @@ export async function DELETE(
     // Delete the mapping
     await prisma.taskListMapping.delete({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 
@@ -310,7 +282,7 @@ export async function DELETE(
       "Failed to delete task list mapping",
       {
         error: error instanceof Error ? error.message : "Unknown error",
-        mappingId: params.id,
+        mappingId: id,
       },
       LOG_SOURCE
     );

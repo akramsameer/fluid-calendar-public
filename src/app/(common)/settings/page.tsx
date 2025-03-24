@@ -6,7 +6,7 @@ import { CalendarSettings } from "@/components/settings/CalendarSettings";
 import { AccountManager } from "@/components/settings/AccountManager";
 import { AutoScheduleSettings } from "@/components/settings/AutoScheduleSettings";
 import { SystemSettings } from "@/components/settings/SystemSettings";
-import { OutlookTaskSettings } from "@/components/settings/OutlookTaskSettings";
+import { TaskSyncSettings } from "@/components/settings/TaskSyncSettings";
 import { LogViewer } from "@/components/settings/LogViewer";
 import { UserManagement } from "@/components/settings/UserManagement";
 import { ImportExportSettings } from "@/components/settings/ImportExportSettings";
@@ -40,7 +40,7 @@ type SettingsTab =
   | "calendar"
   | "auto-schedule"
   | "system"
-  | "outlook-tasks"
+  | "task-sync"
   | "logs"
   | "user-management"
   | "waitlist"
@@ -57,7 +57,7 @@ export default function SettingsPage() {
       { id: "user", label: "User" },
       { id: "calendar", label: "Calendar" },
       { id: "auto-schedule", label: "Auto-Schedule" },
-      { id: "outlook-tasks", label: "Outlook Tasks" },
+      { id: "task-sync", label: "Task Sync" },
       { id: "import-export", label: "Import/Export" },
     ] as const;
 
@@ -98,7 +98,7 @@ export default function SettingsPage() {
         "user",
         "calendar",
         "auto-schedule",
-        "outlook-tasks",
+        "task-sync",
         "system",
         "logs",
         "user-management",
@@ -172,8 +172,8 @@ export default function SettingsPage() {
         return <CalendarSettings />;
       case "auto-schedule":
         return <AutoScheduleSettings />;
-      case "outlook-tasks":
-        return <OutlookTaskSettings />;
+      case "task-sync":
+        return <TaskSyncSettings />;
       case "system":
         return <SystemSettings />;
       case "logs":

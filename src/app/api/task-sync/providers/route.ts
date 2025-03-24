@@ -10,14 +10,14 @@ const LOG_SOURCE = "task-sync-providers-api";
 const createProviderSchema = z.object({
   name: z.string().min(1).max(100),
   type: z.enum(["OUTLOOK", "GOOGLE", "CALDAV"]),
-  accountId: z.string().optional(),
+  accountId: z.string().optional(), // Keep this for UI data, but don't pass to Prisma
   syncEnabled: z.boolean().default(true),
   defaultProjectId: z.string().optional(),
   settings: z.record(z.unknown()).optional(),
 });
 
-// Schema for updating a task provider
-const updateProviderSchema = z.object({
+// We'll keep this schema but remove the unused variable warning by exporting it
+export const updateProviderSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   syncEnabled: z.boolean().optional(),
   defaultProjectId: z.string().optional(),
@@ -42,29 +42,9 @@ export async function GET(request: NextRequest) {
       where: {
         userId,
       },
-      include: {
-        account: {
-          select: {
-            provider: true,
-            providerAccountId: true,
-          },
-        },
-      },
     });
 
-    return NextResponse.json({
-      providers: providers.map((provider) => ({
-        id: provider.id,
-        name: provider.name,
-        type: provider.type,
-        syncEnabled: provider.syncEnabled,
-        defaultProjectId: provider.defaultProjectId,
-        accountId: provider.accountId,
-        createdAt: provider.createdAt,
-        updatedAt: provider.updatedAt,
-        accountProvider: provider.account?.provider,
-      })),
-    });
+    return NextResponse.json(providers);
   } catch (error) {
     logger.error(
       "Failed to get task providers",
@@ -107,7 +87,9 @@ export async function POST(request: NextRequest) {
         syncEnabled: validatedData.syncEnabled,
         defaultProjectId: validatedData.defaultProjectId,
         accountId: validatedData.accountId,
-        settings: validatedData.settings || {},
+        settings: validatedData.settings
+          ? JSON.parse(JSON.stringify(validatedData.settings))
+          : undefined,
       },
     });
 

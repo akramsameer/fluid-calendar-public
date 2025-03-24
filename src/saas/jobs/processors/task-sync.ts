@@ -4,6 +4,7 @@ import { QUEUE_NAMES, TaskSyncJobData } from "../queues";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { TaskSyncManager } from "@/lib/task-sync/task-sync-manager";
+import { getRedisOptions } from "../config/redis";
 
 // Results from a task sync job
 interface TaskSyncJobResult {
@@ -16,6 +17,7 @@ interface TaskSyncJobResult {
     skipped?: number;
     errors?: Array<{ taskId: string; error: string }>;
   };
+  [key: string]: unknown; // Add index signature to satisfy JobResult constraint
 }
 
 // Log source name
@@ -35,10 +37,10 @@ export class TaskSyncProcessor extends BaseProcessor<
   constructor() {
     // Add connection: null as a workaround for the WorkerOptions type
     super(QUEUE_NAMES.TASK_SYNC, {
+      ...getRedisOptions(),
       concurrency: 5, // Process up to 5 sync jobs at once
       lockDuration: 5 * 60 * 1000, // 5 minutes lock
       stalledInterval: 60000, // Check for stalled jobs every minute
-      connection: null as any, // This will be set by BaseProcessor
     });
 
     // Initialize the task sync manager
@@ -53,16 +55,19 @@ export class TaskSyncProcessor extends BaseProcessor<
   protected async process(
     job: Job<TaskSyncJobData>
   ): Promise<TaskSyncJobResult> {
-    const { mappingId, providerId, userId, syncAll, fullSync } = job.data;
+    const { mappingId, providerId, userId, syncAll, fullSync, direction } =
+      job.data;
 
     logger.info(
       `Processing task sync job: ${job.id}`,
       {
-        mappingId,
-        providerId,
-        userId,
-        syncAll,
-        fullSync,
+        jobId: job.id || "",
+        mappingId: mappingId || "",
+        providerId: providerId || "",
+        userId: userId || "",
+        syncAll: syncAll || false,
+        fullSync: fullSync || false,
+        direction: direction || "bidirectional",
       },
       LOG_SOURCE
     );
@@ -75,7 +80,16 @@ export class TaskSyncProcessor extends BaseProcessor<
 
         // Calculate totals
         const totals = results.reduce(
-          (acc, r) => {
+          (
+            acc: {
+              imported: number;
+              updated: number;
+              deleted: number;
+              skipped: number;
+              errors: Array<{ taskId: string; error: string }>;
+            },
+            r
+          ) => {
             acc.imported += r.imported;
             acc.updated += r.updated;
             acc.deleted += r.deleted;
@@ -99,7 +113,17 @@ export class TaskSyncProcessor extends BaseProcessor<
         };
       } else if (mappingId) {
         // Sync a specific mapping
-        const result = await this.syncManager.syncTaskList(mappingId);
+        // Get the mapping with its provider
+        const mapping = await prisma.taskListMapping.findUnique({
+          where: { id: mappingId },
+          include: { provider: true },
+        });
+
+        if (!mapping) {
+          throw new Error(`Task list mapping not found: ${mappingId}`);
+        }
+
+        const result = await this.syncManager.syncTaskList(mapping);
 
         return {
           success: result.success,
@@ -121,12 +145,23 @@ export class TaskSyncProcessor extends BaseProcessor<
 
         // Sync each mapping
         const results = await Promise.all(
-          mappings.map((mapping) => this.syncManager.syncTaskList(mapping.id))
+          mappings.map((mapping: { id: string }) =>
+            this.syncManager.syncTaskList(mapping.id)
+          )
         );
 
         // Calculate totals
         const totals = results.reduce(
-          (acc, r) => {
+          (
+            acc: {
+              imported: number;
+              updated: number;
+              deleted: number;
+              skipped: number;
+              errors: Array<{ taskId: string; error: string }>;
+            },
+            r
+          ) => {
             acc.imported += r.imported;
             acc.updated += r.updated;
             acc.deleted += r.deleted;
@@ -144,7 +179,7 @@ export class TaskSyncProcessor extends BaseProcessor<
         );
 
         return {
-          success: results.every((r) => r.success),
+          success: results.every((r: { success: boolean }) => r.success),
           message: `Synced all task lists for provider ${providerId}`,
           details: totals,
         };
@@ -152,7 +187,10 @@ export class TaskSyncProcessor extends BaseProcessor<
         // No valid sync target specified
         logger.error(
           "Invalid task sync job: no valid sync target",
-          { jobId: job.id, data: job.data },
+          {
+            jobId: job.id || "",
+            error: "Invalid task sync job: no valid sync target",
+          },
           LOG_SOURCE
         );
 
@@ -166,9 +204,8 @@ export class TaskSyncProcessor extends BaseProcessor<
       logger.error(
         "Task sync job failed",
         {
-          jobId: job.id,
+          jobId: job.id || "",
           error: error instanceof Error ? error.message : "Unknown error",
-          data: job.data,
         },
         LOG_SOURCE
       );
