@@ -1,5 +1,81 @@
+# IMPORTANT
+- allow disable of notifications
+- allow users to unsubscribe from waitlist notifications.
+
+## Task Sync Phase 1 Tasks
+
+1. **Database Schema Changes**
+   - [x] Create the `TaskProvider` model in schema.prisma
+   - [x] Create the `TaskListMapping` model to replace `OutlookTaskListMapping`
+   - [x] Create the `TaskSync` model
+   - [x] Add indexes for efficient lookup
+   - [x] Update the `Task` model with additional sync fields
+   - [x] Update the `Project` model with sync-related fields
+   - [x] Create a migration for the schema changes
+  
+2. **Core Interfaces and Classes**
+   - [x] Create `src/lib/task-sync/providers/task-provider.interface.ts`
+   - [x] Create `src/lib/task-sync/task-sync-manager.ts`
+   - [x] Create `src/lib/task-sync/task-change-tracker.ts`
+   - [x] Create helper utilities for mapping between providers
+   - [x] Fix TypeScript type issues in task sync related files
+
+3. **Outlook Provider Implementation**
+   - [x] Create `src/lib/task-sync/providers/outlook-provider.ts`
+   - [x] Port existing functionality from `OutlookTasksService`
+   - [x] Implement the one-way sync from Outlook to FluidCalendar
+   - [ ] Add support for task list mapping
+
+4. **API Endpoints**
+   - [x] Create provider management endpoints
+   - [x] Create mapping management endpoints
+   - [x] Create sync trigger endpoints
+   - [x] Update API endpoints to follow project authentication patterns
+   - [x] Implement task list fetching endpoint for external providers
+
+5. **Background Jobs**
+   - [x] Set up BullMQ job queue for task synchronization
+   - [x] Create job processor for task sync operations
+   - [x] Fix TypeScript issues in task sync processor
+   - [x] Implement scheduler for periodic sync jobs
+
+6. **UI Components**
+   - [x] Create settings UI for task providers
+   - [x] Build task list mapping UI
+   - [x] Add provider account email resolution for better user experience
+   - [ ] Add sync status indicators
+   - [x] Implement comprehensive error handling in UI
+
+7. **Data Migration** (No longer needed - decided to skip migration)
+   - ~~[x] Write migration script to move existing Outlook task mappings~~
+   - ~~[x] Create admin API endpoint to trigger migration~~
+   - ~~[x] Create admin UI for triggering and monitoring migration~~
+
+8. **Next Steps**
+   - [x] Test complete workflow from adding provider to auto-syncing tasks
+   - [ ] Implement sync status indicators
+     - [ ] Add visual indicators for sync status in task components
+     - [ ] Display last sync time and status in project details
+     - [ ] Create toast notifications for sync events
+   - [ ] Implement bi-directional sync (Phase 2)
+     - [x] Enhance TaskChangeTracker to record local task changes
+     - [x] Create TaskChange database model for change tracking
+     - [x] Update API endpoints to track task changes
+     - [x] Update TaskSyncManager to support bidirectional sync flow
+     - [x] Implement change detection comparing local and remote task states
+     - [x] Add methods to push local changes to providers
+     - [x] Update OutlookProvider with create/update/delete task methods
+     - [x] Update TaskListMapping to respect sync direction setting
+     - [ ] Implement conflict detection mechanisms
+     - [ ] Create conflict resolution strategies (latest wins, merge, manual)
+     - [ ] Add API endpoints for conflict resolution
+     - [ ] Test bidirectional sync with various scenarios
+   - [ ] Add Google Tasks provider (Phase 2)
+   - [x] Verify one-way sync functionality
+
 # FluidCalendar Implementation Plan
 # Random Tasks
+- [ ] 2-way task sync see [sync document](docs/task-sync.md)
 - [ ] add a calculator comparing motion to FC
 - [ ] add a sidebar thingy in open to tell them to move to saas
 - [ ] auto schedule working hours in settings using 24 instead am/pm
@@ -207,3 +283,16 @@
   - [ ] Implement proper cleanup on unmount
   - [ ] Add visual indicators for sync status
   - [ ] Add sync error notifications
+
+## Task Synchronization Phase 2 Next Steps
+
+- [x] Implement bidirectional sync capability (FC ↔ Provider)
+- [x] Add UI for changing sync direction
+- [x] Update sync controller to handle direction parameter
+- [ ] Implement conflict resolution strategies for bidirectional sync
+- [ ] Add change tracking for local tasks to support outgoing sync
+- [ ] Add TaskSyncManager methods for external task operations
+- [ ] Implement full sync logic (vs. incremental sync)
+- [ ] Add sync scheduling based on provider settings
+- [ ] Implement proper error handling and notification system
+- [ ] Add proper status tracking and display in UI

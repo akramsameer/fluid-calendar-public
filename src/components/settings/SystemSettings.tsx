@@ -36,6 +36,7 @@ export function SystemSettings() {
           outlookClientSecret: data.outlookClientSecret,
           outlookTenantId: data.outlookTenantId,
           logLevel: data.logLevel,
+          disableHomepage: data.disableHomepage,
         });
       })
       .catch((error) => {
@@ -217,26 +218,27 @@ export function SystemSettings() {
           </div>
         </SettingRow>
 
-        <SettingRow
-          label="Logging"
-          description="Configure application logging level"
-        >
+        <SettingRow label="Homepage" description="Configure homepage behavior">
           <div className="space-y-2">
-            <Label>Log Level</Label>
+            <Label>Disable Homepage</Label>
             <Select
-              value={system.logLevel || "none"}
+              value={system.disableHomepage ? "true" : "false"}
               onValueChange={(value) =>
-                handleUpdate({ logLevel: value as "none" | "debug" })
+                handleUpdate({ disableHomepage: value === "true" })
               }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                <SelectItem value="debug">Debug</SelectItem>
+                <SelectItem value="false">Show Homepage</SelectItem>
+                <SelectItem value="true">Redirect to Login/Calendar</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-sm text-muted-foreground">
+              When enabled, the homepage (/) will redirect to the login page for
+              unauthenticated users or to the calendar for authenticated users.
+            </p>
           </div>
         </SettingRow>
       </SettingsSection>
