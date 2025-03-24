@@ -20,9 +20,10 @@ const updateProviderSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await authenticateRequest(request, LOG_SOURCE);
     if ("response" in auth) {
       return auth.response;
@@ -33,7 +34,7 @@ export async function GET(
     // Get the provider with the account and mappings
     const provider = await prisma.taskProvider.findUnique({
       where: {
-        id: params.id,
+        id: id,
         userId,
       },
       include: {
@@ -92,9 +93,10 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await authenticateRequest(request, LOG_SOURCE);
     if ("response" in auth) {
       return auth.response;
@@ -103,7 +105,7 @@ export async function PATCH(
     const userId = auth.userId;
 
     // Validate the provider ID
-    const providerId = params.id;
+    const providerId = id;
     if (!providerId) {
       return NextResponse.json(
         { error: "Provider ID is required" },
@@ -174,9 +176,10 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await authenticateRequest(request, LOG_SOURCE);
     if ("response" in auth) {
       return auth.response;
@@ -187,7 +190,7 @@ export async function DELETE(
     // Verify the provider exists and belongs to the user
     const existingProvider = await prisma.taskProvider.findUnique({
       where: {
-        id: params.id,
+        id: id,
         userId,
       },
     });
@@ -202,7 +205,7 @@ export async function DELETE(
     // Delete the provider
     await prisma.taskProvider.delete({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 

@@ -16,14 +16,6 @@ const createProviderSchema = z.object({
   settings: z.record(z.unknown()).optional(),
 });
 
-// We'll keep this schema but remove the unused variable warning by exporting it
-export const updateProviderSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  syncEnabled: z.boolean().optional(),
-  defaultProjectId: z.string().optional(),
-  settings: z.record(z.unknown()).optional(),
-});
-
 /**
  * GET /api/task-sync/providers
  * Get all task providers for the current user
