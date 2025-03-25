@@ -53,21 +53,8 @@ interface TaskProvider {
   defaultProjectId?: string;
   error?: string;
   settings?: {
-    direction?: "incoming" | "outgoing" | "bidirectional";
     [key: string]: string | number | boolean | undefined;
   };
-}
-
-interface TaskListMapping {
-  id: string;
-  providerId: string;
-  projectId: string;
-  externalListId: string;
-  externalListName: string;
-  direction: "incoming" | "outgoing" | "bidirectional";
-  isAutoScheduled: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface TaskList {
@@ -88,7 +75,6 @@ export function TaskSyncSettings() {
 
   // State
   const [providers, setProviders] = useState<TaskProvider[]>([]);
-  const [mappings, setMappings] = useState<TaskListMapping[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<TaskProvider | null>(
     null
   );
@@ -184,9 +170,8 @@ export function TaskSyncSettings() {
         throw new Error("Failed to fetch task list mappings");
       }
 
-      const data = await response.json();
-      // Extract the mappings array from the response data
-      setMappings(data.mappings || []);
+      // We just fetch but don't need to store the mappings since they're not used
+      await response.json();
     } catch (error) {
       logger.error(
         "Failed to fetch task list mappings",
@@ -345,12 +330,39 @@ export function TaskSyncSettings() {
   };
 
   // Create a mapping for a task list
-  const createMapping = async (externalListId: string, projectId: string) => {
+  const createMapping = async (
+    externalListId: string,
+    projectId: string,
+    createNewProject: boolean = false
+  ) => {
     if (!selectedProvider) return;
 
     try {
       setIsLoading(true);
       const list = taskLists.find((l) => l.id === externalListId);
+
+      // If creating a new project
+      if (createNewProject && list) {
+        const projectResponse = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: list.name,
+            description: `Project created for syncing with ${selectedProvider.name} task list`,
+          }),
+        });
+
+        if (!projectResponse.ok) {
+          throw new Error("Failed to create new project");
+        }
+
+        const newProject = await projectResponse.json();
+        projectId = newProject.id;
+
+        // Update projects in store
+        const { fetchProjects } = useProjectStore.getState();
+        await fetchProjects();
+      }
 
       const response = await fetch("/api/task-sync/mappings", {
         method: "POST",
@@ -360,7 +372,7 @@ export function TaskSyncSettings() {
           externalListId,
           externalListName: list?.name || "Unknown List",
           projectId,
-          direction: "incoming",
+          direction: "bidirectional", // Always set to bidirectional
         }),
       });
 
@@ -670,35 +682,6 @@ export function TaskSyncSettings() {
                     : `${selectedProvider.syncInterval} minutes`}
                 </div>
               </div>
-              <div>
-                <div className="text-sm text-muted-foreground">
-                  Sync Direction
-                </div>
-                <div className="font-medium">
-                  <Select
-                    disabled={isLoading}
-                    value={
-                      selectedProvider.settings?.direction || "bidirectional"
-                    }
-                    onValueChange={handleSyncDirectionChange}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select direction" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="incoming">
-                        Incoming (From Provider)
-                      </SelectItem>
-                      <SelectItem value="outgoing">
-                        Outgoing (To Provider)
-                      </SelectItem>
-                      <SelectItem value="bidirectional">
-                        Bidirectional (Both)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
             </div>
 
             {selectedProvider.error && (
@@ -794,35 +777,6 @@ export function TaskSyncSettings() {
                             </div>
                           )}
                           <div className="flex space-x-2 mt-2 items-center">
-                            <div className="text-sm text-muted-foreground">
-                              Sync direction:
-                            </div>
-                            <Select
-                              value={list.mappingDirection || "incoming"}
-                              onValueChange={(value) =>
-                                list.mappingId &&
-                                handleMappingDirectionChange(
-                                  list.mappingId,
-                                  value
-                                )
-                              }
-                              disabled={isLoading || !list.mappingId}
-                            >
-                              <SelectTrigger className="w-[150px] h-8">
-                                <SelectValue placeholder="Sync direction" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="incoming">
-                                  From Provider
-                                </SelectItem>
-                                <SelectItem value="outgoing">
-                                  To Provider
-                                </SelectItem>
-                                <SelectItem value="bidirectional">
-                                  Both Ways
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
                             <Button
                               variant="outline"
                               size="sm"
@@ -854,7 +808,7 @@ export function TaskSyncSettings() {
                           <div className="text-sm text-muted-foreground mb-2">
                             Not mapped to any project
                           </div>
-                          <div className="flex space-x-2">
+                          <div className="flex flex-col space-y-2">
                             <Select
                               disabled={
                                 isLoading || projectOptions.length === 0
@@ -864,7 +818,7 @@ export function TaskSyncSettings() {
                               }
                             >
                               <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Map to project" />
+                                <SelectValue placeholder="Map to existing project" />
                               </SelectTrigger>
                               <SelectContent>
                                 {projectOptions.length === 0 ? (
@@ -883,6 +837,15 @@ export function TaskSyncSettings() {
                                 )}
                               </SelectContent>
                             </Select>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => createMapping(list.id, "", true)}
+                              disabled={isLoading}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Create New Project
+                            </Button>
                           </div>
                         </div>
                       )}
@@ -914,122 +877,6 @@ export function TaskSyncSettings() {
         </div>
       </SettingRow>
     );
-  };
-
-  // In the component with provider settings
-  const handleSyncDirectionChange = async (newDirection: string) => {
-    if (!selectedProvider) return;
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(
-        `/api/task-sync/providers/${selectedProvider.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            settings: {
-              ...selectedProvider.settings,
-              direction: newDirection,
-            },
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        console.error(
-          "Failed to update provider sync direction",
-          await response.json()
-        );
-        toast.error("Failed to update sync direction");
-        return;
-      }
-
-      // Update local state
-      setSelectedProvider({
-        ...selectedProvider,
-        settings: {
-          ...selectedProvider.settings,
-          direction: newDirection as "incoming" | "outgoing" | "bidirectional",
-        },
-      });
-
-      toast.success("Sync direction updated successfully");
-    } catch (error) {
-      console.error("Error updating sync direction:", error);
-      toast.error("Failed to update sync direction");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // For the mappings
-  const handleMappingDirectionChange = async (
-    mappingId: string,
-    newDirection: string
-  ) => {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`/api/task-sync/mappings/${mappingId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          direction: newDirection,
-        }),
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        console.error("Failed to update mapping direction", responseData);
-        toast.error("Failed to update mapping direction");
-        return;
-      }
-
-      toast.success("Mapping direction updated successfully");
-
-      // Update both local states: the mappings array and the task lists
-      // Update mappings state
-      setMappings(
-        mappings.map((mapping) =>
-          mapping.id === mappingId
-            ? {
-                ...mapping,
-                direction: newDirection as
-                  | "incoming"
-                  | "outgoing"
-                  | "bidirectional",
-              }
-            : mapping
-        )
-      );
-
-      // Update task lists state to reflect the new direction
-      setTaskLists(
-        taskLists.map((list) =>
-          list.mappingId === mappingId
-            ? {
-                ...list,
-                mappingDirection: newDirection as
-                  | "incoming"
-                  | "outgoing"
-                  | "bidirectional",
-              }
-            : list
-        )
-      );
-    } catch (error) {
-      console.error("Error updating mapping direction:", error);
-      toast.error("Failed to update mapping direction");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
