@@ -67,11 +67,21 @@ export class DailySummaryProcessor extends BaseProcessor<
               timeZone: true,
             },
           },
+          notificationSettings: {
+            select: {
+              dailyEmailEnabled: true,
+            },
+          },
         },
       });
 
       if (!user) {
         throw new Error(`User ${userId} not found`);
+      }
+
+      // Check if daily email is enabled for this user
+      if (!user.notificationSettings?.dailyEmailEnabled) {
+        return { success: true };
       }
 
       const timezone = user.userSettings?.timeZone || "UTC";
@@ -237,24 +247,16 @@ export class DailySummaryProcessor extends BaseProcessor<
         LOG_SOURCE
       );
 
-      // Get all users with email notifications enabled
+      // Get all users with daily email notifications enabled
       const users = await prisma.user.findMany({
         where: {
-          // Add any conditions for users who should receive daily summaries
-          // For example, if you have a user preference for daily summaries:
-          // preferences: {
-          //   dailySummaryEnabled: true,
-          // },
+          notificationSettings: {
+            dailyEmailEnabled: true,
+          },
         },
         select: {
           id: true,
           email: true,
-          // If you have user preferences:
-          // preferences: {
-          //   select: {
-          //     timezone: true,
-          //   },
-          // },
         },
       });
 

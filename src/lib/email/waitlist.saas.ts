@@ -1,9 +1,9 @@
 import { logger } from "../logger";
 import { EmailService } from "./email-service.saas";
-import { Resend } from "resend";
-
+import { getResend } from "./resend";
+import { generateUnsubscribeToken } from "@/app/api/waitlist/unsubscribe/route.saas";
+import { prisma } from "@/lib/prisma";
 const LOG_SOURCE = "WaitlistEmail";
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Utility function to delay execution
@@ -252,6 +252,23 @@ export async function sendReferralMilestoneEmail({
   referralTemplate,
 }: ReferralMilestoneEmailProps) {
   try {
+    // If this is a position improvement notification, check if the user has opted out
+    if (notificationType === "POSITION_IMPROVEMENT") {
+      const waitlistEntry = await prisma.waitlist.findUnique({
+        where: { email },
+        select: { queueNotificationsEnabled: true },
+      });
+
+      if (!waitlistEntry?.queueNotificationsEnabled) {
+        logger.info(
+          "Skipping position improvement notification for opted-out user",
+          { email },
+          LOG_SOURCE
+        );
+        return { success: true, skipped: true };
+      }
+    }
+
     // Use the template from the database or fall back to the default template
     const template =
       referralTemplate || getDefaultReferralTemplate(notificationType);
@@ -263,12 +280,19 @@ export async function sendReferralMilestoneEmail({
       email
     )}`;
 
+    // Generate unsubscribe link for position improvement notifications
+    const unsubscribeToken = generateUnsubscribeToken(email);
+    const unsubscribeLink = `${baseUrl}/api/waitlist/unsubscribe?email=${encodeURIComponent(
+      email
+    )}&token=${unsubscribeToken}`;
+
     // Replace common template variables
     let html = template
       .replace(/{{name}}/g, name)
       .replace(/{{referralCount}}/g, referralCount.toString())
       .replace(/{{referralLink}}/g, referralLink)
-      .replace(/{{statusLink}}/g, statusLink);
+      .replace(/{{statusLink}}/g, statusLink)
+      .replace(/{{unsubscribeLink}}/g, unsubscribeLink);
 
     // Replace notification-specific variables
     switch (notificationType) {
@@ -389,6 +413,9 @@ function getDefaultReferralTemplate(
 <p>Check your current status anytime:</p>
 <a href="{{statusLink}}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Check Status</a>
 <p>Thank you for your interest in FluidCalendar!</p>
+<p style="margin-top: 32px; font-size: 12px; color: #6B7280;">
+  Don't want to receive position update notifications? <a href="{{unsubscribeLink}}" style="color: #4F46E5; text-decoration: underline;">Click here to unsubscribe</a>
+</p>
       `;
 
     default:
@@ -566,6 +593,7 @@ export async function addToAudienceAndsendWaitlistConfirmationEmail(props: {
   try {
     // Create contact in Resend audience
     try {
+      const resend = await getResend();
       await resend.contacts.create({
         email,
         firstName: name || undefined,

@@ -2,12 +2,11 @@ import { Job } from "bullmq";
 import { BaseProcessor } from "./base-processor";
 import { EmailJobData, QUEUE_NAMES } from "../queues";
 import { logger } from "@/lib/logger";
-import { Resend } from "resend";
 import { EmailService } from "@/lib/email/email-service.saas";
 import { getRedisOptions } from "../config/redis";
+import { getResend } from "@/lib/email/resend";
 
 const LOG_SOURCE = "EmailProcessor";
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Email processor for sending emails
@@ -51,6 +50,7 @@ export class EmailProcessor extends BaseProcessor<
     try {
       // Send email using Resend
       const fromEmail = EmailService.formatSender("FluidCalendar");
+      const resend = await getResend();
 
       const emailData = {
         from: fromEmail,

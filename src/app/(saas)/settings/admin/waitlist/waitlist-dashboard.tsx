@@ -98,7 +98,7 @@ export function WaitlistDashboard() {
                   {stats?.conversionRate || 0}%
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Of invited users who registered
+                  Of all invited users (past & current)
                 </p>
               </>
             )}

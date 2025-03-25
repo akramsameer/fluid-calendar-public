@@ -1,17 +1,21 @@
 import { PrismaClient } from "@prisma/client";
-import { logger } from "@/lib/logger";
-
-const LOG_SOURCE = "PrismaUtils";
 
 // Create a new PrismaClient instance
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const globalForPrisma = global as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+// Reset global prisma instance at the start of each process
+globalForPrisma.prisma = undefined;
+
+// Initialize PrismaClient with proper connection handling
+function createPrismaClient() {
+  console.log("[PrismaUtils] Creating new Prisma client");
+
+  const client = new PrismaClient({
     log: [
       {
-        emit: "event",
+        emit: "stdout",
         level: "query",
       },
       {
@@ -29,29 +33,69 @@ export const prisma =
     ],
   });
 
-// Add logging for queries
-// @ts-expect-error - Prisma types are not fully compatible with the event system
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-prisma.$on("query", (e: any) => {
-  logger.debug(`Query: ${e.query}`, { params: e.params }, LOG_SOURCE);
+  // Log when client is created
+  console.log("[PrismaUtils] Prisma client created successfully");
+  return client;
+}
+
+// Create or reuse the Prisma client instance
+console.log("[PrismaUtils] Initializing Prisma client...");
+const prisma = globalForPrisma.prisma || createPrismaClient();
+console.log(
+  "[PrismaUtils] Using",
+  globalForPrisma.prisma ? "existing" : "new",
+  "Prisma client"
+);
+
+// Call connect explicitly to ensure we have a connection
+prisma
+  .$connect()
+  .then(() => {
+    console.log("[PrismaUtils] Initial Prisma connection established");
+  })
+  .catch((error) => {
+    console.error(
+      "[PrismaUtils] Failed to establish initial connection:",
+      error
+    );
+  });
+
+// Ensure connection is properly closed on process exit
+["SIGINT", "SIGTERM", "beforeExit"].forEach((event) => {
+  process.on(event, async () => {
+    try {
+      console.log(`[PrismaUtils] Process ${event} received, cleaning up...`);
+      await prisma.$disconnect();
+      console.log("[PrismaUtils] Disconnected Prisma client");
+    } catch (error) {
+      console.error("[PrismaUtils] Error during cleanup:", error);
+    } finally {
+      process.exit(event === "beforeExit" ? 0 : 1);
+    }
+  });
 });
 
 // Add the prisma client to the global object in development
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+  console.log("[PrismaUtils] Added Prisma client to global scope");
+}
+
+export { prisma };
 
 /**
  * Ensure the Prisma client is connected
  */
 export async function ensurePrismaConnection(): Promise<void> {
   try {
+    await prisma.$connect();
     // Test the connection by executing a simple query
     await prisma.$queryRaw`SELECT 1`;
-    logger.info("Prisma connection established", {}, LOG_SOURCE);
+    console.log("[PrismaUtils] Prisma connection established");
   } catch (error) {
-    logger.error(
-      "Failed to establish Prisma connection",
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      LOG_SOURCE
+    console.error(
+      "[PrismaUtils] Failed to establish Prisma connection:",
+      error instanceof Error ? error.message : "Unknown error"
     );
     throw error;
   }
@@ -63,12 +107,11 @@ export async function ensurePrismaConnection(): Promise<void> {
 export async function disconnectPrisma(): Promise<void> {
   try {
     await prisma.$disconnect();
-    logger.info("Prisma connection closed", {}, LOG_SOURCE);
+    console.log("[PrismaUtils] Prisma connection closed");
   } catch (error) {
-    logger.error(
-      "Failed to close Prisma connection",
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      LOG_SOURCE
+    console.error(
+      "[PrismaUtils] Failed to close Prisma connection:",
+      error instanceof Error ? error.message : "Unknown error"
     );
   }
 }

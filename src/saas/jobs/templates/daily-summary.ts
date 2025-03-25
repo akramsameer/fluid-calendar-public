@@ -227,6 +227,7 @@ export function generateDailySummaryHtml(
         
         <div class="footer">
           <p>This email was sent to you as part of your FluidCalendar subscription.</p>
+          <p>To unsubscribe from daily emails, visit Settings > Notifications in FluidCalendar.</p>
           <p>© ${new Date().getFullYear()} FluidCalendar. All rights reserved.</p>
         </div>
       </body>
@@ -314,6 +315,7 @@ export function generateDailySummaryText(
 
   text += `Visit your dashboard: ${baseUrl}\n\n`;
   text += `This email was sent to you as part of your FluidCalendar subscription.\n`;
+  text += `To unsubscribe from daily emails, visit Settings > Notifications in FluidCalendar.\n`;
   text += `© ${new Date().getFullYear()} FluidCalendar. All rights reserved.`;
 
   return text;
