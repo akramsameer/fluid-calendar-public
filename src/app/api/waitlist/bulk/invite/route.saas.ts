@@ -176,10 +176,11 @@ export async function POST(request: NextRequest) {
 
     // After inviting users, check for position improvements for remaining waitlist users
     try {
-      // Get all remaining waitlist entries with status WAITING
+      // Get all remaining waitlist entries with status WAITING and notifications enabled
       const waitingEntries = await prisma.waitlist.findMany({
         where: {
           status: "WAITING",
+          queueNotificationsEnabled: true, // Only get users who haven't opted out
         },
         orderBy: {
           priorityScore: "desc",
@@ -230,12 +231,10 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Update the entry's last position
+        // Update the last known position for all users
         await prisma.waitlist.update({
           where: { id: entry.id },
-          data: {
-            lastPosition: currentPosition,
-          },
+          data: { lastPosition: currentPosition },
         });
       }
     } catch (positionError) {

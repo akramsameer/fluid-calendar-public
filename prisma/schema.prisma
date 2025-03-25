@@ -434,24 +434,25 @@ model PendingWaitlist {
 }
 
 model Waitlist {
-  id                   String    @id @default(cuid())
-  email                String    @unique
-  name                 String?
-  status               String    @default("WAITING") // WAITING, INVITED, REGISTERED
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  invitedAt            DateTime?
-  registeredAt         DateTime?
-  invitationToken      String?
-  invitationExpiry     DateTime?
-  referralCode         String    @unique
-  referredBy           String?
-  referralCount        Int       @default(0)
-  priorityScore        Float     @default(0)
-  lastVisitedAt        DateTime?
-  notes                String?
-  lastPosition         Int? // Added to track position changes
-  interestedInLifetime Boolean   @default(false)
+  id                        String    @id @default(cuid())
+  email                     String    @unique
+  name                      String?
+  status                    String    @default("WAITING") // WAITING, INVITED, REGISTERED
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+  invitedAt                 DateTime?
+  registeredAt              DateTime?
+  invitationToken           String?
+  invitationExpiry          DateTime?
+  referralCode              String    @unique
+  referredBy                String?
+  referralCount             Int       @default(0)
+  priorityScore             Float     @default(0)
+  lastVisitedAt             DateTime?
+  notes                     String?
+  lastPosition              Int? // Added to track position changes
+  interestedInLifetime      Boolean   @default(false)
+  queueNotificationsEnabled Boolean   @default(true) // Controls whether to send queue position notifications
 
   @@index([status])
   @@index([referredBy])

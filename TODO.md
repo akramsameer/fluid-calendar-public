@@ -1,6 +1,6 @@
 # IMPORTANT
-- allow disable of notifications
-- allow users to unsubscribe from waitlist notifications.
+- allow disable daily email notifications
+- recurring tasks broken for outlook sync
 
 ## Task Sync Phase 1 Tasks
 
