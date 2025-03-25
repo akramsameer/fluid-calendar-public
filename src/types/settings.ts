@@ -29,6 +29,7 @@ export interface CalendarSettings {
 
 export interface NotificationSettings {
   emailNotifications: boolean;
+  dailyEmailEnabled: boolean; // Controls whether the user receives daily email updates
   notifyFor: {
     eventInvites: boolean;
     eventUpdates: boolean;

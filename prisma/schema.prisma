@@ -347,6 +347,7 @@ model NotificationSettings {
   userId                String   @unique
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   emailNotifications    Boolean  @default(true)
+  dailyEmailEnabled     Boolean  @default(true) // Controls whether the user receives daily email updates
   eventInvites          Boolean  @default(true)
   eventUpdates          Boolean  @default(true)
   eventCancellations    Boolean  @default(true)

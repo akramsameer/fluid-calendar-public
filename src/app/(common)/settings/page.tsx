@@ -10,6 +10,8 @@ import { TaskSyncSettings } from "@/components/settings/TaskSyncSettings";
 import { LogViewer } from "@/components/settings/LogViewer";
 import { UserManagement } from "@/components/settings/UserManagement";
 import { ImportExportSettings } from "@/components/settings/ImportExportSettings";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { useSettingsStore } from "@/store/settings";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { useAdmin } from "@/hooks/use-admin";
@@ -45,11 +47,18 @@ type SettingsTab =
   | "user-management"
   | "waitlist"
   | "import-export"
-  | "admin-dashboard";
+  | "admin-dashboard"
+  | "notifications";
 
 export default function SettingsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { initializeSettings } = useSettingsStore();
+
+  // Always initialize settings on mount
+  useEffect(() => {
+    initializeSettings();
+  }, [initializeSettings]);
 
   const tabs = useMemo(() => {
     const baseTabs = [
@@ -58,6 +67,7 @@ export default function SettingsPage() {
       { id: "calendar", label: "Calendar" },
       { id: "auto-schedule", label: "Auto-Schedule" },
       { id: "task-sync", label: "Task Sync" },
+      { id: "notifications", label: "Notifications" },
       { id: "import-export", label: "Import/Export" },
     ] as const;
 
@@ -105,6 +115,7 @@ export default function SettingsPage() {
         "waitlist",
         "import-export",
         "admin-dashboard",
+        "notifications",
       ];
 
       if (allPossibleTabIds.includes(hash)) {
@@ -174,6 +185,8 @@ export default function SettingsPage() {
         return <AutoScheduleSettings />;
       case "task-sync":
         return <TaskSyncSettings />;
+      case "notifications":
+        return <NotificationSettings />;
       case "system":
         return <SystemSettings />;
       case "logs":

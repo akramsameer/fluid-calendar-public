@@ -45,6 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added UI field in System Settings for managing the API key
   - Added automatic initialization of resendApiKey from environment variables during setup
   - Enhanced setup process to prevent overwriting existing SystemSettings for better security
+- Added setting to control daily email updates about upcoming meetings and tasks
+  - Added dailyEmailEnabled field to NotificationSettings model
+  - Added UI toggle in notification settings
+  - Added database migration for the new field
+  - Default is enabled for existing users
 
 ### Changed
 - Updated task list API endpoint to use existing getMsGraphClient utility from outlook-utils.ts
