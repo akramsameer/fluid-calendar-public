@@ -398,6 +398,7 @@ model SystemSettings {
   logDestination      String   @default("db") // db, file, both
   publicSignup        Boolean  @default(false) // Whether public signup is enabled
   disableHomepage     Boolean  @default(false) // Whether to disable the homepage and redirect to login/calendar
+  resendApiKey        String? // API key for Resend email service
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }

@@ -40,6 +40,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Provider-specific recurrence converters to handle different recurrence formats
 - Support for task recurrence patterns in Outlook sync
 - Added OutlookPriority and OutlookStatus enums for improved type safety
+- Added Resend API key to SystemSettings for email service configuration
+  - Added database migration to add resendApiKey field
+  - Added UI field in System Settings for managing the API key
+  - Added automatic initialization of resendApiKey from environment variables during setup
+  - Secured API key storage in database instead of environment variables
+  - Enhanced setup process to prevent overwriting existing SystemSettings for better security
 
 ### Changed
 - Updated task list API endpoint to use existing getMsGraphClient utility from outlook-utils.ts

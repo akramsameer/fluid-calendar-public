@@ -241,6 +241,24 @@ export function SystemSettings() {
             </p>
           </div>
         </SettingRow>
+
+        <SettingRow
+          label="Email Service"
+          description="Configure email service settings"
+        >
+          <div className="space-y-2">
+            <Label>Resend API Key</Label>
+            <Input
+              type="password"
+              value={system.resendApiKey || ""}
+              onChange={(e) => handleUpdate({ resendApiKey: e.target.value })}
+              placeholder="Enter your Resend API key"
+            />
+            <p className="text-sm text-muted-foreground">
+              API key for the Resend email service. Required for sending emails.
+            </p>
+          </div>
+        </SettingRow>
       </SettingsSection>
     </AdminOnly>
   );
