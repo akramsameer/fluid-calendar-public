@@ -1,6 +1,6 @@
 import { logger } from "@/lib/logger";
-import { EmailService } from "./email-service.saas";
 import { getPasswordResetTemplate } from "./templates/password-reset";
+import { isSaasEnabled } from "@/lib/config";
 
 const LOG_SOURCE = "PasswordResetEmail";
 
@@ -28,7 +28,12 @@ export async function sendPasswordResetEmail({
     // Get the email template
     const html = getPasswordResetTemplate(name, resetLink, expirationDate);
 
-    // Send the email using the queue
+    // Dynamically import the correct email service based on SAAS flag
+    const { EmailService } = await import(
+      `./email-service${isSaasEnabled ? ".saas" : ".open"}`
+    );
+
+    // Send the email using the appropriate service
     const { jobId } = await EmailService.sendEmail({
       from: EmailService.formatSender("FluidCalendar"),
       to: email,
@@ -36,12 +41,12 @@ export async function sendPasswordResetEmail({
       html,
     });
 
-    logger.info("Queued password reset email", { email, jobId }, LOG_SOURCE);
+    logger.info("Password reset email sent", { email, jobId }, LOG_SOURCE);
 
     return { success: true, jobId };
   } catch (error) {
     logger.error(
-      "Failed to queue password reset email",
+      "Failed to send password reset email",
       {
         error: error instanceof Error ? error.message : "Unknown error",
         email,

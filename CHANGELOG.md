@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Password reset functionality with email support for both SAAS and open source versions
+- Smart email service that automatically handles both SAAS (queued) and open source (direct) email sending
 - Added system setting to disable the homepage and redirect to login/calendar
   - Admin-configurable option in System Settings
   - Redirects unauthenticated users to login page
