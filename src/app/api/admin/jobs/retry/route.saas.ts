@@ -8,8 +8,23 @@ import { queues } from "@/saas/jobs/queues";
 const LOG_SOURCE = "RetryJobAPI";
 
 /**
+ * Generates a new job ID for a retry attempt
+ * Format: originalJobId_retry_N where N is the retry number
+ */
+async function generateRetryJobId(jobId: string): Promise<string> {
+  // If this is already a retry, increment the number
+  if (jobId.includes("_retry_")) {
+    const [baseId, retryNum] = jobId.split("_retry_");
+    return `${baseId}_retry_${parseInt(retryNum) + 1}`;
+  }
+
+  // First retry
+  return `${jobId}_retry_1`;
+}
+
+/**
  * POST /api/admin/jobs/retry
- * Retries a failed job by updating the existing record
+ * Retries a failed job by updating its ID and status
  */
 export async function POST(request: NextRequest) {
   // Check if user is admin
@@ -64,30 +79,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update the job record to reset its status and attempts
+    // Generate new job ID for the retry
+    const newJobId = await generateRetryJobId(jobId);
+
+    // Update the existing job record with new ID and reset status
     await prisma.jobRecord.update({
       where: {
         id: jobRecord.id,
       },
       data: {
+        jobId: newJobId,
         status: JobStatus.PENDING,
         attempts: 0,
         error: null,
-        updatedAt: new Date(),
         startedAt: null,
         finishedAt: null,
+        updatedAt: new Date(),
       },
     });
 
-    // Add the job back to the queue with the same job ID
+    // Add the job back to the queue with the new job ID
     await queue.add(jobRecord.name, jobRecord.data as Record<string, unknown>, {
-      jobId: jobRecord.jobId,
+      jobId: newJobId,
     });
 
     logger.info(
       `Retried job ${jobId}`,
       {
         jobId,
+        newJobId,
         queueName,
         jobName: jobRecord.name,
       },
