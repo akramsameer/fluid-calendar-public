@@ -1,14 +1,21 @@
 import { PrismaClient } from "@prisma/client";
 
 // Create a new PrismaClient instance
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const globalForPrisma = global as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+// Reset global prisma instance at the start of each process
+globalForPrisma.prisma = undefined;
 
 // Initialize PrismaClient with proper connection handling
-async function createPrismaClient() {
+function createPrismaClient() {
+  console.log("[PrismaUtils] Creating new Prisma client");
+
   const client = new PrismaClient({
     log: [
       {
-        emit: "event",
+        emit: "stdout",
         level: "query",
       },
       {
@@ -26,25 +33,55 @@ async function createPrismaClient() {
     ],
   });
 
-  // Add logging for queries
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client.$on("query", (e: any) => {
-    console.debug("[PrismaUtils] Query:", e.query, "Params:", e.params);
-  });
-
-  // Ensure connection is properly closed before process exits
-  process.on("beforeExit", async () => {
-    await client.$disconnect();
-    console.log("[PrismaUtils] Disconnected Prisma client before exit");
-  });
-
+  // Log when client is created
+  console.log("[PrismaUtils] Prisma client created successfully");
   return client;
 }
 
-export const prisma = globalForPrisma.prisma || (await createPrismaClient());
+// Create or reuse the Prisma client instance
+console.log("[PrismaUtils] Initializing Prisma client...");
+const prisma = globalForPrisma.prisma || createPrismaClient();
+console.log(
+  "[PrismaUtils] Using",
+  globalForPrisma.prisma ? "existing" : "new",
+  "Prisma client"
+);
+
+// Call connect explicitly to ensure we have a connection
+prisma
+  .$connect()
+  .then(() => {
+    console.log("[PrismaUtils] Initial Prisma connection established");
+  })
+  .catch((error) => {
+    console.error(
+      "[PrismaUtils] Failed to establish initial connection:",
+      error
+    );
+  });
+
+// Ensure connection is properly closed on process exit
+["SIGINT", "SIGTERM", "beforeExit"].forEach((event) => {
+  process.on(event, async () => {
+    try {
+      console.log(`[PrismaUtils] Process ${event} received, cleaning up...`);
+      await prisma.$disconnect();
+      console.log("[PrismaUtils] Disconnected Prisma client");
+    } catch (error) {
+      console.error("[PrismaUtils] Error during cleanup:", error);
+    } finally {
+      process.exit(event === "beforeExit" ? 0 : 1);
+    }
+  });
+});
 
 // Add the prisma client to the global object in development
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+  console.log("[PrismaUtils] Added Prisma client to global scope");
+}
+
+export { prisma };
 
 /**
  * Ensure the Prisma client is connected

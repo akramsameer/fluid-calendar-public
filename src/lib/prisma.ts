@@ -5,7 +5,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Properly handle connection lifecycle
-async function createPrismaClient() {
+function createPrismaClient() {
   const client = new PrismaClient({
     log: ["error"],
   });
@@ -19,6 +19,6 @@ async function createPrismaClient() {
   return client;
 }
 
-export const prisma = globalForPrisma.prisma ?? (await createPrismaClient());
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
