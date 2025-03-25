@@ -1,9 +1,8 @@
 import { logger } from "../logger";
 import { EmailService } from "./email-service.saas";
-import { Resend } from "resend";
+import { getResend } from "./resend";
 
 const LOG_SOURCE = "WaitlistEmail";
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Utility function to delay execution
@@ -566,6 +565,7 @@ export async function addToAudienceAndsendWaitlistConfirmationEmail(props: {
   try {
     // Create contact in Resend audience
     try {
+      const resend = await getResend();
       await resend.contacts.create({
         email,
         firstName: name || undefined,

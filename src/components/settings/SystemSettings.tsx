@@ -13,6 +13,7 @@ import {
 import { logger } from "@/lib/logger";
 import AdminOnly from "@/components/auth/AdminOnly";
 import AccessDeniedMessage from "@/components/auth/AccessDeniedMessage";
+import { clearResendInstance } from "@/lib/email/resend";
 
 const LOG_SOURCE = "SystemSettings";
 
@@ -37,6 +38,7 @@ export function SystemSettings() {
           outlookTenantId: data.outlookTenantId,
           logLevel: data.logLevel,
           disableHomepage: data.disableHomepage,
+          resendApiKey: data.resendApiKey,
         });
       })
       .catch((error) => {
@@ -57,6 +59,11 @@ export function SystemSettings() {
       });
       const data = await response.json();
       updateSystemSettings(data);
+
+      // Clear Resend instance if the API key was updated
+      if ("resendApiKey" in updates) {
+        clearResendInstance();
+      }
     } catch (error) {
       logger.error(
         "Failed to update system settings",

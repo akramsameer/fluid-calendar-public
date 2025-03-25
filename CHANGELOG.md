@@ -44,7 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added database migration to add resendApiKey field
   - Added UI field in System Settings for managing the API key
   - Added automatic initialization of resendApiKey from environment variables during setup
-  - Secured API key storage in database instead of environment variables
   - Enhanced setup process to prevent overwriting existing SystemSettings for better security
 
 ### Changed
@@ -63,6 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented recurrence rule conversion for Outlook tasks using provider pattern
 - Improved type safety in recurrence conversion system with better interfaces and removed any types
 - Centralized recurrence-related types in a dedicated types file for better maintainability
+- Moved Resend API key from environment variables to SystemSettings table
+  - Updated email-related services to use the API key from SystemSettings
+  - Improved security by storing sensitive credentials in the database
 
 ### Fixed
 - Added automatic project selection when creating a task from a project view:
@@ -171,6 +173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed `/api/tasks/outlook/lists` endpoint (replaced by `/api/task-sync/providers/[id]/lists`)
   - Removed `OutlookTasksService` (replaced by `OutlookProvider` implementation)
 - Removed `OutlookTaskListMapping` model as it has been replaced by the more generic `TaskListMapping` model in the task synchronization system
+- Removed RESEND_API_KEY from environment variables (now stored in SystemSettings)
 
 ## [1.2.3]
 ### Added

@@ -7,6 +7,7 @@ const publicRoutes = [
   "/setup",
   "/api/setup/check",
   "/auth/signin",
+  "/auth/reset-password",
   "/auth/error",
   "/api/auth/register",
   "/beta",
