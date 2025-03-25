@@ -93,23 +93,13 @@ export async function setupScheduledJobs() {
   console.log("CREATING TEST CRON JOB");
   console.log("TEST_CRON value:", process.env.TEST_CRON);
   const testCronJob = new CronJob(
-    "*/1 * * * *", // Every 1 minute
+    "*/15 * * * *", // Every 15 minutes
     async () => {
       try {
         // Check if TEST_CRON is enabled
-        console.log(
-          "Test cron job running, TEST_CRON =",
-          process.env.TEST_CRON
-        );
         if (process.env.TEST_CRON === "false") {
-          logger.info(
-            "Test cron job is disabled by TEST_CRON=false",
-            {},
-            LOG_SOURCE
-          );
           return;
         }
-
         logger.info("Running scheduled job: Test Cron Email", {}, LOG_SOURCE);
         console.log("Scheduling test email...");
         await TestCronProcessor.scheduleTestEmail("eibrahim@gmail.com");
