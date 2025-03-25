@@ -36,17 +36,6 @@ export async function trackJob(job: Job, userId?: string): Promise<void> {
         userId: userId,
       },
     });
-
-    logger.info(
-      `Tracked job ${job.id} in queue ${job.queueName}`,
-      {
-        jobId: job.id || "unknown",
-        queueName: job.queueName,
-        jobName: job.name,
-        userId: userId || "unknown",
-      },
-      LOG_SOURCE
-    );
   } catch (error) {
     logger.error(
       `Failed to track job ${job.id} in queue ${job.queueName}`,
@@ -79,15 +68,6 @@ export async function trackJobStart(job: Job): Promise<void> {
         attempts: job.attemptsMade,
       },
     });
-
-    logger.info(
-      `Job ${job.id} in queue ${job.queueName} started processing`,
-      {
-        jobId: job.id || "unknown",
-        queueName: job.queueName,
-      },
-      LOG_SOURCE
-    );
   } catch (error) {
     logger.error(
       `Failed to update job ${job.id} status to ACTIVE`,
@@ -126,15 +106,6 @@ export async function trackJobCompletion<T, R extends JobResult>(
         attempts: job.attemptsMade,
       },
     });
-
-    logger.info(
-      `Job ${job.id} in queue ${job.queueName} completed`,
-      {
-        jobId: job.id || "unknown",
-        queueName: job.queueName,
-      },
-      LOG_SOURCE
-    );
   } catch (error) {
     logger.error(
       `Failed to update job ${job.id} status to COMPLETED`,

@@ -684,11 +684,29 @@ export class TaskSyncManager {
 
       for (const externalId of deletedTaskExternalIds) {
         const localTask = localTaskByExternalId.get(externalId);
-
         if (!localTask) continue;
 
         try {
-          // Delete the local task
+          // Check if this task was recently modified locally
+          const recentChanges = await prisma.taskChange.findMany({
+            where: {
+              taskId: localTask.id,
+              timestamp: {
+                gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+              },
+            },
+            orderBy: {
+              timestamp: "desc",
+            },
+          });
+
+          // If we have recent local changes, don't delete the task
+          // This means the task was actively being used in FC
+          if (recentChanges.length > 0) {
+            continue;
+          }
+
+          // Delete the local task only if no recent changes
           await prisma.task.delete({
             where: { id: localTask.id },
           });
