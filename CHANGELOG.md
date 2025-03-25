@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved sensitive credentials from environment variables to SystemSettings
 - Replaced Google Fonts CDN with self-hosted Inter font
 - Updated API routes to follow NextJS 15 conventions
+- Split task sync route into SAAS and open source versions
+  - Moved background job-based sync to `route.saas.ts`
+  - Created synchronous version in `route.open.ts` for open source edition
 
 ### Fixed
 - Multiple task synchronization issues:

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { isSaasEnabled } from "@/lib/config";
 
 // Special project object to represent "no project" state
 const NO_PROJECT: Partial<Project> = {
@@ -104,7 +105,13 @@ export function ProjectSidebar() {
         });
 
         if (response.ok) {
-          toast.success("Task sync initiated for project");
+          if (isSaasEnabled) {
+            toast.success("Task sync initiated for project");
+          } else {
+            const { fetchTasks } = useTaskStore.getState();
+            await fetchTasks();
+            toast.success("Sync Completed");
+          }
         } else {
           toast.error("Failed to sync tasks for project");
         }
