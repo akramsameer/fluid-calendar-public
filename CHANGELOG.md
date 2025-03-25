@@ -8,179 +8,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Password reset functionality with email support for both SAAS and open source versions
-- Smart email service that automatically handles both SAAS (queued) and open source (direct) email sending
-- Added system setting to disable the homepage and redirect to login/calendar
-  - Admin-configurable option in System Settings
-  - Redirects unauthenticated users to login page
-  - Redirects authenticated users to calendar view
-  - Default is off (homepage is shown)
-  - Added database migration to add the disableHomepage field to SystemSettings
-  - Uses direct API calls for real-time setting changes with no caching
-- Task synchronization system (Phase 1)
-  - Added database schema for task providers and task list mappings
-  - Created core interfaces for task synchronization
-  - Implemented task sync job processor and queue management
-  - Added foundation for multi-provider task synchronization
-  - Added API endpoints for managing task providers and mappings
-  - Implemented Outlook tasks provider with one-way sync
-  - Added intelligent periodic sync scheduler with support for different sync intervals
-  - Created settings UI for managing task providers and mappings
-  - Added account email resolution for providers to improve user experience
-  - Added API endpoint for fetching task lists from providers
-- Outlook tasks integration improvements (migration to new task synchronization system)
-- First phase of bidirectional task sync implementation:
-  - Added bidirectional sync capability to the task sync feature
-  - Added direction parameter to the sync API to control sync flow 
-  - Enhanced TaskSyncManager to handle different sync directions
-  - Added UI controls to set sync direction for providers and mappings
-  - Added manual sync button with direction support
-- New field mapping system for task synchronization that allows consistent mapping between internal and external task fields
-- Provider-specific field mappers to handle different task provider implementations
-- Improved task conflict resolution based on update timestamps
-- Recurrence rule conversion system for bidirectional sync of recurring tasks
-- Provider-specific recurrence converters to handle different recurrence formats
-- Support for task recurrence patterns in Outlook sync
-- Added OutlookPriority and OutlookStatus enums for improved type safety
-- Added Resend API key to SystemSettings for email service configuration
-  - Added database migration to add resendApiKey field
-  - Added UI field in System Settings for managing the API key
-  - Added automatic initialization of resendApiKey from environment variables during setup
-  - Enhanced setup process to prevent overwriting existing SystemSettings for better security
-- Added setting to control daily email updates about upcoming meetings and tasks
-  - Added dailyEmailEnabled field to NotificationSettings model
-  - Added UI toggle in notification settings
-  - Added database migration for the new field
-  - Default is enabled for existing users
 
 ### Changed
-- Updated task list API endpoint to use existing getMsGraphClient utility from outlook-utils.ts
-- Fixed project loading in TaskSyncSettings component to ensure projects are available for mapping
-- Fixed API route to properly await dynamic params following NextJS 15 convention
-- Fixed TaskListMapping creation API to match Prisma schema (removed settings field)
-- Updated API routes to follow project authentication patterns:
-  - Replaced getServerSession with authenticateRequest in all task sync API endpoints
-- Replaced Google Fonts CDN with self-hosted Inter font to fix intermittent build failures
-- Updated waitlist entries sorting to include secondary sorting by priorityScore and createdAt
-- Refactored task sync manager to use true bidirectional synchronization instead of two one-way syncs
-- Enhanced handling of field preservation during sync to prevent overwriting local fields with null values
-- Improved date handling in task synchronization to normalize all dates to UTC
-- Fixed type issues in TaskUpdates interface to ensure compatibility with different providers
-- Implemented recurrence rule conversion for Outlook tasks using provider pattern
-- Improved type safety in recurrence conversion system with better interfaces and removed any types
-- Centralized recurrence-related types in a dedicated types file for better maintainability
-- Moved Resend API key from environment variables to SystemSettings table
-  - Updated email-related services to use the API key from SystemSettings
-  - Improved security by storing sensitive credentials in the database
 
 ### Fixed
-- Added automatic project selection when creating a task from a project view:
-  - When viewing a specific project, new tasks are automatically assigned to that project
-  - When viewing "No Project", new tasks are created without a project
-  - Improves workflow efficiency by reducing clicks needed to organize tasks
-- Fixed duplicate task creation in Outlook when creating tasks in FluidCalendar:
-  - Refreshed local task data after processing CREATE changes to prevent duplicate processing
-  - Added tracking of processed task IDs during sync to avoid creating the same task twice
-  - Ensured that tasks with pending sync changes are properly excluded from the unlinked tasks list
-- Fixed task deletion not being properly synced to Outlook:
-  - Improved task deletion API to create change records before deleting the task
-  - Enhanced change tracking to validate required external data for deletions
-  - Added special handling in sync manager to prioritize delete operations
-  - Improved handling of tasks that appear in Outlook but were deleted in FluidCalendar
-  - Fixed database schema to make taskId nullable in TaskChange table to prevent deletion conflicts
-  - Enhanced processDeleteChange to better handle task deletions even when the task is gone
-  - Improved change record persistence for DELETE operations to ensure sync reliability
-- Fixed Prisma validation errors during task synchronization:
-  - Properly handled nested objects like tags and project during conflict resolution
-  - Removed nested objects from update data to prevent validation errors
-  - Replaced any type with proper Record<string, unknown> for better type safety
-  - Improved error handling to provide clearer error messages
-- Fixed tasks not syncing from FluidCalendar to Outlook in bidirectional sync:
-  - Added automatic detection of unlinked local tasks that need initial sync
-  - Implemented synthetic change tracking for untracked tasks
-  - Added extensive logging to help diagnose sync issues
-  - Fixed TaskProvider type reference in syncFromLocalToExternal method
-- Fixed bidirectional task sync issue where tasks edited in FluidCalendar were being overwritten by Outlook version:
-  - Added timestamp comparison to only update tasks when external version is newer
-  - Fixed timestamp tracking when tasks are edited in FluidCalendar
-  - Added detailed logging for sync decision-making
-- Fixed duplicate tasks in bidirectional sync:
-  - Added improved task matching logic to prevent duplicates when syncing between Outlook and FluidCalendar
-  - Added detection of unlinked local tasks to correctly associate them with external tasks
-  - Implemented title-based matching for tasks during first sync to avoid duplicates
-  - Added additional logging to aid in debugging sync issues
-- Fixed bidirectional task sync functionality:
-  - Added missing import for TaskChangeTracker in TaskSyncManager
-  - Fixed authentication issues in task sync API routes
-  - Corrected type errors in TaskSync API routes
-  - Fixed nullable type handling in logger metadata
-  - Improved error handling for authentication failures
-  - Added missing lastModifiedDateTime property to ExternalTask interface
-- Fixed the task list mappings API to prevent projectId from being accidentally set to null when updating only direction or other fields
-- Fixed task mapping direction not displaying correctly in the UI and not updating properly when changed
-- Fixed console error "mappings.map is not a function" when updating task mapping direction in the UI by correctly extracting the mappings array from API response
-- Fixed conversion rate calculation in waitlist management to prevent exceeding 100%
-- Fixed timestamp comparison logic in bidirectional sync:
-  - Improved timestamp comparison to properly determine the newer version for each field
-  - Fixed issue where local changes to due dates weren't being preserved when locally edited
-  - Enhanced logging to clearly indicate which version (local or external) is being used for each sync
-  - Standardized timestamp comparison logic across all task fields for consistent behavior
-- Fixed TypeScript issues in task sync system:
-  - Fixed TaskSyncJobData to satisfy JobData constraint by adding index signature
-  - Updated TaskSyncJobResult to satisfy JobResult constraint by adding index signature
-  - Properly typed logger metadata in task sync processor
-  - Fixed implicit any types in task sync processor
-  - Implemented getMsGraphClient utility function with proper type safety
-  - Resolved linter errors in UI components
-- Fixed toast usage in TaskSyncSettings component to match the API format
-- Added missing provider list API endpoint for task synchronization
-- Fixed all-day events appearing on the wrong day for Google Calendar events due to timezone handling issues
-- Fixed Outlook all-day event creation that was failing due to Outlook requiring exact midnight UTC times
-- Fixed Outlook all-day events requiring a minimum 24-hour duration by automatically extending single-day events to end on the next day at midnight
-- Fixed Outlook all-day events displaying on the wrong day in the calendar due to incorrect date conversion during sync
-- Fixed startDate handling for recurring tasks, ensuring the time interval between start date and due date is preserved when creating new instances
-- Fixed timezone inconsistency in task list display for start dates and due dates
-- Fixed DatePicker showing incorrect dates (off by one day) when inline editing due dates and start dates
-- Fixed CalDAV all-day event creation failing with "invalid date-time value" error by properly using ICAL.Time.fromDateString instead of raw string dates
-- Fixed bidirectional task sync issues where tasks edited in FluidCalendar were being overwritten during Outlook sync
-  - Added proper timestamp comparison logic to ensure tasks are only updated when the external version is newer
-  - Updated all code paths to set timestamps consistently for reliable sync comparisons
-  - Enhanced logging to track timestamp comparisons and sync decisions
-- Fixed task duplication during bidirectional sync when editing tasks in FluidCalendar
-  - Enhanced task matching to prevent creating duplicates when syncing modified tasks
-  - Improved filtering of unlinked tasks to avoid syncing tasks that already exist in the external system
-  - Preserved original external task IDs during update operations
-- Fixed local task changes being reverted during bidirectional sync
-  - Added additional protection for local title changes in bidirectional sync mode
-  - Enhanced logging to better track what changes are being preserved or overwritten
-  - Implemented more aggressive preservation of local changes when titles differ
-- Fixed linter errors throughout the task sync system for better code quality
-- Removed redundant code in the Outlook provider implementation
-- Fixed type conversions between string values and enum types for task status and priority
-- Standardized method names and interfaces for consistency
-- Added proper type definitions for Outlook task update payloads to prevent type errors
-- Fixed type safety issues in TaskSync related files by replacing 'any' types with proper interfaces
-- Removed unused imports and parameters throughout the codebase
-- Fixed issues with Record<string, unknown> type compatibility
-- Improved TypeScript type safety with proper generic type usage
-- Fixed Prisma type compatibility issues in database operations
-- Added proper type assertions with intermediate unknown types where needed
-- Ensured null values are properly handled with Prisma JSON fields
-- Fixed task-sync-manager type incompatibilities with Prisma models
-- Improved date handling in task fields to ensure type compatibility
-- Updated `/api/tasks/outlook/lists` endpoint to use the TaskProvider interface and TaskSyncManager
 
 ### Removed
-- Migration code for old Outlook task mappings - decided to use new sync system without migrating old data
-- Separate one-way sync methods in favor of a more efficient bidirectional approach
-- Legacy components and endpoints related to the old one-way Outlook task import:
-  - Removed `OutlookTaskSettings` component (replaced by `TaskSyncSettings`)
-  - Removed `OutlookTaskImportModal` component (replaced by task sync UI)
-  - Removed `/api/tasks/outlook/import` endpoint (replaced by task sync API)
-  - Removed `/api/tasks/outlook/lists` endpoint (replaced by `/api/task-sync/providers/[id]/lists`)
-  - Removed `OutlookTasksService` (replaced by `OutlookProvider` implementation)
-- Removed `OutlookTaskListMapping` model as it has been replaced by the more generic `TaskListMapping` model in the task synchronization system
-- Removed RESEND_API_KEY from environment variables (now stored in SystemSettings)
+
+## [1.3.0] 2025-03-25
+
+### Added
+- Comprehensive bidirectional task synchronization system with support for Outlook
+  - Field mapping system for consistent task property synchronization
+  - Recurrence rule conversion for recurring tasks
+  - Intelligent conflict resolution based on timestamps
+  - Support for task priorities and status synchronization
+- Password reset functionality with email support for both SAAS and open source versions
+- Smart email service with queued (SAAS) and direct (open source) delivery options
+- System setting to optionally disable homepage and redirect to login/calendar
+- Daily email updates for upcoming meetings and tasks (configurable)
+- Resend API key management through SystemSettings
+
+### Changed
+- Enhanced task sync manager for true bidirectional synchronization
+- Improved date and timezone handling across calendar and task systems
+- Moved sensitive credentials from environment variables to SystemSettings
+- Replaced Google Fonts CDN with self-hosted Inter font
+- Updated API routes to follow NextJS 15 conventions
+
+### Fixed
+- Multiple task synchronization issues:
+  - Prevented duplicate task creation in Outlook
+  - Fixed task deletion synchronization
+  - Resolved bidirectional sync conflicts
+  - Fixed task mapping and direction issues
+- All-day events timezone and display issues
+- Various TypeScript and linter errors throughout the task sync system
+
+### Removed
+- Legacy one-way Outlook task import system and related components
+- OutlookTaskListMapping model in favor of new TaskListMapping
+- RESEND_API_KEY from environment variables
 
 ## [1.2.3]
 ### Added
