@@ -1,14 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { logger } from "@/lib/logger";
-
-const LOG_SOURCE = "PrismaUtils";
 
 // Create a new PrismaClient instance
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+// Initialize PrismaClient with proper connection handling
+async function createPrismaClient() {
+  const client = new PrismaClient({
     log: [
       {
         emit: "event",
@@ -29,12 +26,22 @@ export const prisma =
     ],
   });
 
-// Add logging for queries
-// @ts-expect-error - Prisma types are not fully compatible with the event system
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-prisma.$on("query", (e: any) => {
-  logger.debug(`Query: ${e.query}`, { params: e.params }, LOG_SOURCE);
-});
+  // Add logging for queries
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client.$on("query", (e: any) => {
+    console.debug("[PrismaUtils] Query:", e.query, "Params:", e.params);
+  });
+
+  // Ensure connection is properly closed before process exits
+  process.on("beforeExit", async () => {
+    await client.$disconnect();
+    console.log("[PrismaUtils] Disconnected Prisma client before exit");
+  });
+
+  return client;
+}
+
+export const prisma = globalForPrisma.prisma || (await createPrismaClient());
 
 // Add the prisma client to the global object in development
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
@@ -44,14 +51,14 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
  */
 export async function ensurePrismaConnection(): Promise<void> {
   try {
+    await prisma.$connect();
     // Test the connection by executing a simple query
     await prisma.$queryRaw`SELECT 1`;
-    logger.info("Prisma connection established", {}, LOG_SOURCE);
+    console.log("[PrismaUtils] Prisma connection established");
   } catch (error) {
-    logger.error(
-      "Failed to establish Prisma connection",
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      LOG_SOURCE
+    console.error(
+      "[PrismaUtils] Failed to establish Prisma connection:",
+      error instanceof Error ? error.message : "Unknown error"
     );
     throw error;
   }
@@ -63,12 +70,11 @@ export async function ensurePrismaConnection(): Promise<void> {
 export async function disconnectPrisma(): Promise<void> {
   try {
     await prisma.$disconnect();
-    logger.info("Prisma connection closed", {}, LOG_SOURCE);
+    console.log("[PrismaUtils] Prisma connection closed");
   } catch (error) {
-    logger.error(
-      "Failed to close Prisma connection",
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      LOG_SOURCE
+    console.error(
+      "[PrismaUtils] Failed to close Prisma connection:",
+      error instanceof Error ? error.message : "Unknown error"
     );
   }
 }
