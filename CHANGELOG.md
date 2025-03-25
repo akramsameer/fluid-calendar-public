@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Improved all-day event UI by removing time selection when "All day" is checked, showing only date picker instead
 
 ### Removed
 
