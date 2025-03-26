@@ -121,7 +121,7 @@ export async function setupScheduledJobs() {
 
   // Schedule task synchronization jobs
   const taskSyncJob = new CronJob(
-    "*/15 * * * *", // Every 15 minutes
+    "*/30 * * * *", // Every 30 minutes
     async () => {
       try {
         logger.info("Starting scheduled task sync job", {}, LOG_SOURCE);

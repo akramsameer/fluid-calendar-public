@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Improved all-day event UI by removing time selection when "All day" is checked, showing only date picker instead
 - Fixed Google Calendar event deletion by adding missing userId parameter for authentication
-- Fixed Outlook task sync issue where tasks were incorrectly deleted in FluidCalendar when they still existed in Outlook
+- Fixed Outlook task sync issues with recurring tasks
 
 ### Removed
 

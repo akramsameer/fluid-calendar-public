@@ -63,3 +63,4 @@ scripts/import-resend-waitlist.saas.js
 *.log
 dist/
 Dockerfile.worker
+scripts/test-outlook-task-api.sh
