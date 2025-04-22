@@ -143,12 +143,6 @@ export function TaskRow({
             onSave={onInlineEdit}
           />
 
-          {isFutureTask && (
-            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
-              Upcoming
-            </span>
-          )}
-
           {task.isRecurring && (
             <HiRefresh
               className="h-4 w-4 text-blue-500 shrink-0"

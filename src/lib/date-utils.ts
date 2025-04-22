@@ -183,7 +183,23 @@ export function createAllDayDate(dateString: string): Date {
   const [year, month, day] = dateString.split("T")[0].split("-").map(Number);
 
   // Create a date at midnight local time for the specified day
-  return new Date(year, month - 1, day, 0, 0, 0);
+  // Use setHours(0,0,0,0) to ensure consistent midnight timing
+  const date = new Date(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+/**
+ * Normalizes a date for all-day event display
+ * Ensures the date is set to local midnight and strips any time component
+ * This helps prevent timezone-related display issues with all-day events
+ * @param date The date to normalize
+ * @returns Date object normalized to local midnight
+ */
+export function normalizeAllDayDate(date: Date): Date {
+  const normalizedDate = new Date(date);
+  normalizedDate.setHours(0, 0, 0, 0);
+  return normalizedDate;
 }
 
 /**

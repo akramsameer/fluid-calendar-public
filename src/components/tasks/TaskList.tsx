@@ -5,6 +5,7 @@ import { useTaskListViewSettings } from "@/store/taskListViewSettings";
 import { useProjectStore } from "@/store/project";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -282,16 +283,17 @@ export function TaskList({
         </div>
 
         <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
+          <Checkbox
             id="hideUpcomingTasks"
             checked={hideUpcomingTasks}
-            onChange={(e) =>
-              setFilters({ hideUpcomingTasks: e.target.checked })
+            onCheckedChange={(checked) =>
+              setFilters({ hideUpcomingTasks: checked as boolean })
             }
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/80"
           />
-          <label htmlFor="hideUpcomingTasks" className="text-sm">
+          <label
+            htmlFor="hideUpcomingTasks"
+            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             Hide upcoming tasks
           </label>
         </div>
