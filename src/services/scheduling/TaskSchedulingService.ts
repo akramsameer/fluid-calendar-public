@@ -115,7 +115,9 @@ export async function scheduleAllTasksForUser(
         isAutoScheduled: true,
         scheduleLocked: false,
         status: {
-          not: TaskStatus.COMPLETED,
+          not: {
+            in: [TaskStatus.COMPLETED, TaskStatus.IN_PROGRESS],
+          },
         },
         userId,
       },
@@ -131,7 +133,9 @@ export async function scheduleAllTasksForUser(
         isAutoScheduled: true,
         scheduleLocked: true,
         status: {
-          not: TaskStatus.COMPLETED,
+          not: {
+            in: [TaskStatus.COMPLETED, TaskStatus.IN_PROGRESS],
+          },
         },
         userId,
       },

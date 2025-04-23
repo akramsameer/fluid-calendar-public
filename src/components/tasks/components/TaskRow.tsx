@@ -1,5 +1,5 @@
 import { Task, TaskStatus } from "@/types/task";
-import { format, newDate } from "@/lib/date-utils";
+import { format, newDate, isFutureDate } from "@/lib/date-utils";
 import {
   HiCheck,
   HiClock,
@@ -38,8 +38,7 @@ export function TaskRow({
   onInlineEdit,
 }: TaskRowProps) {
   const { draggableProps, isDragging } = useDraggableTask(task);
-  const now = newDate();
-  const isFutureTask = task.startDate && newDate(task.startDate) > now;
+  const isFutureTask = task.startDate && isFutureDate(task.startDate);
 
   return (
     <tr
@@ -142,6 +141,12 @@ export function TaskRow({
             value={task.title}
             onSave={onInlineEdit}
           />
+
+          {isFutureTask && (
+            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+              Upcoming
+            </span>
+          )}
 
           {task.isRecurring && (
             <HiRefresh

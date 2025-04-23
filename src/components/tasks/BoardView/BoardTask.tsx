@@ -11,6 +11,7 @@ import {
   isThisYear,
   newDateFromYMD,
   newDate,
+  isFutureDate,
 } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +53,8 @@ const formatContextualDate = (date: Date) => {
   const now = newDate();
   now.setHours(0, 0, 0, 0);
 
-  const isOverdue = localDate < now;
+  const isOverdue = localDate < now && !isToday(localDate);
+  const isFuture = isFutureDate(localDate);
   let text = "";
   if (isToday(localDate)) {
     text = "Today";
@@ -67,8 +69,10 @@ const formatContextualDate = (date: Date) => {
   }
   if (isOverdue) {
     text = `Overdue: ${text}`;
+  } else if (isFuture) {
+    text = `Upcoming: ${text}`;
   }
-  return { text, isOverdue };
+  return { text, isOverdue, isFuture };
 };
 
 export function BoardTask({ task, onEdit, onDelete }: BoardTaskProps) {
@@ -83,8 +87,8 @@ export function BoardTask({ task, onEdit, onDelete }: BoardTaskProps) {
 
   const style = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
+      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    }
     : undefined;
 
   return (

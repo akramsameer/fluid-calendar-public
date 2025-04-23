@@ -218,6 +218,18 @@ export function createOutlookAllDayDate(dateString: string): Date {
   return new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
 }
 
+/**
+ * Checks if a date is in the future (tomorrow or later)
+ * @param date The date to check
+ * @returns boolean indicating if the date is tomorrow or later
+ */
+export function isFutureDate(date: Date | string | number | null): boolean {
+  if (!date) return false;
+  const targetDate = startOfDay(newDate(date));
+  const tomorrow = startOfDay(addDays(newDate(), 1));
+  return targetDate >= tomorrow;
+}
+
 // Re-export date-fns functions
 export {
   addMinutes,

@@ -25,6 +25,8 @@ import {
 } from "../utils/task-list-utils";
 import { Button } from "@/components/ui/button";
 import { HiCheck, HiX, HiExclamation } from "react-icons/hi";
+import { isToday, isTomorrow, isThisWeek, isThisYear } from "date-fns";
+import { isFutureDate } from "@/lib/date-utils";
 
 interface EditableCellProps {
   task: Task;
@@ -136,51 +138,46 @@ export function EditableCell({
           </div>
         ) : field === "energyLevel" ? (
           <span
-            className={`px-2 py-1 text-xs rounded-full ${
-              value
-                ? energyLevelColors[value as EnergyLevel]
-                : "text-muted-foreground border border-border"
-            }`}
+            className={`px-2 py-1 text-xs rounded-full ${value
+              ? energyLevelColors[value as EnergyLevel]
+              : "text-muted-foreground border border-border"
+              }`}
           >
             {value ? formatEnumValue(value) : "Set energy"}
           </span>
         ) : field === "preferredTime" ? (
           <span
-            className={`px-2 py-1 text-xs rounded-full ${
-              value
-                ? timePreferenceColors[value as TimePreference]
-                : "text-muted-foreground border border-border"
-            }`}
+            className={`px-2 py-1 text-xs rounded-full ${value
+              ? timePreferenceColors[value as TimePreference]
+              : "text-muted-foreground border border-border"
+              }`}
           >
             {value ? formatEnumValue(value) : "Set time"}
           </span>
         ) : field === "priority" ? (
           <span
-            className={`px-2 py-1 text-xs rounded-full ${
-              value
-                ? priorityColors[value as Priority]
-                : "text-muted-foreground border border-border"
-            }`}
+            className={`px-2 py-1 text-xs rounded-full ${value
+              ? priorityColors[value as Priority]
+              : "text-muted-foreground border border-border"
+              }`}
           >
             {value ? formatEnumValue(value) : "Set priority"}
           </span>
         ) : field === "duration" ? (
           <span
-            className={`text-sm ${
-              value ? "text-muted-foreground" : "text-muted-foreground/70"
-            }`}
+            className={`text-sm ${value ? "text-muted-foreground" : "text-muted-foreground/70"
+              }`}
           >
             {value ? `${value}m` : "Set duration"}
           </span>
         ) : field === "dueDate" ? (
           <span
-            className={`text-sm group flex items-center gap-1 ${
-              value
-                ? formatContextualDate(newDate(value)).isOverdue
-                  ? "text-destructive"
-                  : "text-muted-foreground"
-                : "text-muted-foreground/70"
-            }`}
+            className={`text-sm group flex items-center gap-1 ${value
+              ? formatContextualDate(newDate(value)).isOverdue
+                ? "text-destructive"
+                : "text-muted-foreground"
+              : "text-muted-foreground/70"
+              }`}
           >
             {value ? (
               <>
@@ -195,9 +192,8 @@ export function EditableCell({
           </span>
         ) : field === "startDate" ? (
           <span
-            className={`text-sm ${
-              value ? "text-muted-foreground" : "text-muted-foreground/70"
-            }`}
+            className={`text-sm ${value ? "text-muted-foreground" : "text-muted-foreground/70"
+              }`}
           >
             {value
               ? formatContextualDate(newDate(value)).text
@@ -335,10 +331,10 @@ export function EditableCell({
             selected={
               editValue
                 ? newDateFromYMD(
-                    new Date(editValue).getUTCFullYear(),
-                    new Date(editValue).getUTCMonth(),
-                    new Date(editValue).getUTCDate()
-                  )
+                  new Date(editValue).getUTCFullYear(),
+                  new Date(editValue).getUTCMonth(),
+                  new Date(editValue).getUTCDate()
+                )
                 : null
             }
             onChange={(date) => {
@@ -380,10 +376,10 @@ export function EditableCell({
             selected={
               editValue
                 ? newDateFromYMD(
-                    new Date(editValue).getUTCFullYear(),
-                    new Date(editValue).getUTCMonth(),
-                    new Date(editValue).getUTCDate()
-                  )
+                  new Date(editValue).getUTCFullYear(),
+                  new Date(editValue).getUTCMonth(),
+                  new Date(editValue).getUTCDate()
+                )
                 : null
             }
             onChange={(date) => {
@@ -496,7 +492,8 @@ const formatContextualDate = (date: Date) => {
   const now = newDate();
   now.setHours(0, 0, 0, 0);
 
-  const isOverdue = localDate < now;
+  const isOverdue = localDate < now && !isToday(localDate);
+  const isFuture = isFutureDate(localDate);
   let text = "";
   if (isToday(localDate)) {
     text = "Today";
@@ -511,9 +508,8 @@ const formatContextualDate = (date: Date) => {
   }
   if (isOverdue) {
     text = `Overdue: ${text}`;
+  } else if (isFuture) {
+    text = `Upcoming: ${text}`;
   }
-  return { text, isOverdue };
+  return { text, isOverdue, isFuture };
 };
-
-// Import missing functions
-import { isToday, isTomorrow, isThisWeek, isThisYear } from "date-fns";

@@ -1,7 +1,7 @@
 import * as Popover from "@radix-ui/react-popover";
 import { CalendarEvent, AttendeeStatus } from "@/types/calendar";
 import { Task, TaskStatus, Priority } from "@/types/task";
-import { format, newDate } from "@/lib/date-utils";
+import { format, newDate, isFutureDate } from "@/lib/date-utils";
 import { isTaskOverdue } from "@/lib/task-utils";
 import {
   IoTimeOutline,
@@ -26,11 +26,11 @@ interface EventQuickViewProps {
   isOpen: boolean;
   onClose: () => void;
   item:
-    | (CalendarEvent & {
-        attendees?: Attendee[];
-        extendedProps?: { isTask?: boolean };
-      })
-    | (Task & { project?: { name: string; color?: string | null } | null });
+  | (CalendarEvent & {
+    attendees?: Attendee[];
+    extendedProps?: { isTask?: boolean };
+  })
+  | (Task & { project?: { name: string; color?: string | null } | null });
   onEdit: () => void;
   onDelete: () => void;
   position: { x: number; y: number };
@@ -200,11 +200,13 @@ export function EventQuickView({
                       <span
                         className={cn(
                           isOverdue &&
-                            "text-destructive dark:text-destructive font-medium"
+                          "text-destructive dark:text-destructive font-medium",
+                          isFutureDate(taskItem.dueDate) && "text-primary font-medium"
                         )}
                       >
                         Due {format(newDate(taskItem.dueDate), "PPp")}
                         {isOverdue && " (OVERDUE)"}
+                        {isFutureDate(taskItem.dueDate) && " (UPCOMING)"}
                       </span>
                     ) : (
                       <span>No due date</span>
@@ -227,8 +229,13 @@ export function EventQuickView({
                 {taskItem.startDate && (
                   <div className="flex items-center gap-2">
                     <IoCalendarOutline className="h-4 w-4 flex-shrink-0" />
-                    <span>
+                    <span
+                      className={cn(
+                        isFutureDate(taskItem.startDate) && "text-primary font-medium"
+                      )}
+                    >
                       Starts {format(newDate(taskItem.startDate), "PPp")}
+                      {isFutureDate(taskItem.startDate) && " (UPCOMING)"}
                     </span>
                   </div>
                 )}
