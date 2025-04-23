@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+import { Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+
 import RegistrationForm from "./registration-form";
 
 interface WaitlistEntry {
@@ -117,7 +121,7 @@ export default function JoinPageClient() {
   // Show loading state while validating
   if (isValidating) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Validating Invitation</CardTitle>
@@ -136,7 +140,7 @@ export default function JoinPageClient() {
   // Show success state after registration
   if (registrationSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">
@@ -163,15 +167,15 @@ export default function JoinPageClient() {
   // Show error state if validation failed
   if (validationError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">
               {isExpired
                 ? "Invitation Expired"
                 : isAlreadyRegistered
-                ? "Already Registered"
-                : "Invalid Invitation"}
+                  ? "Already Registered"
+                  : "Invalid Invitation"}
             </CardTitle>
             <CardDescription className="text-center">
               {validationError}
@@ -229,7 +233,7 @@ export default function JoinPageClient() {
 
   // Show registration form
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">Join FluidCalendar Beta</CardTitle>
@@ -237,8 +241,8 @@ export default function JoinPageClient() {
             {waitlistEntry
               ? "Complete your registration to join the beta program"
               : publicSignupEnabled
-              ? "Create your account to join the beta program"
-              : "Registration requires an invitation"}
+                ? "Create your account to join the beta program"
+                : "Registration requires an invitation"}
           </CardDescription>
         </CardHeader>
         <CardContent>

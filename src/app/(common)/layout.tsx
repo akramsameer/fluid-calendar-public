@@ -1,29 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import "../globals.css";
-import { SessionProvider } from "@/components/providers/SessionProvider";
-import { PrivacyProvider } from "@/components/providers/PrivacyProvider";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { AppNav } from "@/components/navigation/AppNav";
-import { DndProvider } from "@/components/dnd/DndProvider";
-import { CommandPalette } from "@/components/ui/command-palette";
-import { CommandPaletteHint } from "@/components/ui/command-palette-hint";
-import { CommandPaletteFab } from "@/components/ui/command-palette-fab";
-import { ShortcutsModal } from "@/components/ui/shortcuts-modal";
-import { useShortcutsStore } from "@/store/shortcuts";
-import { SetupCheck } from "@/components/setup/SetupCheck";
-import { Toaster } from "@/components/ui/sonner";
+import { useEffect, useState } from "react";
+
 import dynamic from "next/dynamic";
+
+import { DndProvider } from "@/components/dnd/DndProvider";
+import { AppNav } from "@/components/navigation/AppNav";
+import { PrivacyProvider } from "@/components/providers/PrivacyProvider";
+import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { SetupCheck } from "@/components/setup/SetupCheck";
+import { CommandPalette } from "@/components/ui/command-palette";
+import { CommandPaletteFab } from "@/components/ui/command-palette-fab";
+import { CommandPaletteHint } from "@/components/ui/command-palette-hint";
+import { ShortcutsModal } from "@/components/ui/shortcuts-modal";
+import { Toaster } from "@/components/ui/sonner";
+
 import { usePageTitle } from "@/hooks/use-page-title";
+
+import { useShortcutsStore } from "@/store/shortcuts";
+
+import "../globals.css";
 
 // Dynamically import the NotificationProvider based on SAAS flag
 const NotificationProvider = dynamic<{ children: React.ReactNode }>(
   () =>
     import(
-      `@/components/providers/NotificationProvider${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true"
-        ? ".saas"
-        : ".open"
+      `@/components/providers/NotificationProvider${
+        process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true"
+          ? ".saas"
+          : ".open"
       }`
     ).then((mod) => mod.NotificationProvider),
   {
@@ -60,7 +66,7 @@ export default function RootLayout({
   }, [setShortcutsOpen]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <SessionProvider>
         <ThemeProvider attribute="data-theme" enableSystem={true}>
           <PrivacyProvider>
@@ -77,7 +83,7 @@ export default function RootLayout({
                 onClose={() => setShortcutsOpen(false)}
               />
               <AppNav />
-              <main className="flex-1 relative">
+              <main className="relative flex-1">
                 <NotificationProvider>{children}</NotificationProvider>
               </main>
               <Toaster />

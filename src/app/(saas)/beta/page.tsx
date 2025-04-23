@@ -1,9 +1,11 @@
-import { Metadata } from "next";
 import { Suspense } from "react";
-import WaitlistForm from "./waitlist-form";
-import { BetaHero } from "./beta-hero";
+
+import { Metadata } from "next";
+
 import { BetaFeatures } from "./beta-features";
+import { BetaHero } from "./beta-hero";
 import { LifetimeOffer } from "./lifetime-offer";
+import WaitlistForm from "./waitlist-form";
 
 export const metadata: Metadata = {
   title: "Join the FluidCalendar Beta",
@@ -14,10 +16,10 @@ export const metadata: Metadata = {
 export default function BetaPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
-      <div className="container px-4 py-12 mx-auto max-w-7xl">
+      <div className="container mx-auto max-w-7xl px-4 py-12">
         <BetaHero />
 
-        <div className="grid gap-12 mt-16 md:grid-cols-2">
+        <div className="mt-16 grid gap-12 md:grid-cols-2">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
               Join the Waitlist
@@ -30,10 +32,10 @@ export default function BetaPage() {
             <div className="mt-8">
               <Suspense
                 fallback={
-                  <div className="p-4 border rounded animate-pulse">
-                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-10 bg-gray-200 rounded"></div>
+                  <div className="animate-pulse rounded border p-4">
+                    <div className="mb-4 h-10 rounded bg-gray-200"></div>
+                    <div className="mb-4 h-10 rounded bg-gray-200"></div>
+                    <div className="h-10 rounded bg-gray-200"></div>
                   </div>
                 }
               >
@@ -44,10 +46,10 @@ export default function BetaPage() {
             <div className="mt-8">
               <Suspense
                 fallback={
-                  <div className="p-4 border rounded animate-pulse">
-                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-10 bg-gray-200 rounded"></div>
+                  <div className="animate-pulse rounded border p-4">
+                    <div className="mb-4 h-10 rounded bg-gray-200"></div>
+                    <div className="mb-4 h-10 rounded bg-gray-200"></div>
+                    <div className="h-10 rounded bg-gray-200"></div>
                   </div>
                 }
               >
@@ -63,7 +65,7 @@ export default function BetaPage() {
             <ul className="mt-4 space-y-4 text-gray-600 dark:text-gray-400">
               <li className="flex items-start">
                 <svg
-                  className="w-5 h-5 mr-2 text-blue-500"
+                  className="mr-2 h-5 w-5 text-blue-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -80,7 +82,7 @@ export default function BetaPage() {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-5 h-5 mr-2 text-blue-500"
+                  className="mr-2 h-5 w-5 text-blue-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -97,7 +99,7 @@ export default function BetaPage() {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-5 h-5 mr-2 text-blue-500"
+                  className="mr-2 h-5 w-5 text-blue-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -114,7 +116,7 @@ export default function BetaPage() {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="w-5 h-5 mr-2 text-blue-500"
+                  className="mr-2 h-5 w-5 text-blue-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -131,7 +133,7 @@ export default function BetaPage() {
               </li>
             </ul>
 
-            <div className="p-4 mt-8 border rounded-lg bg-blue-50 border-blue-100 dark:bg-blue-950 dark:border-blue-900">
+            <div className="mt-8 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
               <h3 className="font-medium text-blue-800 dark:text-blue-300">
                 Refer friends, move up the list!
               </h3>

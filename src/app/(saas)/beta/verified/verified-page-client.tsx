@@ -1,7 +1,10 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+import { CheckCircle } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,17 +13,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
 
 export default function VerifiedPageClient() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex justify-center mb-4">
+          <div className="mb-4 flex justify-center">
             <CheckCircle className="h-16 w-16 text-green-500" />
           </div>
           <CardTitle className="text-center">Email Verified!</CardTitle>

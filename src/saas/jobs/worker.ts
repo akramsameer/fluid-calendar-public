@@ -1,21 +1,23 @@
 // import { logger } from "@/lib/logger";
+import { CronJob } from "cron";
+
 import { logger } from "@/lib/logger";
+
 import { closeRedisConnection } from "./config/redis";
-import { initializeQueues, closeQueues } from "./queues";
-import { emailProcessor } from "./processors/email";
 import {
-  dailySummaryProcessor,
   DailySummaryProcessor,
+  dailySummaryProcessor,
 } from "./processors/daily-summary";
+import { emailProcessor } from "./processors/email";
 import { maintenanceProcessor } from "./processors/maintenance";
 import { taskReminderProcessor } from "./processors/task-reminder";
-import { CronJob } from "cron";
-import { ensurePrismaConnection, disconnectPrisma } from "./utils/prisma-utils";
-import { addCleanupOrphanedRecordsJob } from "./queues";
 import { taskScheduleProcessor } from "./processors/task-schedule";
-import { testCronProcessor, TestCronProcessor } from "./processors/test-cron";
 import { taskSyncProcessor } from "./processors/task-sync";
 import { TaskSyncScheduler } from "./processors/task-sync-scheduler";
+import { TestCronProcessor, testCronProcessor } from "./processors/test-cron";
+import { closeQueues, initializeQueues } from "./queues";
+import { addCleanupOrphanedRecordsJob } from "./queues";
+import { disconnectPrisma, ensurePrismaConnection } from "./utils/prisma-utils";
 
 const LOG_SOURCE = "Worker";
 

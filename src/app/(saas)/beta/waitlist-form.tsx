@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+
 import { useSearchParams } from "next/navigation";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ValidationError {
   code: string;
@@ -124,7 +127,7 @@ export default function WaitlistForm() {
 
   if (isSuccess) {
     return (
-      <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded border border-green-100 dark:border-green-800 text-center">
+      <div className="rounded border border-green-100 bg-green-50 p-4 text-center dark:border-green-800 dark:bg-green-900/30">
         {verificationRequired ? (
           <>
             <h3 className="text-lg font-medium text-green-800 dark:text-green-300">
@@ -178,7 +181,7 @@ export default function WaitlistForm() {
       </div>
 
       {referralCode && (
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded border border-blue-100 dark:border-blue-800">
+        <div className="rounded border border-blue-100 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/30">
           <p className="text-sm text-blue-700 dark:text-blue-400">
             You were referred by a friend! This will give you a boost in the
             waitlist.
@@ -246,7 +249,7 @@ export default function WaitlistForm() {
           >
             I&apos;m interested in a lifetime subscription to support open
             source development and get immediate beta access
-            <span className="ml-2 text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full">
+            <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800 dark:bg-green-900 dark:text-green-300">
               $200 (50% off)
             </span>
           </Label>

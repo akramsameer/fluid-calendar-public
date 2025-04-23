@@ -1,9 +1,7 @@
+import { newDate, toZonedTime } from "@/lib/date-utils";
 import { logger } from "@/lib/logger";
+
 import { prisma } from "./prisma-utils";
-import {
-  toZonedTime,
-  newDate,
-} from "@/lib/date-utils";
 
 const LOG_SOURCE = "TaskUtils";
 
@@ -111,8 +109,8 @@ export async function getUserTopTasks(userId: string, targetDate: string) {
         task.status === "todo"
           ? "TODO"
           : task.status === "in_progress"
-          ? "IN_PROGRESS"
-          : "DONE",
+            ? "IN_PROGRESS"
+            : "DONE",
       projectName: task.project?.name,
       scheduledStart: task.scheduledStart,
     }));

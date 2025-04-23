@@ -38,4 +38,4 @@ I'd love to hear feedback from the open-source community, especially if you have
 
 ---
 
-*Related: [FluidCalendar is now open source](https://www.reddit.com/r/selfhosted/comments/1irj353/fluidcalendar_is_now_open_source/)*
+_Related: [FluidCalendar is now open source](https://www.reddit.com/r/selfhosted/comments/1irj353/fluidcalendar_is_now_open_source/)_

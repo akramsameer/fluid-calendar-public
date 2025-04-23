@@ -1,10 +1,12 @@
 import { Job } from "bullmq";
-import { BaseProcessor } from "./base-processor";
-import { EmailJobData, QUEUE_NAMES } from "../queues";
-import { logger } from "@/lib/logger";
+
 import { EmailService } from "@/lib/email/email-service.saas";
-import { getRedisOptions } from "../config/redis";
 import { getResend } from "@/lib/email/resend";
+import { logger } from "@/lib/logger";
+
+import { getRedisOptions } from "../config/redis";
+import { EmailJobData, QUEUE_NAMES } from "../queues";
+import { BaseProcessor } from "./base-processor";
 
 const LOG_SOURCE = "EmailProcessor";
 

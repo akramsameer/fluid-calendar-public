@@ -1,5 +1,6 @@
-import { getRedisClient } from "../config/redis";
 import { logger } from "@/lib/logger";
+
+import { getRedisClient } from "../config/redis";
 
 const LOG_SOURCE = "RedisNotification";
 const NOTIFICATION_EXPIRY = 60 * 60; // 1 hour in seconds

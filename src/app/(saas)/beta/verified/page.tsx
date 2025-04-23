@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+
 import VerifiedPageClient from "./verified-page-client";
 
 export const metadata: Metadata = {

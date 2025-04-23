@@ -1,8 +1,11 @@
+import { generateUnsubscribeToken } from "@/app/api/waitlist/unsubscribe/route.saas";
+
+import { prisma } from "@/lib/prisma";
+
 import { logger } from "../logger";
 import { EmailService } from "./email-service.saas";
 import { getResend } from "./resend";
-import { generateUnsubscribeToken } from "@/app/api/waitlist/unsubscribe/route.saas";
-import { prisma } from "@/lib/prisma";
+
 const LOG_SOURCE = "WaitlistEmail";
 
 /**

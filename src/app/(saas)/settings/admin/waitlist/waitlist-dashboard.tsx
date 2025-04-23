@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import {
+  MailIcon,
+  SettingsIcon,
+  TrendingUpIcon,
+  UsersIcon,
+} from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { WaitlistTable } from "./waitlist-table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { useWaitlistStore } from "@/store/waitlist.saas";
+
 import { BetaSettings } from "./beta-settings";
 import { InvitationManager } from "./invitation-manager";
-import {
-  UsersIcon,
-  SettingsIcon,
-  MailIcon,
-  TrendingUpIcon,
-} from "lucide-react";
-import { useWaitlistStore } from "@/store/waitlist.saas";
-import { Skeleton } from "@/components/ui/skeleton";
+import { WaitlistTable } from "./waitlist-table";
 
 export function WaitlistDashboard() {
   const [activeTab, setActiveTab] = useState("entries");

@@ -1,10 +1,12 @@
-import { Job } from "bullmq";
-import { BaseProcessor } from "./base-processor";
-import { prisma } from "@/lib/prisma";
-import { TaskScheduleJobData } from "../queues";
-import { logger } from "@/lib/logger";
-import { sendNotification, NotificationType } from "../utils/notification";
 import { scheduleAllTasksForUser } from "@/services/scheduling/TaskSchedulingService";
+import { Job } from "bullmq";
+
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
+
+import { TaskScheduleJobData } from "../queues";
+import { NotificationType, sendNotification } from "../utils/notification";
+import { BaseProcessor } from "./base-processor";
 
 const LOG_SOURCE = "TaskScheduleProcessor";
 

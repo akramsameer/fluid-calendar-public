@@ -5,7 +5,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
-      <body className="h-full bg-background antialiased flex flex-col">{children}</body>
+      <body className="flex h-full flex-col bg-background antialiased">
+        {children}
+      </body>
     </html>
   );
 }

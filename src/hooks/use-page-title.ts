@@ -1,5 +1,7 @@
 import { useEffect } from "react";
+
 import { usePathname } from "next/navigation";
+
 import { getTitleFromPathname } from "@/lib/utils/page-title";
 
 export function usePageTitle() {

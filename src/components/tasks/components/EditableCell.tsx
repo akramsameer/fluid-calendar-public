@@ -1,5 +1,12 @@
-import { useState, useRef, useEffect } from "react";
-import { Task, EnergyLevel, TimePreference, Priority } from "@/types/task";
+import { useEffect, useRef, useState } from "react";
+
+// Import missing functions
+import { isThisWeek, isThisYear, isToday, isTomorrow } from "date-fns";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { HiCheck, HiExclamation, HiX } from "react-icons/hi";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -8,25 +15,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+
 import {
+  createUTCMidnightDate,
   format,
+  isFutureDate,
   newDate,
   newDateFromYMD,
-  createUTCMidnightDate,
 } from "@/lib/date-utils";
+
 import { useProjectStore } from "@/store/project";
+
+import { EnergyLevel, Priority, Task, TimePreference } from "@/types/task";
+
 import {
-  formatEnumValue,
   energyLevelColors,
-  timePreferenceColors,
+  formatEnumValue,
   priorityColors,
+  timePreferenceColors,
 } from "../utils/task-list-utils";
-import { Button } from "@/components/ui/button";
-import { HiCheck, HiX, HiExclamation } from "react-icons/hi";
-import { isToday, isTomorrow, isThisWeek, isThisYear } from "date-fns";
-import { isFutureDate } from "@/lib/date-utils";
 
 interface EditableCellProps {
   task: Task;
@@ -111,11 +118,11 @@ export function EditableCell({
     return (
       <div
         onClick={handleClick}
-        className="cursor-pointer hover:bg-muted/50 px-1 -mx-1 rounded"
+        className="-mx-1 cursor-pointer rounded px-1 hover:bg-muted/50"
       >
         {field === "title" ? (
           <div>
-            <div className="text-sm font-medium text-foreground task-title">
+            <div className="task-title text-sm font-medium text-foreground">
               {value}
             </div>
 
@@ -124,7 +131,7 @@ export function EditableCell({
                 {task.tags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs"
+                    className="inline-flex items-center rounded px-1.5 py-0.5 text-xs"
                     style={{
                       backgroundColor: `${tag.color}20` || "var(--muted)",
                       color: tag.color || "var(--muted-foreground)",
@@ -138,46 +145,51 @@ export function EditableCell({
           </div>
         ) : field === "energyLevel" ? (
           <span
-            className={`px-2 py-1 text-xs rounded-full ${value
-              ? energyLevelColors[value as EnergyLevel]
-              : "text-muted-foreground border border-border"
-              }`}
+            className={`rounded-full px-2 py-1 text-xs ${
+              value
+                ? energyLevelColors[value as EnergyLevel]
+                : "border border-border text-muted-foreground"
+            }`}
           >
             {value ? formatEnumValue(value) : "Set energy"}
           </span>
         ) : field === "preferredTime" ? (
           <span
-            className={`px-2 py-1 text-xs rounded-full ${value
-              ? timePreferenceColors[value as TimePreference]
-              : "text-muted-foreground border border-border"
-              }`}
+            className={`rounded-full px-2 py-1 text-xs ${
+              value
+                ? timePreferenceColors[value as TimePreference]
+                : "border border-border text-muted-foreground"
+            }`}
           >
             {value ? formatEnumValue(value) : "Set time"}
           </span>
         ) : field === "priority" ? (
           <span
-            className={`px-2 py-1 text-xs rounded-full ${value
-              ? priorityColors[value as Priority]
-              : "text-muted-foreground border border-border"
-              }`}
+            className={`rounded-full px-2 py-1 text-xs ${
+              value
+                ? priorityColors[value as Priority]
+                : "border border-border text-muted-foreground"
+            }`}
           >
             {value ? formatEnumValue(value) : "Set priority"}
           </span>
         ) : field === "duration" ? (
           <span
-            className={`text-sm ${value ? "text-muted-foreground" : "text-muted-foreground/70"
-              }`}
+            className={`text-sm ${
+              value ? "text-muted-foreground" : "text-muted-foreground/70"
+            }`}
           >
             {value ? `${value}m` : "Set duration"}
           </span>
         ) : field === "dueDate" ? (
           <span
-            className={`text-sm group flex items-center gap-1 ${value
-              ? formatContextualDate(newDate(value)).isOverdue
-                ? "text-destructive"
-                : "text-muted-foreground"
-              : "text-muted-foreground/70"
-              }`}
+            className={`group flex items-center gap-1 text-sm ${
+              value
+                ? formatContextualDate(newDate(value)).isOverdue
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+                : "text-muted-foreground/70"
+            }`}
           >
             {value ? (
               <>
@@ -192,8 +204,9 @@ export function EditableCell({
           </span>
         ) : field === "startDate" ? (
           <span
-            className={`text-sm ${value ? "text-muted-foreground" : "text-muted-foreground/70"
-              }`}
+            className={`text-sm ${
+              value ? "text-muted-foreground" : "text-muted-foreground/70"
+            }`}
           >
             {value
               ? formatContextualDate(newDate(value)).text
@@ -204,7 +217,7 @@ export function EditableCell({
             {task.project ? (
               <>
                 <div
-                  className="w-3 h-3 rounded-full"
+                  className="h-3 w-3 rounded-full"
                   style={{
                     backgroundColor: task.project.color || "var(--muted)",
                   }}
@@ -331,17 +344,17 @@ export function EditableCell({
             selected={
               editValue
                 ? newDateFromYMD(
-                  new Date(editValue).getUTCFullYear(),
-                  new Date(editValue).getUTCMonth(),
-                  new Date(editValue).getUTCDate()
-                )
+                    new Date(editValue).getUTCFullYear(),
+                    new Date(editValue).getUTCMonth(),
+                    new Date(editValue).getUTCDate()
+                  )
                 : null
             }
             onChange={(date) => {
               // Just update the local state, don't save yet
               setEditValue(date);
             }}
-            className="h-8 w-full border border-input bg-background px-2 py-1 text-sm rounded-md"
+            className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-sm"
             dateFormat="MMM d, yyyy"
             isClearable
             autoFocus
@@ -357,7 +370,7 @@ export function EditableCell({
               });
               setIsEditing(false);
             }}
-            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-500/10"
+            className="h-8 w-8 p-0 text-green-600 hover:bg-green-500/10 hover:text-green-700"
           >
             <HiCheck className="h-4 w-4" />
           </Button>
@@ -365,7 +378,7 @@ export function EditableCell({
             size="sm"
             variant="ghost"
             onClick={handleCancel}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <HiX className="h-4 w-4" />
           </Button>
@@ -376,17 +389,17 @@ export function EditableCell({
             selected={
               editValue
                 ? newDateFromYMD(
-                  new Date(editValue).getUTCFullYear(),
-                  new Date(editValue).getUTCMonth(),
-                  new Date(editValue).getUTCDate()
-                )
+                    new Date(editValue).getUTCFullYear(),
+                    new Date(editValue).getUTCMonth(),
+                    new Date(editValue).getUTCDate()
+                  )
                 : null
             }
             onChange={(date) => {
               // Just update the local state, don't save yet
               setEditValue(date);
             }}
-            className="h-8 w-full border border-input bg-background px-2 py-1 text-sm rounded-md"
+            className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-sm"
             dateFormat="MMM d, yyyy"
             isClearable
             autoFocus
@@ -402,7 +415,7 @@ export function EditableCell({
               });
               setIsEditing(false);
             }}
-            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-500/10"
+            className="h-8 w-8 p-0 text-green-600 hover:bg-green-500/10 hover:text-green-700"
           >
             <HiCheck className="h-4 w-4" />
           </Button>
@@ -410,7 +423,7 @@ export function EditableCell({
             size="sm"
             variant="ghost"
             onClick={handleCancel}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <HiX className="h-4 w-4" />
           </Button>
@@ -428,7 +441,7 @@ export function EditableCell({
               {task.project ? (
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="h-3 w-3 rounded-full"
                     style={{
                       backgroundColor: task.project.color || "var(--muted)",
                     }}
@@ -446,7 +459,7 @@ export function EditableCell({
               <SelectItem key={project.id} value={project.id}>
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: project.color || "var(--muted)" }}
                   />
                   <span>{project.name}</span>
@@ -462,7 +475,7 @@ export function EditableCell({
             size="sm"
             variant="ghost"
             onClick={handleSave}
-            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-500/10"
+            className="h-8 w-8 p-0 text-green-600 hover:bg-green-500/10 hover:text-green-700"
           >
             <HiCheck className="h-4 w-4" />
           </Button>
@@ -470,7 +483,7 @@ export function EditableCell({
             size="sm"
             variant="ghost"
             onClick={handleCancel}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <HiX className="h-4 w-4" />
           </Button>

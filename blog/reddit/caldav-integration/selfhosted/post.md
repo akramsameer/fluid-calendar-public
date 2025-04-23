@@ -1,6 +1,6 @@
 # FluidCalendar now supports CalDAV for self-hosted calendar integration!
 
-Hey r/selfhosted! 
+Hey r/selfhosted!
 
 I wanted to share an update on FluidCalendar, my open-source smart calendar and task scheduler that I've been working on as an alternative to Motion.
 
@@ -37,4 +37,4 @@ I'd love to hear your feedback, especially if you're connecting FluidCalendar to
 
 ---
 
-*Related: [FluidCalendar is now open source](https://www.reddit.com/r/selfhosted/comments/1irj353/fluidcalendar_is_now_open_source/)*
+_Related: [FluidCalendar is now open source](https://www.reddit.com/r/selfhosted/comments/1irj353/fluidcalendar_is_now_open_source/)_

@@ -25,11 +25,13 @@ The deployment process is automated through GitHub Actions and is defined in the
 If you need to deploy manually, follow these steps:
 
 1. Build the Docker image:
+
    ```bash
    docker build -t registry.digitalocean.com/curatedletters/fluid-calendar-website:latest -f src/saas/Dockerfile.saas .
    ```
 
 2. Push the image to DigitalOcean Container Registry:
+
    ```bash
    docker push registry.digitalocean.com/curatedletters/fluid-calendar-website:latest
    ```
@@ -59,16 +61,19 @@ The application is configured to be accessible at `app.fluidcalendar.com`. The I
 If you encounter issues with the deployment, check the following:
 
 1. Pod status:
+
    ```bash
    kubectl get pods -n fluid-calendar
    ```
 
 2. Pod logs:
+
    ```bash
    kubectl logs <pod-name> -n fluid-calendar
    ```
 
 3. Migration job logs:
+
    ```bash
    kubectl logs job/db-migrate -n fluid-calendar
    ```
@@ -80,4 +85,4 @@ If you encounter issues with the deployment, check the following:
 
 ## Note
 
-These deployment files are specific to the SAAS version and are excluded from the open source repository via the `sync-repos.sh` script. 
+These deployment files are specific to the SAAS version and are excluded from the open source repository via the `sync-repos.sh` script.

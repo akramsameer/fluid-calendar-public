@@ -1,10 +1,13 @@
 "use client";
 
-import { inter } from "@/lib/fonts";
-import "../app/globals.css";
 import { useEffect, useState } from "react";
+
 import { usePathname } from "next/navigation";
+
+import { inter } from "@/lib/fonts";
 import { getTitleFromPathname } from "@/lib/utils/page-title";
+
+import "../app/globals.css";
 
 export default function Loading() {
   // Use client-side rendering to avoid hydration issues
@@ -24,8 +27,8 @@ export default function Loading() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
+      <div className="mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
       <p className={inter.className}>Loading...</p>
     </div>
   );

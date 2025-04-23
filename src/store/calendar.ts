@@ -1,18 +1,22 @@
+import { RRule } from "rrule";
+import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { v4 as uuidv4 } from "uuid";
-import { RRule } from "rrule";
+
+import { newDate, normalizeAllDayDate } from "@/lib/date-utils";
+import { DEFAULT_TASK_COLOR } from "@/lib/task-utils";
+
+import { useTaskStore } from "@/store/task";
+
 import {
-  CalendarState,
-  CalendarFeed,
   CalendarEvent,
+  CalendarFeed,
+  CalendarState,
   CalendarView,
   CalendarViewState,
 } from "@/types/calendar";
-import { useTaskStore } from "@/store/task";
-import { newDate, normalizeAllDayDate } from "@/lib/date-utils";
-import { DEFAULT_TASK_COLOR } from "@/lib/task-utils";
 import { TaskStatus } from "@/types/task";
+
 // Separate store for view preferences that will be persisted in localStorage
 interface ViewStore extends CalendarViewState {
   setView: (view: CalendarView) => void;
@@ -779,8 +783,8 @@ export const useCalendarStore = create<CalendarStore>()((set, get) => ({
         feed.type === "GOOGLE"
           ? `/api/calendar/google/${feedId}`
           : feed.type === "CALDAV"
-          ? `/api/calendar/caldav/sync`
-          : `/api/calendar/outlook/sync`;
+            ? `/api/calendar/caldav/sync`
+            : `/api/calendar/outlook/sync`;
 
       const response = await fetch(endpoint, {
         method: "PUT",

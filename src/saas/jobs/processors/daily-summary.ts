@@ -1,27 +1,29 @@
+import { scheduleAllTasksForUser } from "@/services/scheduling/TaskSchedulingService";
 import { Job } from "bullmq";
-import { BaseProcessor } from "./base-processor";
+
+import {
+  format,
+  newDate,
+  newDateFromYMD,
+  parseISO,
+  toZonedTime,
+} from "@/lib/date-utils";
+import { logger } from "@/lib/logger";
+
 import {
   DailySummaryJobData,
   QUEUE_NAMES,
-  addEmailJob,
   addDailySummaryJob,
+  addEmailJob,
 } from "../queues";
-import { getUserDailyMeetings } from "../utils/meeting-utils";
-import { getUserTopTasks } from "../utils/task-utils";
 import {
   generateDailySummaryHtml,
   generateDailySummaryText,
 } from "../templates/daily-summary";
-import { logger } from "@/lib/logger";
+import { getUserDailyMeetings } from "../utils/meeting-utils";
 import { prisma } from "../utils/prisma-utils";
-import {
-  parseISO,
-  toZonedTime,
-  newDate,
-  format,
-  newDateFromYMD,
-} from "@/lib/date-utils";
-import { scheduleAllTasksForUser } from "@/services/scheduling/TaskSchedulingService";
+import { getUserTopTasks } from "../utils/task-utils";
+import { BaseProcessor } from "./base-processor";
 
 const LOG_SOURCE = "DailySummaryProcessor";
 

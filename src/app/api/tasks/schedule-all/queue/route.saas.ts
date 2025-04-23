@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { addTaskScheduleJob } from "@/saas/jobs/queues";
+
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
-import { addTaskScheduleJob } from "@/saas/jobs/queues";
 import { prisma } from "@/lib/prisma";
 
 const LOG_SOURCE = "task-schedule-queue-route";

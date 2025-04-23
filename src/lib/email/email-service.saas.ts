@@ -1,5 +1,6 @@
+import { EmailJobData, addEmailJob } from "@/saas/jobs/queues";
+
 import { logger } from "@/lib/logger";
-import { addEmailJob, EmailJobData } from "@/saas/jobs/queues";
 
 const LOG_SOURCE = "EmailService";
 

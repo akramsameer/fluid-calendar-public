@@ -1,7 +1,11 @@
 "use client";
 
-import { useAdmin } from "@/hooks/use-admin";
+import { useCallback, useEffect, useState } from "react";
+
+import { JobRecord, JobStatus, User } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,17 +15,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { JobRecord, JobStatus, User } from "@prisma/client";
-import { useState, useEffect, useCallback } from "react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { useAdmin } from "@/hooks/use-admin";
 
 type JobWithUser = JobRecord & {
   user: Pick<User, "name" | "email"> | null;
@@ -122,8 +125,8 @@ export default function JobsPage() {
   if (isAdminLoading || isLoading) {
     return (
       <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-6">Background Jobs</h1>
-        <div className="flex justify-center items-center h-64">
+        <h1 className="mb-6 text-3xl font-bold">Background Jobs</h1>
+        <div className="flex h-64 items-center justify-center">
           <p className="text-muted-foreground">Loading job data...</p>
         </div>
       </div>
@@ -133,9 +136,9 @@ export default function JobsPage() {
   if (!isAdmin) {
     return (
       <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-6">Access Denied</h1>
+        <h1 className="mb-6 text-3xl font-bold">Access Denied</h1>
         <div className="flex flex-col items-center justify-center p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Admin Access Required</h2>
+          <h2 className="mb-4 text-2xl font-bold">Admin Access Required</h2>
           <p className="text-muted-foreground">
             You need administrator privileges to access this page.
           </p>
@@ -146,10 +149,10 @@ export default function JobsPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Background Jobs</h1>
+      <h1 className="mb-6 text-3xl font-bold">Background Jobs</h1>
 
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle>Total Jobs</CardTitle>
@@ -207,12 +210,12 @@ export default function JobsPage() {
               e.preventDefault();
               triggerDailySummary(new FormData(e.currentTarget));
             }}
-            className="flex flex-col md:flex-row gap-4"
+            className="flex flex-col gap-4 md:flex-row"
           >
             <div className="flex-1">
               <label
                 htmlFor="userId"
-                className="block text-sm font-medium mb-1"
+                className="mb-1 block text-sm font-medium"
               >
                 User ID
               </label>
@@ -220,33 +223,33 @@ export default function JobsPage() {
                 type="text"
                 id="userId"
                 name="userId"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full rounded-md border px-3 py-2"
                 placeholder="User ID"
                 required
               />
             </div>
             <div className="flex-1">
-              <label htmlFor="email" className="block text-sm font-medium mb-1">
+              <label htmlFor="email" className="mb-1 block text-sm font-medium">
                 Email
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full rounded-md border px-3 py-2"
                 placeholder="Email address"
                 required
               />
             </div>
             <div className="flex-1">
-              <label htmlFor="date" className="block text-sm font-medium mb-1">
+              <label htmlFor="date" className="mb-1 block text-sm font-medium">
                 Date (Optional)
               </label>
               <input
                 type="date"
                 id="date"
                 name="date"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full rounded-md border px-3 py-2"
                 placeholder="YYYY-MM-DD"
               />
             </div>
@@ -264,7 +267,7 @@ export default function JobsPage() {
           <TabsTrigger value="pending">Pending Jobs</TabsTrigger>
         </TabsList>
 
-        <div className="flex justify-end mb-4">
+        <div className="mb-4 flex justify-end">
           <Button
             variant="outline"
             size="sm"
@@ -346,7 +349,7 @@ function JobsTable({
   }
 
   if (jobs.length === 0) {
-    return <p className="text-center py-8 text-gray-500">No jobs found</p>;
+    return <p className="py-8 text-center text-gray-500">No jobs found</p>;
   }
 
   return (
@@ -396,7 +399,7 @@ function JobsTable({
                 <td className="px-4 py-2">
                   {job.attempts}/{job.maxAttempts}
                 </td>
-                <td className="px-4 py-2 space-x-2">
+                <td className="space-x-2 px-4 py-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -465,7 +468,7 @@ function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Job Details</DialogTitle>
           <DialogDescription>
@@ -476,7 +479,7 @@ function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModalProps) {
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="space-y-1">
             <h4 className="text-sm font-medium">ID</h4>
-            <p className="text-sm font-mono break-all">{job.jobId}</p>
+            <p className="break-all font-mono text-sm">{job.jobId}</p>
           </div>
           <div className="space-y-1">
             <h4 className="text-sm font-medium">Queue</h4>
@@ -536,7 +539,7 @@ function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModalProps) {
 
         <div className="space-y-2">
           <h4 className="text-sm font-medium">Data</h4>
-          <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto text-xs">
+          <pre className="overflow-x-auto rounded-md bg-gray-100 p-4 text-xs">
             {JSON.stringify(job.data, null, 2)}
           </pre>
         </div>
@@ -544,7 +547,7 @@ function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModalProps) {
         {job.result && (
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Result</h4>
-            <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto text-xs">
+            <pre className="overflow-x-auto rounded-md bg-gray-100 p-4 text-xs">
               {JSON.stringify(job.result, null, 2)}
             </pre>
           </div>
@@ -553,7 +556,7 @@ function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModalProps) {
         {job.error && (
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Error</h4>
-            <div className="bg-red-50 p-4 rounded-md text-red-800 text-sm">
+            <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
               {job.error}
             </div>
           </div>

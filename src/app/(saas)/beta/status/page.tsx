@@ -1,5 +1,7 @@
-import { Metadata } from "next";
 import { Suspense } from "react";
+
+import { Metadata } from "next";
+
 import StatusForm from "./status-form";
 
 export const metadata: Metadata = {
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
 export default function StatusPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
-      <div className="container px-4 py-12 mx-auto max-w-3xl">
+      <div className="container mx-auto max-w-3xl px-4 py-12">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
             Check Your Waitlist Status
@@ -25,7 +27,7 @@ export default function StatusPage() {
         <div className="mt-12">
           <Suspense
             fallback={
-              <div className="text-center py-4">Loading status form...</div>
+              <div className="py-4 text-center">Loading status form...</div>
             }
           >
             <StatusForm />

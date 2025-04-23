@@ -1,6 +1,7 @@
-import { prisma } from "@/lib/prisma";
-import { logger } from "@/lib/logger";
 import { JobStatus } from "@prisma/client";
+
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 const LOG_SOURCE = "JobCreator";
 

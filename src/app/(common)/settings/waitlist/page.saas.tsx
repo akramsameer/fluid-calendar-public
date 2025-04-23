@@ -1,8 +1,10 @@
 "use client";
 
 import { WaitlistDashboard } from "@/app/(saas)/settings/admin/waitlist/waitlist-dashboard";
-import { useAdmin } from "@/hooks/use-admin";
+
 import AccessDeniedMessage from "@/components/auth/AccessDeniedMessage";
+
+import { useAdmin } from "@/hooks/use-admin";
 
 /**
  * SAAS version of the Waitlist Admin page
@@ -20,14 +22,14 @@ export default function WaitlistPage() {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6">Beta Waitlist Management</h2>
+      <h2 className="mb-6 text-3xl font-bold">Beta Waitlist Management</h2>
 
       {/* Use the WaitlistDashboard component directly */}
       <WaitlistDashboard />
 
       {/* Additional content that's always visible */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">About Beta Waitlist</h2>
+        <h2 className="mb-4 text-xl font-semibold">About Beta Waitlist</h2>
         <p className="text-gray-700">
           The beta waitlist allows you to manage user access to your beta
           program. You can view waitlist entries, send invitations, and

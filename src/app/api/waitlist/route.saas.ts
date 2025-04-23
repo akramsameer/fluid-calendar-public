@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { prisma } from "@/lib/prisma";
+
 import { v4 as uuidv4 } from "uuid";
-import { logger } from "@/lib/logger";
-import { sendVerificationEmail } from "@/lib/email/waitlist.saas";
+import { z } from "zod";
+
 import { EmailService } from "@/lib/email/email-service.saas";
+import { sendVerificationEmail } from "@/lib/email/waitlist.saas";
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 const LOG_SOURCE = "WaitlistAPI";
 

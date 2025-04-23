@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { AlertCircle, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function VerifyPageClient() {
   const searchParams = useSearchParams();
@@ -55,13 +58,13 @@ export default function VerifyPageClient() {
 
   if (isVerifying) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Verifying Your Email</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
-            <Loader2 className="h-16 w-16 text-blue-500 animate-spin mb-4" />
+            <Loader2 className="mb-4 h-16 w-16 animate-spin text-blue-500" />
             <p className="text-center">
               Please wait while we verify your email address...
             </p>
@@ -73,10 +76,10 @@ export default function VerifyPageClient() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <div className="flex justify-center mb-4">
+            <div className="mb-4 flex justify-center">
               <AlertCircle className="h-16 w-16 text-red-500" />
             </div>
             <CardTitle className="text-center">Verification Failed</CardTitle>

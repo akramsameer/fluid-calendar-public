@@ -1,8 +1,10 @@
-import "@/app/globals.css";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { SessionProvider } from "@/components/providers/SessionProvider";
-import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
+
+import "@/app/globals.css";
+
+import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function SAASLayout({
   children,
@@ -28,9 +30,7 @@ export default function SAASLayout({
         forcedTheme="light"
         enableSystem={false}
       >
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <SessionProvider>{children}</SessionProvider>
         <Toaster />
       </ThemeProvider>
     </>

@@ -1,6 +1,8 @@
 import { Job, Worker, WorkerOptions } from "bullmq";
-import { getRedisOptions } from "../config/redis";
+
 import { logger } from "@/lib/logger";
+
+import { getRedisOptions } from "../config/redis";
 import {
   trackJob,
   trackJobCompletion,
@@ -14,7 +16,7 @@ type JobResult = string | number | boolean | null | Record<string, unknown>;
 
 export abstract class BaseProcessor<
   T extends JobData = Record<string, unknown>,
-  R extends JobResult = Record<string, unknown>
+  R extends JobResult = Record<string, unknown>,
 > {
   protected worker: Worker;
   protected queueName: string;

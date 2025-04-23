@@ -2,10 +2,11 @@
 
 After adding support for Google Calendar and Microsoft Outlook, I received numerous requests from users who wanted to connect FluidCalendar to their self-hosted or privacy-focused calendar services. Today, I'm excited to share how I implemented CalDAV integration, which dramatically expands FluidCalendar's compatibility with calendar servers and reinforces its position as a versatile open-source alternative to Motion.
 
-👉 **Missed earlier parts of the journey?**  
-- [Part 1: FluidCalendar: An Open Source Alternative to Motion](https://medium.com/front-end-weekly/fluid-calendar-an-open-source-alternative-to-motion-part-1-7a5b52bf219d)  
-- [Part 2: FluidCalendar: Outlook Integration and Enhanced Features](https://medium.com/@eibrahim/fluidcalendar-outlook-integration-and-enhanced-features-part-2-1d3dd2858439)  
-- [Part 3: FluidCalendar: Task Integration and Intelligent Scheduling](https://medium.com/@eibrahim/fluidcalendar-task-integration-and-intelligent-scheduling-part-3-05b873a3fce0)  
+👉 **Missed earlier parts of the journey?**
+
+- [Part 1: FluidCalendar: An Open Source Alternative to Motion](https://medium.com/front-end-weekly/fluid-calendar-an-open-source-alternative-to-motion-part-1-7a5b52bf219d)
+- [Part 2: FluidCalendar: Outlook Integration and Enhanced Features](https://medium.com/@eibrahim/fluidcalendar-outlook-integration-and-enhanced-features-part-2-1d3dd2858439)
+- [Part 3: FluidCalendar: Task Integration and Intelligent Scheduling](https://medium.com/@eibrahim/fluidcalendar-task-integration-and-intelligent-scheduling-part-3-05b873a3fce0)
 - [Part 4: FluidCalendar: Introducing Focus Mode for Deep Work](https://medium.com/front-end-weekly/fluidcalendar-introducing-focus-mode-for-deep-work-part-4-3570ba95589a)
 
 ## What is CalDAV and Why It Matters
@@ -42,7 +43,7 @@ The first step was expanding our database schema to support CalDAV-specific fiel
 model ConnectedAccount {
   // Existing fields
   // ...
-  
+
   // Added fields for CalDAV
   caldavUrl      String?  // Base URL for CalDAV server
   caldavUsername String?  // Username for authentication
@@ -52,7 +53,7 @@ model ConnectedAccount {
 model CalendarFeed {
   // Existing fields
   // ...
-  
+
   // Added fields for CalDAV
   caldavPath     String?  // Path to the specific calendar on the server
   ctag           String?  // For efficient calendar change detection
@@ -69,7 +70,10 @@ The core of the integration is the `CalDAVCalendarService` class, which handles 
 export class CalDAVCalendarService {
   private client: ExtendedDAVClient | null = null;
 
-  constructor(private prisma: PrismaClient, private account: ConnectedAccount) {
+  constructor(
+    private prisma: PrismaClient,
+    private account: ConnectedAccount
+  ) {
     // Initialize client when needed
   }
 
@@ -79,29 +83,50 @@ export class CalDAVCalendarService {
   }
 
   // Event operations
-  async getEvents(start: Date, end: Date, calendarPath: string): Promise<CalendarEvent[]> {
+  async getEvents(
+    start: Date,
+    end: Date,
+    calendarPath: string
+  ): Promise<CalendarEvent[]> {
     // Fetch events from the CalDAV server
   }
 
   // Synchronization
-  async syncCalendar(feedId: string, calendarPath: string, userId: string): Promise<SyncResult> {
+  async syncCalendar(
+    feedId: string,
+    calendarPath: string,
+    userId: string
+  ): Promise<SyncResult> {
     // Synchronize with the server and update the database
   }
 
   // CRUD operations
-  async createEvent(calendarPath: string, event: CalendarEventInput, userId: string): Promise<CalendarEvent> {
+  async createEvent(
+    calendarPath: string,
+    event: CalendarEventInput,
+    userId: string
+  ): Promise<CalendarEvent> {
     // Create new events on the server
   }
 
-  async updateEvent(eventWithFeed: CalendarEventWithFeed, calendarPath: string, 
-                    externalEventId: string, event: CalendarEventInput, 
-                    mode: "single" | "series", userId: string): Promise<CalendarEvent> {
+  async updateEvent(
+    eventWithFeed: CalendarEventWithFeed,
+    calendarPath: string,
+    externalEventId: string,
+    event: CalendarEventInput,
+    mode: "single" | "series",
+    userId: string
+  ): Promise<CalendarEvent> {
     // Update existing events on the server
   }
 
-  async deleteEvent(event: CalendarEventWithFeed, calendarPath: string,
-                   externalEventId: string, mode: "single" | "series", 
-                   userId: string): Promise<void> {
+  async deleteEvent(
+    event: CalendarEventWithFeed,
+    calendarPath: string,
+    externalEventId: string,
+    mode: "single" | "series",
+    userId: string
+  ): Promise<void> {
     // Delete events from the server
   }
 
@@ -172,28 +197,29 @@ And for parsing iCalendar data into our internal format:
 ```typescript
 function convertVEventToCalendarEvent(vevent: ICAL.Component): CalendarEvent {
   // Extract event properties
-  const uid = vevent.getFirstPropertyValue('uid') || crypto.randomUUID();
-  const summary = vevent.getFirstPropertyValue('summary');
-  const description = vevent.getFirstPropertyValue('description');
-  const location = vevent.getFirstPropertyValue('location');
+  const uid = vevent.getFirstPropertyValue("uid") || crypto.randomUUID();
+  const summary = vevent.getFirstPropertyValue("summary");
+  const description = vevent.getFirstPropertyValue("description");
+  const location = vevent.getFirstPropertyValue("location");
 
   // Get start and end times
-  const dtstart = vevent.getFirstProperty('dtstart');
-  const dtend = vevent.getFirstProperty('dtend') || vevent.getFirstProperty('duration');
-  
+  const dtstart = vevent.getFirstProperty("dtstart");
+  const dtend =
+    vevent.getFirstProperty("dtend") || vevent.getFirstProperty("duration");
+
   // Check if this is an all-day event
   const isAllDay = isAllDayEvent(vevent);
-  
+
   // Process dates, handling all the edge cases
   // ...
-  
+
   // Detect recurrence information
-  const rrule = vevent.getFirstPropertyValue('rrule');
+  const rrule = vevent.getFirstPropertyValue("rrule");
   const isRecurring = !!rrule;
-  const recurrenceId = vevent.getFirstPropertyValue('recurrence-id');
+  const recurrenceId = vevent.getFirstPropertyValue("recurrence-id");
   const isInstance = !!recurrenceId;
   const isMaster = isRecurring && !isInstance;
-  
+
   // Convert to internal event format
   return {
     id: uid,
@@ -490,4 +516,4 @@ Follow me on Twitter [@eibrahim](https://x.com/eibrahim) for updates and behind-
 
 ---
 
-*Are there specific calendar providers you'd like to see supported next in FluidCalendar? Share your thoughts in the comments!*
+_Are there specific calendar providers you'd like to see supported next in FluidCalendar? Share your thoughts in the comments!_

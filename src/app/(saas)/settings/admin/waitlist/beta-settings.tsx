@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import { Loader2, Save } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,9 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,10 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Save, Loader2 } from "lucide-react";
-import { useWaitlistStore } from "@/store/waitlist.saas";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+
+import { useWaitlistStore } from "@/store/waitlist.saas";
 
 export function BetaSettings() {
   const {
@@ -118,8 +121,8 @@ export function BetaSettings() {
   // Show error state
   if (settingsError) {
     return (
-      <div className="bg-destructive/10 text-destructive p-6 rounded-md">
-        <h3 className="text-lg font-medium mb-2">Error loading settings</h3>
+      <div className="rounded-md bg-destructive/10 p-6 text-destructive">
+        <h3 className="mb-2 text-lg font-medium">Error loading settings</h3>
         <p>{settingsError}</p>
         <Button
           className="mt-4"
@@ -200,7 +203,7 @@ export function BetaSettings() {
               </div>
 
               {autoInviteEnabled && (
-                <div className="grid gap-4 sm:grid-cols-2 pl-6 border-l-2 border-gray-100 dark:border-gray-800">
+                <div className="grid gap-4 border-l-2 border-gray-100 pl-6 dark:border-gray-800 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="autoCount">Users per batch</Label>
                     <Input

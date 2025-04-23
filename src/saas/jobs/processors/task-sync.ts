@@ -1,10 +1,12 @@
 import { Job } from "bullmq";
-import { BaseProcessor } from "./base-processor";
-import { QUEUE_NAMES, TaskSyncJobData } from "../queues";
+
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { TaskSyncManager } from "@/lib/task-sync/task-sync-manager";
+
 import { getRedisOptions } from "../config/redis";
+import { QUEUE_NAMES, TaskSyncJobData } from "../queues";
+import { BaseProcessor } from "./base-processor";
 
 // Results from a task sync job
 interface TaskSyncJobResult {

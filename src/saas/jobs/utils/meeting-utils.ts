@@ -1,7 +1,6 @@
+import { toZonedTime } from "@/lib/date-utils";
 import { logger } from "@/lib/logger";
-import {
-  toZonedTime,
-} from "@/lib/date-utils";
+
 import { prisma } from "./prisma-utils";
 
 const LOG_SOURCE = "MeetingUtils";

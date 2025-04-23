@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/api-auth";
+
 import { addDailySummaryJob } from "@/saas/jobs/queues";
+
+import { requireAdmin } from "@/lib/auth/api-auth";
 
 /**
  * POST /api/admin/jobs/trigger-daily-summary

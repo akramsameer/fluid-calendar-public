@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, Zap, Calendar, BarChart3 } from "lucide-react";
+import { BarChart3, Calendar, CalendarDays, Clock, Zap } from "lucide-react";
 
 export function BetaFeatures() {
   const features = [
@@ -48,7 +48,7 @@ export function BetaFeatures() {
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <div key={feature.name} className="pt-6">
-                <div className="flow-root rounded-lg bg-gray-50 dark:bg-gray-800 px-6 pb-8">
+                <div className="flow-root rounded-lg bg-gray-50 px-6 pb-8 dark:bg-gray-800">
                   <div className="-mt-6">
                     <div>
                       <span className="inline-flex items-center justify-center rounded-md bg-blue-500 p-3 shadow-lg">

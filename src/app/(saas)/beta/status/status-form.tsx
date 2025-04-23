@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import { useSearchParams } from "next/navigation";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { Loader2, AlertCircle } from "lucide-react";
+
 import WaitlistStatus from "./waitlist-status";
 
 const formSchema = z.object({
@@ -130,11 +134,11 @@ export default function StatusForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="mx-auto max-w-md">
       {pendingVerification ? (
-        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded border border-yellow-100 dark:border-yellow-800 mb-4">
+        <div className="mb-4 rounded border border-yellow-100 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/30">
           <div className="flex items-start">
-            <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5" />
+            <AlertCircle className="mr-2 mt-0.5 h-5 w-5 text-yellow-600 dark:text-yellow-400" />
             <div>
               <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
                 Email verification required

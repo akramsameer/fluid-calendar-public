@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { logger } from "@/lib/logger";
-import { requireAdmin } from "@/lib/auth/api-auth";
-import { z } from "zod";
+
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+
+import { requireAdmin } from "@/lib/auth/api-auth";
 import { sendInvitationEmail } from "@/lib/email/waitlist.saas";
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 const LOG_SOURCE = "InvitationsAPI";
 

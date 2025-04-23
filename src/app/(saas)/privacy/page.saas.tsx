@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="container max-w-4xl px-4 py-12 mx-auto">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-8 text-3xl font-bold text-gray-900 dark:text-white">
         Privacy Policy
       </h1>
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
           Last updated: March 10, 2025
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           1. Introduction
         </h2>
         <p>
@@ -26,14 +26,14 @@ export default function PrivacyPage() {
           collect, use, and safeguard your information when you use our service.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           2. Information We Collect
         </h2>
         <p>
           We collect several types of information from and about users of our
           Service, including:
         </p>
-        <ul className="mt-4 space-y-2 list-disc list-inside">
+        <ul className="mt-4 list-inside list-disc space-y-2">
           <li>
             <strong>Personal Data:</strong> Name, email address, and other
             contact information you provide when registering for an account or
@@ -55,11 +55,11 @@ export default function PrivacyPage() {
           </li>
         </ul>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           3. How We Use Your Information
         </h2>
         <p>We use the information we collect to:</p>
-        <ul className="mt-4 space-y-2 list-disc list-inside">
+        <ul className="mt-4 list-inside list-disc space-y-2">
           <li>Provide, maintain, and improve our Service</li>
           <li>Process and complete transactions</li>
           <li>Send you technical notices, updates, and support messages</li>
@@ -69,11 +69,11 @@ export default function PrivacyPage() {
           <li>Protect against harmful or unlawful activity</li>
         </ul>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           4. Data Sharing and Disclosure
         </h2>
         <p>We may share your information in the following situations:</p>
-        <ul className="mt-4 space-y-2 list-disc list-inside">
+        <ul className="mt-4 list-inside list-disc space-y-2">
           <li>
             <strong>With Service Providers:</strong> We may share your
             information with third-party vendors who provide services on our
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
           </li>
         </ul>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           5. Data Security
         </h2>
         <p>
@@ -106,14 +106,14 @@ export default function PrivacyPage() {
           security.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           6. Your Data Protection Rights
         </h2>
         <p>
           Depending on your location, you may have the following rights
           regarding your personal data:
         </p>
-        <ul className="mt-4 space-y-2 list-disc list-inside">
+        <ul className="mt-4 list-inside list-disc space-y-2">
           <li>The right to access your personal data</li>
           <li>The right to rectify inaccurate or incomplete data</li>
           <li>The right to erasure (the &quot;right to be forgotten&quot;)</li>
@@ -127,7 +127,7 @@ export default function PrivacyPage() {
           provided in the &quot;Contact Us&quot; section.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           7. Data Retention and Deletion
         </h2>
         <p>
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
           with our services and as required to fulfill our legal obligations.
         </p>
         <p>For Google user data specifically:</p>
-        <ul className="mt-4 space-y-2 list-disc list-inside">
+        <ul className="mt-4 list-inside list-disc space-y-2">
           <li>
             Calendar data is stored in our database for the purpose of providing
             the service and is retained for as long as you maintain an active
@@ -164,7 +164,7 @@ export default function PrivacyPage() {
           but not in a way that would identify you personally.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           8. Children&apos;s Privacy
         </h2>
         <p>
@@ -174,7 +174,7 @@ export default function PrivacyPage() {
           with personal information, please contact us.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           9. Third-Party Services
         </h2>
         <p>
@@ -184,7 +184,7 @@ export default function PrivacyPage() {
           any third-party websites or services.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           10. Changes to This Privacy Policy
         </h2>
         <p>
@@ -198,7 +198,7 @@ export default function PrivacyPage() {
           posted on this page.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           11. Contact Us
         </h2>
         <p>

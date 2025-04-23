@@ -1,9 +1,11 @@
 import { Job } from "bullmq";
-import { BaseProcessor } from "./base-processor";
-import { MaintenanceJobData, QUEUE_NAMES } from "../queues";
+
+import { newDate, subHours } from "@/lib/date-utils";
 import { logger } from "@/lib/logger";
+
+import { MaintenanceJobData, QUEUE_NAMES } from "../queues";
 import { prisma } from "../utils/prisma-utils";
-import { subHours, newDate } from "@/lib/date-utils";
+import { BaseProcessor } from "./base-processor";
 
 const LOG_SOURCE = "MaintenanceProcessor";
 

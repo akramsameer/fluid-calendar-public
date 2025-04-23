@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { logger } from "@/lib/logger";
-import { authenticateRequest } from "@/lib/auth/api-auth";
-import { prisma } from "@/lib/prisma";
+
 import { addTaskSyncJob } from "@/saas/jobs/queues";
+import { z } from "zod";
+
+import { authenticateRequest } from "@/lib/auth/api-auth";
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 // Log source for this file
 const LOG_SOURCE = "TaskSyncAPI";

@@ -1,9 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2, Users, Clock, Award } from "lucide-react";
 import { useState } from "react";
+
+import { ArrowLeft, Award, Clock, Share2, Users } from "lucide-react";
 import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 
 interface WaitlistStatusData {
   position: number;
@@ -55,9 +57,9 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
       </Button>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="p-6 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center mb-4">
-            <Users className="h-5 w-5 mr-2 text-blue-500" />
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="mb-4 flex items-center">
+            <Users className="mr-2 h-5 w-5 text-blue-500" />
             <h3 className="text-lg font-medium">Your Position</h3>
           </div>
           <div className="flex items-baseline">
@@ -68,9 +70,9 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
               of {data.totalWaitlist}
             </span>
           </div>
-          <div className="mt-4 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-full bg-blue-500 rounded-full"
+              className="h-full rounded-full bg-blue-500"
               style={{
                 width: `${Math.max(
                   5,
@@ -84,9 +86,9 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
           </div>
         </div>
 
-        <div className="p-6 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center mb-4">
-            <Award className="h-5 w-5 mr-2 text-green-500" />
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="mb-4 flex items-center">
+            <Award className="mr-2 h-5 w-5 text-green-500" />
             <h3 className="text-lg font-medium">Your Referrals</h3>
           </div>
           <div className="flex items-baseline">
@@ -104,9 +106,9 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
       </div>
 
       {data.estimatedTime && (
-        <div className="p-6 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center mb-4">
-            <Clock className="h-5 w-5 mr-2 text-purple-500" />
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="mb-4 flex items-center">
+            <Clock className="mr-2 h-5 w-5 text-purple-500" />
             <h3 className="text-lg font-medium">Estimated Wait Time</h3>
           </div>
           <p className="text-gray-600 dark:text-gray-400">
@@ -115,20 +117,20 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
         </div>
       )}
 
-      <div className="p-6 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center mb-4">
-          <Share2 className="h-5 w-5 mr-2 text-blue-500" />
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4 flex items-center">
+          <Share2 className="mr-2 h-5 w-5 text-blue-500" />
           <h3 className="text-lg font-medium">Share Your Referral Link</h3>
         </div>
         <p className="mb-4 text-gray-600 dark:text-gray-400">
           Share this link with friends to move up in the waitlist:
         </p>
-        <div className="flex items-center mb-4">
+        <div className="mb-4 flex items-center">
           <input
             type="text"
             value={referralLink}
             readOnly
-            className="flex-1 p-2 border rounded-l-md bg-gray-50 dark:bg-gray-900 text-sm"
+            className="flex-1 rounded-l-md border bg-gray-50 p-2 text-sm dark:bg-gray-900"
           />
           <Button
             onClick={copyReferralLink}
@@ -149,7 +151,7 @@ export default function WaitlistStatus({ data, onBack }: WaitlistStatusProps) {
       </div>
 
       {data.status === "INVITED" && (
-        <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800">
+        <div className="rounded-lg border border-green-100 bg-green-50 p-6 dark:border-green-800 dark:bg-green-900/30">
           <h3 className="text-lg font-medium text-green-800 dark:text-green-300">
             You&apos;ve Been Invited!
           </h3>

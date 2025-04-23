@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 
 // Form validation schema
 const formSchema = z
@@ -159,7 +161,7 @@ export default function RegistrationForm({
       </div>
 
       <div className="mt-6">
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="mb-4 text-sm text-gray-500">
           By registering, you&apos;ll be able to sign in using your email
           through our secure authentication providers.
         </p>

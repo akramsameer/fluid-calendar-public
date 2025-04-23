@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { logger } from "@/lib/logger";
 
 const LOG_SOURCE = "WaitlistStore";

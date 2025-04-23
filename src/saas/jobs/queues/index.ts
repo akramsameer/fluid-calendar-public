@@ -1,8 +1,10 @@
-import { Queue, JobsOptions } from "bullmq";
-import { getRedisOptions } from "../config/redis";
-import { logger } from "@/lib/logger";
-import { trackJobCreation } from "../utils/job-creator";
+import { JobsOptions, Queue } from "bullmq";
 import { v4 as uuidv4 } from "uuid";
+
+import { logger } from "@/lib/logger";
+
+import { getRedisOptions } from "../config/redis";
+import { trackJobCreation } from "../utils/job-creator";
 
 const LOG_SOURCE = "BullMQQueues";
 

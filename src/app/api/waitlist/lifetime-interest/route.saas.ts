@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { z } from "zod";
-import { logger } from "@/lib/logger";
+
 import { EmailService } from "@/lib/email/email-service.saas";
+import { logger } from "@/lib/logger";
 
 const LOG_SOURCE = "LifetimeInterestAPI";
 

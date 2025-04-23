@@ -1,14 +1,22 @@
 "use client";
 
 import { useEffect } from "react";
+
+import { format } from "date-fns";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  ChevronDown,
+  Download,
+  Mail,
+  MoreHorizontal,
+  Search,
+  Star,
+  Trash,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,23 +25,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  MoreHorizontal,
-  ChevronDown,
-  Search,
-  Mail,
-  Trash,
-  Download,
-  Star,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { useWaitlistStore, WaitlistEntry } from "@/store/waitlist.saas";
-import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { WaitlistEntry, useWaitlistStore } from "@/store/waitlist.saas";
 
 // TODO: Implement modal dialogs for bulk actions:
 // 1. Bulk invite modal - to collect date and custom message
@@ -275,7 +278,7 @@ export function WaitlistTable() {
         return (
           <Badge
             variant="outline"
-            className="bg-yellow-50 text-yellow-700 border-yellow-200"
+            className="border-yellow-200 bg-yellow-50 text-yellow-700"
           >
             Waiting
           </Badge>
@@ -284,7 +287,7 @@ export function WaitlistTable() {
         return (
           <Badge
             variant="outline"
-            className="bg-blue-50 text-blue-700 border-blue-200"
+            className="border-blue-200 bg-blue-50 text-blue-700"
           >
             Invited
           </Badge>
@@ -293,7 +296,7 @@ export function WaitlistTable() {
         return (
           <Badge
             variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
+            className="border-green-200 bg-green-50 text-green-700"
           >
             Registered
           </Badge>
@@ -302,7 +305,7 @@ export function WaitlistTable() {
         return (
           <Badge
             variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200"
+            className="border-gray-200 bg-gray-50 text-gray-700"
           >
             {status}
           </Badge>
@@ -324,7 +327,7 @@ export function WaitlistTable() {
   if (entriesError && entries.length === 0) {
     return (
       <div className="p-8 text-center">
-        <p className="text-red-500 mb-4">Failed to load waitlist entries</p>
+        <p className="mb-4 text-red-500">Failed to load waitlist entries</p>
         <Button onClick={() => fetchEntries()}>Try Again</Button>
       </div>
     );
@@ -332,14 +335,14 @@ export function WaitlistTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row">
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search emails or names..."
-              className="pl-8 w-[250px]"
+              className="w-[250px] pl-8"
               value={filters.search}
               onChange={(e) => setFilters({ search: e.target.value })}
             />
@@ -517,9 +520,9 @@ export function WaitlistTable() {
             {entriesLoading ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-24 text-center">
-                  <div className="flex justify-center items-center">
+                  <div className="flex items-center justify-center">
                     <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary"
+                      className="-ml-1 mr-3 h-5 w-5 animate-spin text-primary"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -618,7 +621,7 @@ export function WaitlistTable() {
       </div>
 
       {/* TODO: Implement pagination controls with page numbers and better UI */}
-      <div className="flex items-center justify-between mt-4">
+      <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           Showing {entries.length} of {totalEntries} entries
         </div>

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth/api-auth";
+
 import { JobStatus } from "@prisma/client";
+
+import { requireAdmin } from "@/lib/auth/api-auth";
+import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/admin/jobs/stats

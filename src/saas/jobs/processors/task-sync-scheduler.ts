@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
+
 import { addTaskSyncJob } from "../queues";
 
 const LOG_SOURCE = "TaskSyncScheduler";

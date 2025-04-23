@@ -9,10 +9,10 @@ Following the Microsoft Outlook calendar integration, I'm excited to share my la
 
 One of the most requested features after the Outlook calendar integration was the ability to **import tasks from Microsoft To Do**. This integration brings several benefits:
 
-1. Seamless import of existing tasks and to-dos  
-2. Mapping of Microsoft To Do lists to **FluidCalendar projects**  
-3. Automatic scheduling of imported tasks based on list priorities  
-4. Preservation of task metadata (priority, due dates, etc.)  
+1. Seamless import of existing tasks and to-dos
+2. Mapping of Microsoft To Do lists to **FluidCalendar projects**
+3. Automatic scheduling of imported tasks based on list priorities
+4. Preservation of task metadata (priority, due dates, etc.)
 
 ### Technical Implementation
 
@@ -43,7 +43,7 @@ Building on the Microsoft To Do integration, I implemented a more **robust prior
 export enum Priority {
   HIGH = "high",
   MEDIUM = "medium",
-  LOW = "low"
+  LOW = "low",
 }
 
 interface Task {
@@ -55,19 +55,22 @@ interface Task {
 ```
 
 ### Key Improvements:
-1. Natural mapping of Microsoft To Do priorities to **FluidCalendar priorities**  
-2. Enhanced integration with the auto-scheduling algorithm  
-3. Clear visual indicators in the UI for different priority levels  
-4. Support for bulk priority updates and project-based prioritization  
+
+1. Natural mapping of Microsoft To Do priorities to **FluidCalendar priorities**
+2. Enhanced integration with the auto-scheduling algorithm
+3. Clear visual indicators in the UI for different priority levels
+4. Support for bulk priority updates and project-based prioritization
 
 ## The Intelligence Behind Auto-Scheduling
 
 The highlight of this release is the revamped **auto-scheduling algorithm**. Here's how it works:
 
 ### Slot Scoring Algorithm
+
 The algorithm uses a scoring system to select the best time slot for each task.
 
 #### **1. Base Score Calculation**
+
 ```typescript
 interface SlotScore {
   timeSlot: TimeSlot;
@@ -79,10 +82,14 @@ interface SlotScore {
 function calculateSlotScore(slot: TimeSlot, task: Task): SlotScore {
   let score = 100; // Base score
   const adjustments: ScoreAdjustment[] = [];
-  
+
   // Example: Prioritize high priority tasks
   if (task.priority === Priority.HIGH) {
-    adjustments.push({ factor: 'priority', value: 20, reason: 'High priority task' });
+    adjustments.push({
+      factor: "priority",
+      value: 20,
+      reason: "High priority task",
+    });
   }
 
   return {
@@ -95,33 +102,37 @@ function calculateSlotScore(slot: TimeSlot, task: Task): SlotScore {
 ```
 
 #### **2. Scoring Factors:**
-- **Priority Impact**: Higher priority tasks are favored for optimal time slots.  
-- **Energy Level Matching**: (Optional) Matches task demands with typical user energy levels.  
-- **Time Preferences**: Considers user-defined preferred working hours.  
-- **Buffer Times**: Maintains adequate spacing between tasks.  
+
+- **Priority Impact**: Higher priority tasks are favored for optimal time slots.
+- **Energy Level Matching**: (Optional) Matches task demands with typical user energy levels.
+- **Time Preferences**: Considers user-defined preferred working hours.
+- **Buffer Times**: Maintains adequate spacing between tasks.
 
 #### **3. Scheduling Steps:**
-1. **Task Prioritization:** Sort tasks by priority and due date.  
-2. **Slot Identification:** Find available time slots and calculate scores.  
-3. **Optimization:** Balance workload, resolve conflicts, and respect buffer times.  
-4. **Final Placement:** Schedule tasks in the highest-scoring slots.  
+
+1. **Task Prioritization:** Sort tasks by priority and due date.
+2. **Slot Identification:** Find available time slots and calculate scores.
+3. **Optimization:** Balance workload, resolve conflicts, and respect buffer times.
+4. **Final Placement:** Schedule tasks in the highest-scoring slots.
 
 ## What's Next?
 
 I’d love to hear **your thoughts** on what I should tackle next! Here are a few ideas I’m considering:
-- 📝 Import tasks from other platforms like **Asana, Jira, or Google Tasks**  
-- 🔄 Implement **two-way sync** with Microsoft To Do and Outlook  
-- 📅 Add support for **CalDAV or iCal calendar integration**  
-- 💡 Introduce **AI-based scheduling suggestions**  
 
-👉 **What feature would make FluidCalendar more valuable for you? Drop your suggestions!**  
+- 📝 Import tasks from other platforms like **Asana, Jira, or Google Tasks**
+- 🔄 Implement **two-way sync** with Microsoft To Do and Outlook
+- 📅 Add support for **CalDAV or iCal calendar integration**
+- 💡 Introduce **AI-based scheduling suggestions**
+
+👉 **What feature would make FluidCalendar more valuable for you? Drop your suggestions!**
 
 ## Get Involved
+
 You can help shape FluidCalendar’s future:  
 ✅ Try out the new **Microsoft To Do import**  
 ✅ Share feedback and feature requests  
 ✅ Contribute to the codebase on GitHub: [FluidCalendar GitHub Repository](https://github.com/dotnetfactory/fluid-calendar)  
-✅ Report edge cases or suggest improvements to the auto-scheduler  
+✅ Report edge cases or suggest improvements to the auto-scheduler
 
 ## Looking Forward
 
@@ -129,7 +140,6 @@ This update marks another significant step toward making **FluidCalendar** an in
 
 👉 **Haven't read the earlier posts?**  
 📖 [Part 1 – Building FluidCalendar](https://medium.com/front-end-weekly/fluid-calendar-an-open-source-alternative-to-motion-part-1-7a5b52bf219d)  
-📖 [Part 2 – Outlook Integration and Enhanced Features](https://medium.com/@eibrahim/fluidcalendar-outlook-integration-and-enhanced-features-part-2-1d3dd2858439)  
+📖 [Part 2 – Outlook Integration and Enhanced Features](https://medium.com/@eibrahim/fluidcalendar-outlook-integration-and-enhanced-features-part-2-1d3dd2858439)
 
 Follow me on Twitter [@eibrahim](https://twitter.com/eibrahim) for updates and behind-the-scenes insights. Thanks for your support! 🚀
-

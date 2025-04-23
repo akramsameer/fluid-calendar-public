@@ -1,7 +1,8 @@
 "use client";
 
-import { useAdmin } from "@/hooks/use-admin";
 import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,7 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
+import { useAdmin } from "@/hooks/use-admin";
 
 export default function AdminPage() {
   const { isAdmin, isLoading } = useAdmin();
@@ -17,8 +19,8 @@ export default function AdminPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        <div className="flex justify-center items-center h-64">
+        <h1 className="mb-6 text-3xl font-bold">Admin Dashboard</h1>
+        <div className="flex h-64 items-center justify-center">
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -28,9 +30,9 @@ export default function AdminPage() {
   if (!isAdmin) {
     return (
       <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-6">Access Denied</h1>
+        <h1 className="mb-6 text-3xl font-bold">Access Denied</h1>
         <div className="flex flex-col items-center justify-center p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Admin Access Required</h2>
+          <h2 className="mb-4 text-2xl font-bold">Admin Access Required</h2>
           <p className="text-muted-foreground">
             You need administrator privileges to access this page.
           </p>
@@ -41,9 +43,9 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <h1 className="mb-6 text-3xl font-bold">Admin Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Job Management</CardTitle>

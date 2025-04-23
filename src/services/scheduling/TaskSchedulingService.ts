@@ -1,14 +1,16 @@
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { SchedulingService } from "./SchedulingService";
+
+import { ProjectStatus } from "@/types/project";
 import {
+  EnergyLevel,
+  Priority,
   TaskStatus,
   TaskWithRelations,
-  Priority,
-  EnergyLevel,
   TimePreference,
 } from "@/types/task";
-import { ProjectStatus } from "@/types/project";
-import { logger } from "@/lib/logger";
+
+import { SchedulingService } from "./SchedulingService";
 
 const LOG_SOURCE = "TaskSchedulingService";
 

@@ -1,6 +1,7 @@
 import "@/app/globals.css";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
+
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export default function OpenSourceHomeLayout({
   children,

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="container max-w-4xl px-4 py-12 mx-auto">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-8 text-3xl font-bold text-gray-900 dark:text-white">
         Terms of Service
       </h1>
@@ -17,7 +17,7 @@ export default function TermsPage() {
           Last updated: March 10, 2025
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           1. Introduction
         </h2>
         <p>
@@ -26,7 +26,7 @@ export default function TermsPage() {
           agree to be bound by these Terms.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           2. Definitions
         </h2>
         <p>
@@ -40,7 +40,7 @@ export default function TermsPage() {
           that allows access to the Service.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           3. Account Registration and Security
         </h2>
         <p>
@@ -55,7 +55,7 @@ export default function TermsPage() {
           immediately of any unauthorized use of your account.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           4. User Content
         </h2>
         <p>
@@ -69,11 +69,11 @@ export default function TermsPage() {
           such content on and through the Service.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           5. Acceptable Use
         </h2>
         <p>You agree not to use the Service:</p>
-        <ul className="mt-4 space-y-2 list-disc list-inside">
+        <ul className="mt-4 list-inside list-disc space-y-2">
           <li>In any way that violates any applicable law or regulation</li>
           <li>
             To transmit any material that is defamatory, offensive, or otherwise
@@ -92,7 +92,7 @@ export default function TermsPage() {
           </li>
         </ul>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           6. Intellectual Property
         </h2>
         <p>
@@ -102,7 +102,7 @@ export default function TermsPage() {
           laws.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           7. Termination
         </h2>
         <p>
@@ -117,7 +117,7 @@ export default function TermsPage() {
           deletion.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           8. Limitation of Liability
         </h2>
         <p>
@@ -129,7 +129,7 @@ export default function TermsPage() {
           inability to access or use the Service.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           9. Changes to Terms
         </h2>
         <p>
@@ -143,7 +143,7 @@ export default function TermsPage() {
           your acceptance of the new Terms.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
+        <h2 className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-white">
           10. Contact Us
         </h2>
         <p>

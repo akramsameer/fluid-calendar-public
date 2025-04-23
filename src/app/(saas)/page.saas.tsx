@@ -1,16 +1,17 @@
 "use client";
 
-import {
-  CalendarDaysIcon,
-  ClockIcon,
-  SparklesIcon,
-  BoltIcon,
-  CloudIcon,
-  LockClosedIcon,
-} from "@heroicons/react/24/outline";
-import { Toaster } from "sonner";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+import {
+  BoltIcon,
+  CalendarDaysIcon,
+  ClockIcon,
+  CloudIcon,
+  LockClosedIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
+import { Toaster } from "sonner";
 
 const features = [
   {
@@ -68,14 +69,14 @@ export default function Home() {
       <Toaster position="top-right" />
 
       {/* Hero Section */}
-      <section className="pt-20 pb-16 px-4 text-center">
-        <h1 className="text-5xl font-bold text-gray-900 mb-6">
+      <section className="px-4 pb-16 pt-20 text-center">
+        <h1 className="mb-6 text-5xl font-bold text-gray-900">
           Welcome to{" "}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             FluidCalendar
           </span>
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+        <p className="mx-auto mb-8 max-w-3xl text-xl text-gray-600">
           The open-source intelligent calendar that adapts to your workflow.
           Experience seamless task scheduling powered by AI, designed to make
           your time management effortless.
@@ -90,7 +91,7 @@ export default function Home() {
               className="inline-flex items-center text-blue-600 hover:text-blue-700"
             >
               <svg
-                className="w-5 h-5 mr-2"
+                className="mr-2 h-5 w-5"
                 fill="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -109,13 +110,13 @@ export default function Home() {
         <div className="flex justify-center gap-4">
           <a
             href="/beta"
-            className="inline-block bg-blue-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+            className="inline-block rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition-colors duration-200 hover:bg-blue-700"
           >
             Join the Beta
           </a>
           <button
             onClick={handleLogin}
-            className="inline-block bg-white text-blue-600 py-3 px-8 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 transition-colors duration-200"
+            className="inline-block rounded-lg border border-blue-600 bg-white px-8 py-3 font-semibold text-blue-600 transition-colors duration-200 hover:bg-blue-50"
           >
             {session ? "Go to App" : "Login"}
           </button>
@@ -123,24 +124,24 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
+      <section className="bg-white px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-center text-3xl font-bold text-gray-900">
             Why Choose FluidCalendar?
           </h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="mx-auto mb-12 max-w-2xl text-center text-gray-600">
             Experience a calendar that thinks ahead, adapts to your needs, and
             helps you make the most of your time.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-3">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="p-6 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                className="rounded-xl bg-gray-50 p-6 transition-colors duration-200 hover:bg-gray-100"
               >
-                <feature.icon className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <feature.icon className="mb-4 h-12 w-12 text-blue-600" />
+                <h3 className="mb-2 text-xl font-semibold text-gray-900">
                   {feature.title}
                 </h3>
                 <p className="text-gray-600">{feature.description}</p>
@@ -151,9 +152,9 @@ export default function Home() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">
+      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-16 text-white">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="mb-4 text-3xl font-bold">
             Be Among the First to Experience FluidCalendar
           </h2>
           <p className="mb-8 text-lg opacity-90">
@@ -162,7 +163,7 @@ export default function Home() {
           </p>
           <a
             href="/beta"
-            className="inline-block bg-white text-blue-600 py-3 px-8 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+            className="inline-block rounded-lg bg-white px-8 py-3 font-semibold text-blue-600 transition-colors duration-200 hover:bg-gray-100"
           >
             Join the Beta
           </a>
@@ -170,7 +171,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 text-center text-gray-600 border-t">
+      <footer className="border-t px-4 py-8 text-center text-gray-600">
         <p>
           Built by{" "}
           <a
@@ -182,7 +183,7 @@ export default function Home() {
             EliteCoders
           </a>
         </p>
-        <div className="flex justify-center mt-4 space-x-6">
+        <div className="mt-4 flex justify-center space-x-6">
           <a
             href="/terms"
             className="text-sm text-gray-600 hover:text-gray-900"

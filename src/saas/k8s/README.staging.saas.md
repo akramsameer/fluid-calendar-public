@@ -26,11 +26,13 @@ The staging environment is automatically deployed when changes are pushed to the
 If you need to deploy to staging manually, follow these steps:
 
 1. Build the Docker image:
+
    ```bash
    docker build -t registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest -f src/saas/Dockerfile.saas .
    ```
 
 2. Push the image to DigitalOcean Container Registry:
+
    ```bash
    docker push registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest
    ```
@@ -90,4 +92,4 @@ kubectl logs deployment/fluid-calendar-worker -n fluid-calendar-staging
 # Check Redis status
 kubectl get statefulset -n fluid-calendar-staging
 kubectl logs statefulset/redis -n fluid-calendar-staging
-``` 
+```

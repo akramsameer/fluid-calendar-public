@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+
+import { CheckCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { Loader2, CheckCircle } from "lucide-react";
 
 export function LifetimeOffer() {
   const [email, setEmail] = useState("");
@@ -51,15 +53,16 @@ export function LifetimeOffer() {
 
   if (isSuccess) {
     return (
-      <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg border border-green-100 dark:border-green-800">
+      <div className="rounded-lg border border-green-100 bg-gradient-to-r from-green-50 to-emerald-50 p-6 dark:border-green-800 dark:from-green-900/30 dark:to-emerald-900/30">
         <div className="flex flex-col items-center text-center">
-          <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
+          <CheckCircle className="mb-4 h-12 w-12 text-green-500" />
           <h3 className="text-xl font-bold text-green-800 dark:text-green-300">
             Thank You for Your Interest!
           </h3>
           <p className="mt-2 text-green-700 dark:text-green-400">
-            We&apos;ve recorded your interest in the lifetime subscription. We&apos;ll
-            contact you soon with more details about this exclusive offer.
+            We&apos;ve recorded your interest in the lifetime subscription.
+            We&apos;ll contact you soon with more details about this exclusive
+            offer.
           </p>
         </div>
       </div>
@@ -67,24 +70,24 @@ export function LifetimeOffer() {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border border-blue-100 dark:border-blue-800">
-      <div className="flex items-center justify-between mb-4">
+    <div className="rounded-lg border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:border-blue-800 dark:from-blue-900/30 dark:to-indigo-900/30">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="text-xl font-bold text-blue-800 dark:text-blue-300">
           Exclusive Lifetime Offer
         </h3>
-        <span className="px-3 py-1 text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 rounded-full">
+        <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800 dark:bg-red-900/50 dark:text-red-300">
           Limited to 50 users
         </span>
       </div>
 
-      <p className="text-blue-700 dark:text-blue-400 mb-4">
+      <p className="mb-4 text-blue-700 dark:text-blue-400">
         Support our open source development and get{" "}
         <strong>immediate access</strong> to the beta with a lifetime
         subscription.
       </p>
 
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-md border border-blue-200 dark:border-blue-700 mb-4">
-        <div className="flex justify-between items-center">
+      <div className="mb-4 rounded-md border border-blue-200 bg-white p-4 dark:border-blue-700 dark:bg-gray-800">
+        <div className="flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white">
               Lifetime Subscription
@@ -96,10 +99,10 @@ export function LifetimeOffer() {
               <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 $200
               </span>
-              <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 line-through">
+              <span className="ml-2 text-sm text-gray-500 line-through dark:text-gray-400">
                 $400
               </span>
-              <span className="ml-2 text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full">
+              <span className="ml-2 rounded-full bg-green-100 px-2 py-1 text-xs text-green-800 dark:bg-green-900 dark:text-green-300">
                 50% OFF
               </span>
             </div>
@@ -146,7 +149,7 @@ export function LifetimeOffer() {
           )}
         </Button>
 
-        <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400">
           By expressing interest, you&apos;ll be contacted with details about
           this exclusive offer. No payment is required at this stage.
         </p>

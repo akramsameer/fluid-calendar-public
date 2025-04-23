@@ -1,7 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { format } from "date-fns";
+import { CalendarIcon, Loader2, Send } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -9,19 +15,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon, Loader2, Send } from "lucide-react";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+
 import { useWaitlistStore } from "@/store/waitlist.saas";
 
 export function InvitationManager() {
@@ -114,7 +117,7 @@ export function InvitationManager() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="count">Number of invitations</Label>
                   <Input
@@ -210,7 +213,7 @@ export function InvitationManager() {
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
               ) : invitationsError ? (
-                <div className="text-center py-8 text-red-500">
+                <div className="py-8 text-center text-red-500">
                   Failed to load invitations. Please try again.
                 </div>
               ) : invitations && invitations.length > 0 ? (
@@ -238,31 +241,31 @@ export function InvitationManager() {
                           key={invitation.id}
                           className="border-b hover:bg-muted/50"
                         >
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <td className="whitespace-nowrap px-4 py-3 text-sm">
                             {invitation.email}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <td className="whitespace-nowrap px-4 py-3 text-sm">
                             {format(
                               new Date(invitation.sentAt || Date.now()),
                               "PPP"
                             )}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <td className="whitespace-nowrap px-4 py-3 text-sm">
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                 invitation.status === "SENT"
                                   ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                                   : invitation.status === "OPENED"
-                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                                  : invitation.status === "CLICKED"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                  : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                                    : invitation.status === "CLICKED"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                      : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
                               }`}
                             >
                               {invitation.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-right">
+                          <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -279,7 +282,7 @@ export function InvitationManager() {
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="py-8 text-center text-muted-foreground">
                   No invitations have been sent yet.
                 </div>
               )}

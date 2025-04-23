@@ -8,7 +8,7 @@ export default function PrivacyLayout({
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <header className="border-b border-gray-200 dark:border-gray-800">
-        <div className="container flex items-center justify-between h-16 px-4 mx-auto">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center">
             <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
               FluidCalendar
@@ -37,12 +37,12 @@ export default function PrivacyLayout({
         </div>
       </header>
       <main>{children}</main>
-      <footer className="py-8 border-t border-gray-200 dark:border-gray-800">
-        <div className="container px-4 mx-auto text-center text-sm text-gray-600 dark:text-gray-400">
+      <footer className="border-t border-gray-200 py-8 dark:border-gray-800">
+        <div className="container mx-auto px-4 text-center text-sm text-gray-600 dark:text-gray-400">
           <p>
             © {new Date().getFullYear()} FluidCalendar. All rights reserved.
           </p>
-          <div className="flex justify-center mt-4 space-x-6">
+          <div className="mt-4 flex justify-center space-x-6">
             <Link
               href="/terms"
               className="hover:text-gray-900 dark:hover:text-white"

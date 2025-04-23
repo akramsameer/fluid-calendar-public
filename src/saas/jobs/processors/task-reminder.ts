@@ -1,12 +1,14 @@
 import { Job } from "bullmq";
-import { BaseProcessor } from "./base-processor";
-import { TaskReminderJobData, QUEUE_NAMES, addEmailJob } from "../queues";
+
 import { logger } from "@/lib/logger";
-import { prisma } from "../utils/prisma-utils";
+
+import { QUEUE_NAMES, TaskReminderJobData, addEmailJob } from "../queues";
 import {
   generateTaskReminderHtml,
   generateTaskReminderText,
 } from "../templates/task-reminder";
+import { prisma } from "../utils/prisma-utils";
+import { BaseProcessor } from "./base-processor";
 
 const LOG_SOURCE = "TaskReminderProcessor";
 

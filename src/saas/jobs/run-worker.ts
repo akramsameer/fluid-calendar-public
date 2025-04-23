@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+
 /**
  * This script is used to run the worker process.
  * It ensures that all path aliases like @/ are properly resolved.
  */
+import { logger } from "@/lib/logger";
 
 import { initializeQueues } from "./queues";
-import { logger } from "@/lib/logger";
 import { setupScheduledJobs } from "./worker";
 
 const LOG_SOURCE = "WorkerRunner";
