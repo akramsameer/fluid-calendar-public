@@ -38,7 +38,11 @@ COPY . .
 RUN infisical run --token="${INFISICAL_TOKEN}" --projectId="${PROJECT_ID}" --env="${INFISICAL_SECRET_ENV}" --domain="${INFISICAL_API_URL}" -- npx prisma generate
 
 # Build the application
-RUN infisical run --token="${INFISICAL_TOKEN}" --projectId="${PROJECT_ID}" --env="${INFISICAL_SECRET_ENV}" --domain="${INFISICAL_API_URL}" -- npm run build
+RUN NODE_OPTIONS="--max-old-space-size=4096" infisical run --token="${INFISICAL_TOKEN}" \
+    --projectId="${PROJECT_ID}" \
+    --env="${INFISICAL_SECRET_ENV}" \
+    --domain="${INFISICAL_API_URL}" \
+    -- npm run build
 
 # Build the worker
 RUN npm run build:worker

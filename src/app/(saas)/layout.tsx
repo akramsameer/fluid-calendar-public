@@ -2,8 +2,6 @@ import Script from "next/script";
 
 import "@/app/globals.css";
 
-import { SessionProvider } from "@/components/providers/SessionProvider";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function SAASLayout({
@@ -25,14 +23,8 @@ export default function SAASLayout({
           gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
         `}
       </Script>
-      <ThemeProvider
-        attribute="data-theme"
-        forcedTheme="light"
-        enableSystem={false}
-      >
-        <SessionProvider>{children}</SessionProvider>
-        <Toaster />
-      </ThemeProvider>
+      {children}
+      <Toaster />
     </>
   );
 }
