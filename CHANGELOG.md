@@ -71,6 +71,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `STRIPE_LIFETIME_REGULAR_PRICE_ID`: Price ID for regular lifetime access
 - Updated verifyPaymentStatus to include additional payment information
 - Improved error handling and logging in subscription flow
+- Improved SAAS/open source code separation:
+  - Renamed subscription-related files to include `.saas.ts` extension:
+    - `/src/lib/actions/subscription.ts` → `/src/lib/actions/subscription.saas.ts`
+    - `/src/lib/services/subscription.ts` → `/src/lib/services/subscription.saas.ts`
+    - `/src/lib/hooks/useSubscription.ts` → `/src/lib/hooks/useSubscription.saas.ts`
+    - `/src/app/api/subscription/lifetime/route.ts` → `/src/app/api/subscription/lifetime/route.saas.ts`
+    - `/src/app/api/subscription/lifetime/status/route.ts` → `/src/app/api/subscription/lifetime/status/route.saas.ts`
+    - `/src/app/api/subscription/lifetime/verify/route.ts` → `/src/app/api/subscription/lifetime/verify/route.saas.ts`
+    - `/src/app/(saas)/subscription/lifetime/success/page.tsx` → `/src/app/(saas)/subscription/lifetime/success/page.saas.tsx`
+  - Updated all imports referencing these files to use the new paths
+  - Created separate implementations of components with SAAS-specific code:
+    - Split `LifetimeAccessBanner` into `.saas.tsx` and `.open.tsx` versions
+    - Modified Calendar component to use dynamic imports based on `isSaasEnabled` flag
+    - Removed direct SAAS imports from common components
 
 ### Fixed
 

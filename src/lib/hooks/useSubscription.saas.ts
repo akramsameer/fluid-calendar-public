@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   LifetimeSubscriptionRequest,
   subscriptionService,
-} from "../services/subscription";
+} from "../services/subscription.saas";
 
 export const useLifetimeSubscription = () => {
   return useMutation({

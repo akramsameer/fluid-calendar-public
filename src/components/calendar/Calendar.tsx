@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import dynamic from "next/dynamic";
 import { HiMenu } from "react-icons/hi";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
@@ -13,7 +14,7 @@ import { WeekView } from "@/components/calendar/WeekView";
 import { SponsorshipBanner } from "@/components/ui/sponsorship-banner";
 
 import { addDays, formatDate, newDate, subDays } from "@/lib/date-utils";
-import { useLifetimeStatusQuery } from "@/lib/services/subscription";
+import { isSaasEnabled } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 import {
@@ -25,7 +26,13 @@ import { useTaskStore } from "@/store/task";
 
 import { CalendarEvent, CalendarFeed } from "@/types/calendar";
 
-import { LifetimeAccessBanner } from "./LifetimeAccessBanner";
+// Dynamically import the appropriate version of the LifetimeAccessBanner
+const LifetimeAccessBanner = dynamic(
+  () => import(`./LifetimeAccessBanner.${isSaasEnabled ? "saas" : "open"}`).then(
+    (mod) => mod.LifetimeAccessBanner
+  ),
+  { ssr: false } // Disable SSR for this component to prevent import errors
+);
 
 interface CalendarProps {
   initialFeeds?: CalendarFeed[];
@@ -39,7 +46,6 @@ export function Calendar({
   const { date: currentDate, setDate, view, setView } = useViewStore();
   const { isSidebarOpen, setSidebarOpen, isHydrated } = useCalendarUIStore();
   const { scheduleAllTasks } = useTaskStore();
-  const { data: lifetimeStatus } = useLifetimeStatusQuery();
   const { setFeeds, setEvents } = useCalendarStore();
 
   // Use initial data from server for hydration
@@ -113,9 +119,7 @@ export function Calendar({
       {/* Main Content */}
       <main className="flex min-w-0 flex-1 flex-col bg-background">
         {/* Lifetime Access Banner */}
-        <LifetimeAccessBanner
-          hasLifetimeAccess={lifetimeStatus?.hasLifetimeAccess}
-        />
+        <LifetimeAccessBanner />
         {/* Header */}
         <header className="flex h-16 flex-none items-center border-b border-border px-4">
           <button
