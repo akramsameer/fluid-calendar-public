@@ -2,6 +2,7 @@ import { scheduleAllTasksForUser } from "@/services/scheduling/TaskSchedulingSer
 import { Job } from "bullmq";
 
 import {
+  addDays,
   format,
   newDate,
   newDateFromYMD,
@@ -103,11 +104,9 @@ export class DailySummaryProcessor extends BaseProcessor<
       // Calculate the forecast date based on the determination above
       // Use the current time in user's timezone as the base date to calculate tomorrow
       const forecastDate = format(
-        newDateFromYMD(
-          currentTimeInUserTz.getFullYear(),
-          currentTimeInUserTz.getMonth(),
-          currentTimeInUserTz.getDate() + (showTomorrow ? 1 : 0)
-        ),
+        showTomorrow
+          ? addDays(toZonedTime(newDate(), timezone), 1)
+          : toZonedTime(newDate(), timezone),
         "yyyy-MM-dd"
       );
 

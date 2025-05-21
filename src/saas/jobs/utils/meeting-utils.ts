@@ -1,4 +1,4 @@
-import { toZonedTime } from "@/lib/date-utils";
+import { convertToUserTimezone } from "@/lib/date-utils";
 import { logger } from "@/lib/logger";
 
 import { prisma } from "./prisma-utils";
@@ -14,6 +14,7 @@ export interface Meeting {
   description?: string | null;
   isAllDay: boolean;
   calendarName?: string;
+  timezone?: string;
 }
 
 /**
@@ -31,15 +32,8 @@ export async function getUserDailyMeetings(userId: string, targetDate: string) {
 
     // Create date objects for start and end of day in the user's timezone
     // Use the date components to create a Date in the user's timezone
-    const dayStart = toZonedTime(
-      new Date(year, month - 1, day, 0, 0, 0, 0),
-      userTimezone
-    );
-
-    const dayEnd = toZonedTime(
-      new Date(year, month - 1, day, 23, 59, 59, 999),
-      userTimezone
-    );
+    const dayStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    const dayEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
 
     logger.info(
       `Getting meetings for user ${userId} on ${targetDate} (${userTimezone})`,
@@ -49,6 +43,7 @@ export async function getUserDailyMeetings(userId: string, targetDate: string) {
         dayStart: dayStart.toISOString(),
         dayEnd: dayEnd.toISOString(),
         dateComponents: [year.toString(), month.toString(), day.toString()],
+        userTimezone,
       },
       LOG_SOURCE
     );
@@ -59,12 +54,20 @@ export async function getUserDailyMeetings(userId: string, targetDate: string) {
         feed: {
           userId: userId,
         },
-        start: {
-          gte: dayStart,
-        },
-        end: {
-          lte: dayEnd,
-        },
+        OR: [
+          // Regular events that overlap with the day
+          {
+            AND: [{ start: { lte: dayEnd } }, { end: { gte: dayStart } }],
+          },
+          // All-day events on this day
+          {
+            allDay: true,
+            start: {
+              gte: new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0)),
+              lt: new Date(Date.UTC(year, month - 1, day + 1, 0, 0, 0, 0)),
+            },
+          },
+        ],
       },
       include: {
         feed: {
@@ -79,16 +82,21 @@ export async function getUserDailyMeetings(userId: string, targetDate: string) {
     });
 
     // Transform to Meeting interface
-    const meetings: Meeting[] = events.map((event) => ({
-      id: event.id,
-      title: event.title,
-      startTime: event.start,
-      endTime: event.end,
-      location: event.location,
-      description: event.description,
-      isAllDay: event.allDay,
-      calendarName: event.feed?.name,
-    }));
+    const meetings: Meeting[] = events.map((event) => {
+      const timezone = userTimezone || "UTC";
+
+      return {
+        id: event.id,
+        title: event.title,
+        startTime: convertToUserTimezone(event.start, timezone),
+        endTime: convertToUserTimezone(event.end, timezone),
+        location: event.location,
+        description: event.description,
+        isAllDay: event.allDay,
+        calendarName: event.feed?.name,
+        timezone: timezone, // Include user timezone in the meeting data
+      };
+    });
 
     logger.info(
       `Found ${meetings.length} meetings for user ${userId}`,

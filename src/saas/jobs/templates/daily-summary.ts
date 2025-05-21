@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 import { Meeting } from "../utils/meeting-utils";
 import { Task } from "../utils/task-utils";
@@ -20,6 +21,10 @@ export function generateDailySummaryHtml(
   const formattedDate = format(date, "EEEE, MMMM do, yyyy");
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://fluidcalendar.com";
+
+  // Default timezone to UTC if not specified in the first meeting
+  const userTimezone =
+    meetings.length > 0 && meetings[0].timezone ? meetings[0].timezone : "UTC";
 
   return `
     <!DOCTYPE html>
@@ -164,8 +169,9 @@ export function generateDailySummaryHtml(
                 ${
                   meeting.isAllDay
                     ? "All day"
-                    : `${format(meeting.startTime, "h:mm a")} - ${format(
+                    : `${formatInTimeZone(meeting.startTime, userTimezone, "h:mm a")} - ${formatInTimeZone(
                         meeting.endTime,
+                        userTimezone,
                         "h:mm a"
                       )}`
                 }
@@ -254,6 +260,10 @@ export function generateDailySummaryText(
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://fluidcalendar.com";
 
+  // Default timezone to UTC if not specified in the first meeting
+  const userTimezone =
+    meetings.length > 0 && meetings[0].timezone ? meetings[0].timezone : "UTC";
+
   let text = `YOUR DAILY SUMMARY - ${formattedDate}\n\n`;
 
   // Meetings section
@@ -264,8 +274,9 @@ export function generateDailySummaryText(
     meetings.forEach((meeting) => {
       const time = meeting.isAllDay
         ? "All day"
-        : `${format(meeting.startTime, "h:mm a")} - ${format(
+        : `${formatInTimeZone(meeting.startTime, userTimezone, "h:mm a")} - ${formatInTimeZone(
             meeting.endTime,
+            userTimezone,
             "h:mm a"
           )}`;
 
