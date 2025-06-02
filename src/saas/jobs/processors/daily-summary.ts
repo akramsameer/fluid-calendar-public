@@ -194,13 +194,15 @@ export class DailySummaryProcessor extends BaseProcessor<
         user.name || "User",
         forecastDateObj,
         meetings,
-        tasks
+        tasks,
+        timezone
       );
       const text = generateDailySummaryText(
         user.name || "User",
         forecastDateObj,
         meetings,
-        tasks
+        tasks,
+        timezone
       );
 
       // Queue email job with appropriate subject

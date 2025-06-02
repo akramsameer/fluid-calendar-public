@@ -1,3 +1,6 @@
+import { parseISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+
 import { convertToUserTimezone } from "@/lib/date-utils";
 import { logger } from "@/lib/logger";
 
@@ -20,51 +23,68 @@ export interface Meeting {
 /**
  * Fetch a user's meetings for a specific day
  * @param userId The user ID
- * @param targetDate The date to fetch meetings for (ISO string)
+ * @param targetDate The date to fetch meetings for (ISO string YYYY-MM-DD)
  * @returns An array of meetings
  */
 export async function getUserDailyMeetings(userId: string, targetDate: string) {
   try {
     const userTimezone = await getUserTimezone(userId);
 
-    // Parse the date components directly to avoid timezone issues
-    const [year, month, day] = targetDate.split("-").map(Number);
+    // For timed events: define the day's window in user's timezone, then convert to UTC
+    const localDayStartString = `${targetDate}T00:00:00`;
+    const localDayEndString = `${targetDate}T23:59:59.999`;
 
-    // Create date objects for start and end of day in the user's timezone
-    // Use the date components to create a Date in the user's timezone
-    const dayStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-    const dayEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    // Convert local time string in user's timezone to a UTC Date object
+    const dayStartStringInUserTZWithOffset = formatInTimeZone(
+      parseISO(localDayStartString),
+      userTimezone,
+      "yyyy-MM-dd'T'HH:mm:ssXXX"
+    );
+    const dayEndStringInUserTZWithOffset = formatInTimeZone(
+      parseISO(localDayEndString),
+      userTimezone,
+      "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+    ); // Added .SSS for milliseconds
+
+    const dayStart = parseISO(dayStartStringInUserTZWithOffset);
+    const dayEnd = parseISO(dayEndStringInUserTZWithOffset);
+
+    // For all-day events query: parse targetDate for year, month, day
+    const [year, monthNum, dayNum] = targetDate.split("-").map(Number);
+    const monthIndex = monthNum - 1;
 
     logger.info(
-      `Getting meetings for user ${userId} on ${targetDate} (${userTimezone})`,
+      `Getting meetings for user ${userId} on ${targetDate} (userTZ: ${userTimezone})`,
       {
         userId,
         targetDate,
-        dayStart: dayStart.toISOString(),
-        dayEnd: dayEnd.toISOString(),
-        dateComponents: [year.toString(), month.toString(), day.toString()],
         userTimezone,
+        localDayStartInput: localDayStartString,
+        localDayEndInput: localDayEndString,
+        dayStartStringWithOffset: dayStartStringInUserTZWithOffset,
+        dayEndStringWithOffset: dayEndStringInUserTZWithOffset,
+        calculatedDayStartUTC_forTimedEvents: dayStart.toISOString(),
+        calculatedDayEndUTC_forTimedEvents: dayEnd.toISOString(),
       },
       LOG_SOURCE
     );
 
-    // In the schema, the model is CalendarEvent, not Event
     const events = await prisma.calendarEvent.findMany({
       where: {
         feed: {
           userId: userId,
         },
         OR: [
-          // Regular events that overlap with the day
+          // Regular (timed) events that overlap with the day in user's timezone
           {
             AND: [{ start: { lte: dayEnd } }, { end: { gte: dayStart } }],
           },
-          // All-day events on this day
+          // All-day events: query for events on the UTC date corresponding to targetDate
           {
             allDay: true,
             start: {
-              gte: new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0)),
-              lt: new Date(Date.UTC(year, month - 1, day + 1, 0, 0, 0, 0)),
+              gte: new Date(Date.UTC(year, monthIndex, dayNum, 0, 0, 0, 0)),
+              lt: new Date(Date.UTC(year, monthIndex, dayNum + 1, 0, 0, 0, 0)),
             },
           },
         ],
@@ -83,18 +103,17 @@ export async function getUserDailyMeetings(userId: string, targetDate: string) {
 
     // Transform to Meeting interface
     const meetings: Meeting[] = events.map((event) => {
-      const timezone = userTimezone || "UTC";
-
+      const eventDisplayTimezone = userTimezone || "UTC";
       return {
         id: event.id,
         title: event.title,
-        startTime: convertToUserTimezone(event.start, timezone),
-        endTime: convertToUserTimezone(event.end, timezone),
+        startTime: convertToUserTimezone(event.start, eventDisplayTimezone),
+        endTime: convertToUserTimezone(event.end, eventDisplayTimezone),
         location: event.location,
         description: event.description,
         isAllDay: event.allDay,
         calendarName: event.feed?.name,
-        timezone: timezone, // Include user timezone in the meeting data
+        timezone: eventDisplayTimezone,
       };
     });
 
@@ -133,7 +152,6 @@ async function getUserTimezone(userId: string): Promise<string> {
         },
       },
     });
-
     return user?.userSettings?.timeZone || "UTC";
   } catch (error) {
     logger.error(

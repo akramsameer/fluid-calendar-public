@@ -72,3 +72,4 @@ scripts/test-outlook-task-api.sh
 developer-staging-kubeconfig.yaml
 developer-kubeconfig.yaml
 *kubeconfig*.yaml
+dev-access/

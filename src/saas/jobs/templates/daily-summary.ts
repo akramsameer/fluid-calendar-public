@@ -10,21 +10,19 @@ import { Task } from "../utils/task-utils";
  * @param date The date for the summary
  * @param meetings The user's meetings for the day
  * @param tasks The user's top tasks
+ * @param userTimezone The user's timezone
  * @returns HTML string for the email
  */
 export function generateDailySummaryHtml(
   userName: string,
   date: Date,
   meetings: Meeting[],
-  tasks: Task[]
+  tasks: Task[],
+  userTimezone: string
 ): string {
   const formattedDate = format(date, "EEEE, MMMM do, yyyy");
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://fluidcalendar.com";
-
-  // Default timezone to UTC if not specified in the first meeting
-  const userTimezone =
-    meetings.length > 0 && meetings[0].timezone ? meetings[0].timezone : "UTC";
 
   return `
     <!DOCTYPE html>
@@ -248,21 +246,19 @@ export function generateDailySummaryHtml(
  * @param date The date for the summary
  * @param meetings The user's meetings for the day
  * @param tasks The user's top tasks
+ * @param userTimezone The user's timezone
  * @returns Plain text string for the email
  */
 export function generateDailySummaryText(
   userName: string,
   date: Date,
   meetings: Meeting[],
-  tasks: Task[]
+  tasks: Task[],
+  userTimezone: string
 ): string {
   const formattedDate = format(date, "EEEE, MMMM do, yyyy");
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://fluidcalendar.com";
-
-  // Default timezone to UTC if not specified in the first meeting
-  const userTimezone =
-    meetings.length > 0 && meetings[0].timezone ? meetings[0].timezone : "UTC";
 
   let text = `YOUR DAILY SUMMARY - ${formattedDate}\n\n`;
 
