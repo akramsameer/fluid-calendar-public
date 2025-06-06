@@ -16,7 +16,6 @@ import { useProjectStore } from "@/store/project";
 import { useSettingsStore } from "@/store/settings";
 import { useSetupStore } from "@/store/setup";
 import { useTaskStore } from "@/store/task";
-import { useWaitlistStore } from "@/store/waitlist.saas";
 
 /**
  * Lists of stores to handle during logout
@@ -52,11 +51,19 @@ export function clearStoresOnLogout() {
   useSettingsStore.getState().clear();
 
   // Clear SaaS-specific stores if available
-  try {
-    useWaitlistStore.getState().clear();
-  } catch {
-    // Ignore if not available
-  }
+  import(
+    `@/store/waitlist${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}`
+  )
+    .then(({ useWaitlistStore }) => {
+      try {
+        useWaitlistStore.getState().clear();
+      } catch (error) {
+        console.error("Failed to clear waitlist store:", error);
+      }
+    })
+    .catch(() => {
+      // Silently ignore if the module is not available
+    });
 
   // Force localStorage cleanup for complete data removal
   STORE_KEYS.clearCompletely.forEach((storeKey) => {
@@ -134,6 +141,20 @@ export async function initializeStores() {
     }
   } catch (error) {
     console.error("Failed to initialize calendar store:", error);
+  }
+
+  // Initialize waitlist store if available
+  try {
+    const { useWaitlistStore } = await import(
+      `@/store/waitlist${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}`
+    );
+    const waitlistStore = useWaitlistStore.getState();
+    if (waitlistStore && waitlistStore.fetchEntries) {
+      const waitlistPromise = waitlistStore.fetchEntries();
+      initPromises.push(waitlistPromise);
+    }
+  } catch (error) {
+    console.error("Failed to initialize waitlist store:", error);
   }
 
   // Wait for all initialization promises to complete

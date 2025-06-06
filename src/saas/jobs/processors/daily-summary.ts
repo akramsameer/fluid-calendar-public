@@ -94,30 +94,41 @@ export class DailySummaryProcessor extends BaseProcessor<
       const parsedDate = parseISO(targetDate);
       const zonedDate = toZonedTime(parsedDate, timezone);
 
-      // Determine if we should show today or tomorrow based on current time in user's timezone
-      const currentTimeInUserTz = toZonedTime(newDate(), timezone);
-      const currentHourInUserTz = currentTimeInUserTz.getHours();
+      let forecastDate: string;
+      let showTomorrow: boolean;
+      let currentHourInUserTz: number | undefined;
+      let currentTimeInUserTz: Date | undefined;
 
-      // If it's before 8am in user's timezone, show today; otherwise show tomorrow
-      const showTomorrow = currentHourInUserTz >= 8;
+      if (date) {
+        // If a specific date was provided, use it directly
+        forecastDate = targetDate;
+        showTomorrow = false; // Not relevant when date is specified
+      } else {
+        // If no date provided, use today/tomorrow logic based on current time
+        currentTimeInUserTz = toZonedTime(newDate(), timezone);
+        currentHourInUserTz = currentTimeInUserTz.getHours();
 
-      // Calculate the forecast date based on the determination above
-      // Use the current time in user's timezone as the base date to calculate tomorrow
-      const forecastDate = format(
-        showTomorrow
-          ? addDays(toZonedTime(newDate(), timezone), 1)
-          : toZonedTime(newDate(), timezone),
-        "yyyy-MM-dd"
-      );
+        // If it's before 8am in user's timezone, show today; otherwise show tomorrow
+        showTomorrow = currentHourInUserTz >= 8;
+
+        // Calculate the forecast date based on the determination above
+        // Use the current time in user's timezone as the base date to calculate tomorrow
+        forecastDate = format(
+          showTomorrow
+            ? addDays(toZonedTime(newDate(), timezone), 1)
+            : toZonedTime(newDate(), timezone),
+          "yyyy-MM-dd"
+        );
+      }
 
       // Log which day we're showing
       logger.info(
         `Generating ${
-          showTomorrow ? "tomorrow's" : "today's"
+          showTomorrow ? "tomorrow's" : date ? "specified date" : "today's"
         } summary for user ${userId}`,
         {
           userId,
-          currentHourInUserTz,
+          currentHourInUserTz: currentHourInUserTz || null,
           showingTomorrow: showTomorrow,
           forecastDate,
           timezone,
@@ -126,7 +137,7 @@ export class DailySummaryProcessor extends BaseProcessor<
           parsedDate: parsedDate.toISOString(),
           zonedDate: zonedDate.toISOString(),
           newDate: newDate().toISOString(),
-          currentTimeInUserTz: currentTimeInUserTz.toISOString(),
+          currentTimeInUserTz: currentTimeInUserTz?.toISOString() || null,
         },
         LOG_SOURCE
       );
@@ -151,79 +162,74 @@ export class DailySummaryProcessor extends BaseProcessor<
       }
 
       // Fetch meetings and tasks for the forecast date
-      const [meetings, tasks] = await Promise.all([
-        getUserDailyMeetings(userId, forecastDate),
-        getUserTopTasks(userId, forecastDate),
-      ]);
+      try {
+        const [meetings, tasks] = await Promise.all([
+          getUserDailyMeetings(userId, forecastDate),
+          getUserTopTasks(userId, forecastDate),
+        ]);
 
-      logger.info(
-        `Fetched ${meetings.length} meetings and ${tasks.length} tasks for user ${userId}`,
-        {
-          userId,
-          meetingCount: meetings.length,
-          taskCount: tasks.length,
-        },
-        LOG_SOURCE
-      );
+        logger.info(
+          `Fetched ${meetings.length} meetings and ${tasks.length} tasks for user ${userId}`,
+          {
+            userId,
+            meetingCount: meetings.length,
+            taskCount: tasks.length,
+          },
+          LOG_SOURCE
+        );
 
-      // Generate email content with the forecast date
-      // Create forecastDateObj directly from the components of the forecastDate
-      const [year, month, day] = forecastDate.split("-").map(Number);
-      const forecastDateObj = newDateFromYMD(year, month - 1, day); // month is 0-indexed in JS Date
+        // Generate email content with the forecast date
+        // Create forecastDateObj directly from the components of the forecastDate
+        const [year, month, day] = forecastDate.split("-").map(Number);
+        const forecastDateObj = newDateFromYMD(year, month - 1, day);
 
-      // Add additional log to debug the forecastDateObj
-      logger.info(
-        `Debug forecastDateObj for user ${userId}`,
-        {
-          userId,
-          forecastDate,
-          forecastDateObj: forecastDateObj.toISOString(),
-          forecastDateObjYear: forecastDateObj.getFullYear(),
-          forecastDateObjMonth: forecastDateObj.getMonth() + 1, // Add 1 to match 1-indexed month display
-          forecastDateObjDate: forecastDateObj.getDate(),
-          forecastDateComponents: [
-            year.toString(),
-            month.toString(),
-            day.toString(),
-          ],
-        },
-        LOG_SOURCE
-      );
+        const html = generateDailySummaryHtml(
+          user.name || "User",
+          forecastDateObj,
+          meetings,
+          tasks,
+          timezone
+        );
+        const text = generateDailySummaryText(
+          user.name || "User",
+          forecastDateObj,
+          meetings,
+          tasks,
+          timezone
+        );
 
-      const html = generateDailySummaryHtml(
-        user.name || "User",
-        forecastDateObj,
-        meetings,
-        tasks,
-        timezone
-      );
-      const text = generateDailySummaryText(
-        user.name || "User",
-        forecastDateObj,
-        meetings,
-        tasks,
-        timezone
-      );
+        // Queue email job with appropriate subject
+        await addEmailJob({
+          to: email || user.email || "",
+          subject: `Agenda for ${format(forecastDateObj, "EEEE, MMMM do")}`,
+          html,
+          text,
+        });
 
-      // Queue email job with appropriate subject
-      await addEmailJob({
-        to: email || user.email || "",
-        subject: `Agenda for ${format(forecastDateObj, "EEEE, MMMM do")}`,
-        html,
-        text,
-      });
+        logger.info(
+          `Daily summary email queued for user ${userId}`,
+          {
+            userId,
+            email: email || user.email,
+            forecastDateObj: forecastDateObj.toISOString(),
+          },
+          LOG_SOURCE
+        );
 
-      logger.info(
-        `Daily summary email queued for user ${userId}`,
-        {
-          userId,
-          email: email || user.email,
-          forecastDateObj: forecastDateObj.toISOString(),
-        },
-        LOG_SOURCE
-      );
+        return { success: true };
+      } catch (error) {
+        logger.error(
+          `Failed to generate daily summary for user ${userId}`,
+          {
+            userId,
+            email,
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+          LOG_SOURCE
+        );
 
-      return { success: true };
+        throw error;
+      }
     } catch (error) {
       logger.error(
         `Failed to generate daily summary for user ${userId}`,

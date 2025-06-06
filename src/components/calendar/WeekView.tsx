@@ -250,15 +250,8 @@ export function WeekView({ currentDate, onDateClick }: WeekViewProps) {
 
     await updateTask(taskId, { status });
 
-    // Update the quick view item to reflect the new status
-    if (isTask) {
-      const updatedTask = useTaskStore
-        .getState()
-        .tasks.find((t) => t.id === taskId);
-      if (updatedTask) {
-        setQuickViewItem(updatedTask);
-      }
-    }
+    // Close the quick view popup after updating the task status
+    handleQuickViewClose();
   };
 
   const renderEventContent = useCallback(

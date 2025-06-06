@@ -1,7 +1,6 @@
 import { parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
-import { convertToUserTimezone } from "@/lib/date-utils";
 import { logger } from "@/lib/logger";
 
 import { prisma } from "./prisma-utils";
@@ -17,7 +16,6 @@ export interface Meeting {
   description?: string | null;
   isAllDay: boolean;
   calendarName?: string;
-  timezone?: string;
 }
 
 /**
@@ -103,17 +101,15 @@ export async function getUserDailyMeetings(userId: string, targetDate: string) {
 
     // Transform to Meeting interface
     const meetings: Meeting[] = events.map((event) => {
-      const eventDisplayTimezone = userTimezone || "UTC";
       return {
         id: event.id,
         title: event.title,
-        startTime: convertToUserTimezone(event.start, eventDisplayTimezone),
-        endTime: convertToUserTimezone(event.end, eventDisplayTimezone),
+        startTime: event.start, // Keep in UTC - no conversion here
+        endTime: event.end, // Keep in UTC - no conversion here
         location: event.location,
         description: event.description,
         isAllDay: event.allDay,
         calendarName: event.feed?.name,
-        timezone: eventDisplayTimezone,
       };
     });
 
