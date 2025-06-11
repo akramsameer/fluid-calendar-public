@@ -19,7 +19,21 @@ export class TaskSyncScheduler {
    * @returns Number of sync jobs scheduled
    */
   static async scheduleAllSyncJobs(fullSync = false): Promise<number> {
-    logger.info("Scheduling task sync jobs for all users", {}, LOG_SOURCE);
+    const schedulerId = Math.random().toString(36).substring(2, 15);
+    const stackTrace = new Error().stack;
+
+    logger.info(
+      "🕐📅 SCHEDULER: STARTING SYNC JOB SCHEDULING",
+      {
+        scheduler_id: schedulerId,
+        fullSync,
+        timestamp: new Date().toISOString(),
+        stackTrace:
+          stackTrace?.split("\n").slice(0, 8).join("\n") || "No stack trace",
+        schedulingReason: fullSync ? "FULL_SYNC_REQUESTED" : "PERIODIC_SYNC",
+      },
+      LOG_SOURCE
+    );
 
     try {
       // Get all enabled task providers
@@ -52,37 +66,119 @@ export class TaskSyncScheduler {
       });
 
       logger.info(
-        `Found ${enabledProviders.length} providers to sync`,
-        {},
+        "🔍📊 SCHEDULER: FOUND PROVIDERS FOR SYNC",
+        {
+          scheduler_id: schedulerId,
+          totalProviders: enabledProviders.length,
+          fullSync,
+          providers: enabledProviders.map((provider) => ({
+            id: provider.id,
+            userId: provider.userId,
+            type: provider.type,
+            name: provider.name,
+            syncInterval: provider.syncInterval,
+            lastSyncedAt: provider.lastSyncedAt?.toISOString() || "never",
+            syncEnabled: provider.syncEnabled,
+            timeSinceLastSync: provider.lastSyncedAt
+              ? Math.round(
+                  (Date.now() - provider.lastSyncedAt.getTime()) / (1000 * 60)
+                ) + " minutes"
+              : "never synced",
+          })),
+          currentTime: new Date().toISOString(),
+        },
         LOG_SOURCE
       );
 
       // Schedule a sync job for each provider
+      let scheduledCount = 0;
       for (const provider of enabledProviders) {
-        await addTaskSyncJob({
-          userId: provider.userId,
-          providerId: provider.id,
-          syncAll: true,
-          fullSync,
-        });
+        try {
+          logger.info(
+            "🚀📤 SCHEDULER: SCHEDULING SYNC JOB FOR PROVIDER",
+            {
+              scheduler_id: schedulerId,
+              providerId: provider.id,
+              providerName: provider.name,
+              providerType: provider.type,
+              userId: provider.userId,
+              syncInterval: provider.syncInterval,
+              lastSyncedAt: provider.lastSyncedAt?.toISOString() || "never",
+              fullSync,
+              jobType: "provider_sync",
+            },
+            LOG_SOURCE
+          );
 
-        logger.info(
-          `Scheduled sync for provider ${provider.id} (${provider.name})`,
-          {
-            providerId: provider.id,
+          await addTaskSyncJob({
             userId: provider.userId,
-            syncInterval: provider.syncInterval,
-          },
-          LOG_SOURCE
-        );
+            providerId: provider.id,
+            syncAll: true,
+            fullSync,
+          });
+
+          scheduledCount++;
+
+          logger.info(
+            "✅📤 SCHEDULER: SYNC JOB SCHEDULED FOR PROVIDER",
+            {
+              scheduler_id: schedulerId,
+              providerId: provider.id,
+              providerName: provider.name,
+              userId: provider.userId,
+              syncInterval: provider.syncInterval,
+              scheduledCount,
+            },
+            LOG_SOURCE
+          );
+        } catch (providerError) {
+          logger.error(
+            "❌📤 SCHEDULER: FAILED TO SCHEDULE SYNC JOB FOR PROVIDER",
+            {
+              scheduler_id: schedulerId,
+              providerId: provider.id,
+              providerName: provider.name,
+              userId: provider.userId,
+              error:
+                providerError instanceof Error
+                  ? providerError.message
+                  : "Unknown error",
+              errorStack:
+                providerError instanceof Error && providerError.stack
+                  ? providerError.stack
+                  : "No stack trace",
+            },
+            LOG_SOURCE
+          );
+          // Continue with other providers
+        }
       }
 
-      return enabledProviders.length;
+      logger.info(
+        "🎉📅 SCHEDULER: SYNC JOB SCHEDULING COMPLETED",
+        {
+          scheduler_id: schedulerId,
+          totalProvidersFound: enabledProviders.length,
+          totalJobsScheduled: scheduledCount,
+          fullSync,
+          completedAt: new Date().toISOString(),
+        },
+        LOG_SOURCE
+      );
+
+      return scheduledCount;
     } catch (error) {
       logger.error(
-        "Failed to schedule task sync jobs",
+        "💥📅 SCHEDULER: SYNC JOB SCHEDULING ERROR",
         {
+          scheduler_id: schedulerId,
           error: error instanceof Error ? error.message : "Unknown error",
+          errorStack:
+            error instanceof Error && error.stack
+              ? error.stack
+              : "No stack trace",
+          fullSync,
+          timestamp: new Date().toISOString(),
         },
         LOG_SOURCE
       );

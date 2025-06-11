@@ -125,21 +125,48 @@ export async function setupScheduledJobs() {
   const taskSyncJob = new CronJob(
     "*/30 * * * *", // Every 30 minutes
     async () => {
+      const cronId = Math.random().toString(36).substring(2, 15);
+      const stackTrace = new Error().stack;
+
       try {
-        logger.info("Starting scheduled task sync job", {}, LOG_SOURCE);
+        logger.info(
+          "🕐🔄 CRON: TASK SYNC JOB TRIGGERED",
+          {
+            cron_id: cronId,
+            cronSchedule: "*/30 * * * *",
+            cronDescription: "Every 30 minutes",
+            triggerTime: new Date().toISOString(),
+            stackTrace: stackTrace
+              ? stackTrace.split("\n").slice(0, 8).join("\n")
+              : "No stack trace available",
+            triggerReason: "SCHEDULED_CRON_JOB",
+          },
+          LOG_SOURCE
+        );
 
         const jobsScheduled = await TaskSyncScheduler.scheduleAllSyncJobs();
 
         logger.info(
-          "Scheduled task sync jobs",
-          { count: jobsScheduled },
+          "✅🔄 CRON: TASK SYNC JOB COMPLETED",
+          {
+            cron_id: cronId,
+            jobsScheduled,
+            completedAt: new Date().toISOString(),
+            success: true,
+          },
           LOG_SOURCE
         );
       } catch (error) {
         logger.error(
-          "Failed to schedule task sync jobs",
+          "💥🔄 CRON: TASK SYNC JOB ERROR",
           {
+            cron_id: cronId,
             error: error instanceof Error ? error.message : "Unknown error",
+            errorStack:
+              error instanceof Error && error.stack
+                ? error.stack
+                : "No stack trace",
+            failedAt: new Date().toISOString(),
           },
           LOG_SOURCE
         );

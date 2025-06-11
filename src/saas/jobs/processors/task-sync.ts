@@ -61,12 +61,10 @@ export class TaskSyncProcessor extends BaseProcessor<
       job.data;
 
     logger.info(
-      `Processing task sync job: ${job.id}`,
+      "Starting task sync job",
       {
         jobId: job.id || "",
-        mappingId: mappingId || "",
-        providerId: providerId || "",
-        userId: userId || "",
+        userId: userId || "none",
         syncAll: syncAll || false,
         fullSync: fullSync || false,
         direction: direction || "bidirectional",
@@ -77,6 +75,15 @@ export class TaskSyncProcessor extends BaseProcessor<
     try {
       // Different sync strategies based on the job data
       if (syncAll && userId) {
+        logger.info(
+          "Sync all mappings for user",
+          {
+            userId,
+            syncType: "ALL_USER_MAPPINGS",
+          },
+          LOG_SOURCE
+        );
+
         // Sync all mappings for a user
         const results = await this.syncManager.syncAllForUser(userId);
 
@@ -108,42 +115,81 @@ export class TaskSyncProcessor extends BaseProcessor<
           }
         );
 
+        logger.info(
+          "Sync all user mappings completed",
+          {
+            userId,
+            imported: totals.imported,
+            updated: totals.updated,
+            deleted: totals.deleted,
+            skipped: totals.skipped,
+            errors: totals.errors.length,
+            mappingsProcessed: results.length,
+          },
+          LOG_SOURCE
+        );
+
         return {
           success: results.every((r) => r.success),
           message: `Synced all task lists for user ${userId}`,
           details: totals,
         };
       } else if (mappingId) {
+        logger.info(
+          "Sync specific mapping",
+          {
+            mappingId,
+            syncType: "SPECIFIC_MAPPING",
+          },
+          LOG_SOURCE
+        );
+
         // Sync a specific mapping
-        // Get the mapping with its provider
-        const mapping = await prisma.taskListMapping.findUnique({
-          where: { id: mappingId },
-          include: { provider: true },
-        });
+        const result = await this.syncManager.syncTaskList(mappingId);
 
-        if (!mapping) {
-          throw new Error(`Task list mapping not found: ${mappingId}`);
-        }
-
-        const result = await this.syncManager.syncTaskList(mapping);
-
-        return {
-          success: result.success,
-          message: `Synced task list mapping ${mappingId}`,
-          details: {
+        logger.info(
+          "Sync specific mapping completed",
+          {
+            mappingId,
+            success: result.success,
             imported: result.imported,
             updated: result.updated,
             deleted: result.deleted,
             skipped: result.skipped,
-            errors: result.errors,
+            errors: result.errors.length,
           },
+          LOG_SOURCE
+        );
+
+        return {
+          success: result.success,
+          message: `Synced task list ${mappingId}`,
+          details: result,
         };
       } else if (providerId) {
+        logger.info(
+          "Sync all provider mappings",
+          {
+            providerId,
+            syncType: "ALL_PROVIDER_MAPPINGS",
+          },
+          LOG_SOURCE
+        );
+
         // Sync all mappings for a specific provider
         // Get all mappings for this provider
         const mappings = await prisma.taskListMapping.findMany({
           where: { providerId },
         });
+
+        logger.info(
+          "Found provider mappings",
+          {
+            providerId,
+            mappingsCount: mappings.length,
+          },
+          LOG_SOURCE
+        );
 
         // Sync each mapping
         const results = await Promise.all(
@@ -180,6 +226,20 @@ export class TaskSyncProcessor extends BaseProcessor<
           }
         );
 
+        logger.info(
+          "Sync all provider mappings completed",
+          {
+            providerId,
+            imported: totals.imported,
+            updated: totals.updated,
+            deleted: totals.deleted,
+            skipped: totals.skipped,
+            errors: totals.errors.length,
+            mappingsProcessed: mappings.length,
+          },
+          LOG_SOURCE
+        );
+
         return {
           success: results.every((r: { success: boolean }) => r.success),
           message: `Synced all task lists for provider ${providerId}`,
@@ -202,9 +262,8 @@ export class TaskSyncProcessor extends BaseProcessor<
         };
       }
     } catch (error) {
-      // Log and return error
       logger.error(
-        "Task sync job failed",
+        "Task sync processor error",
         {
           jobId: job.id || "",
           error: error instanceof Error ? error.message : "Unknown error",
@@ -212,12 +271,7 @@ export class TaskSyncProcessor extends BaseProcessor<
         LOG_SOURCE
       );
 
-      return {
-        success: false,
-        message: `Task sync failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-      };
+      throw error;
     }
   }
 }
