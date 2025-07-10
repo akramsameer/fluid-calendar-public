@@ -343,7 +343,6 @@ async function createLifetimeCheckoutSession(
       cancel_url: cancelUrl || defaultCancelUrl,
       metadata: sessionMetadata,
       allow_promotion_codes: true, // Enable manual promotion code entry
-      payment_method_collection: "if_required", // Skip payment method collection for $0 total
     });
 
     logger.info(
