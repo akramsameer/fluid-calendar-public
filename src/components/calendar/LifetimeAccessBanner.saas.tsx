@@ -185,7 +185,7 @@ export const LifetimeAccessBanner: React.FC = () => {
                         </div>
                         <div className="flex gap-2 max-md:flex-wrap">
                             <Button size="sm" className="text-sm" asChild>
-                                <a href="/beta">Buy Lifetime Access</a>
+                                <a href="/pricing">Buy Lifetime Access</a>
                             </Button>
                         </div>
                     </div>

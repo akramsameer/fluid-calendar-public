@@ -7,6 +7,7 @@ import { getAuthOptions } from "@/lib/auth/auth-options";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
+import { EARLY_BIRD_CONFIG } from "@/lib/stripe/price-config";
 
 const LOG_SOURCE = "BillingActions";
 
@@ -33,7 +34,8 @@ export async function createLifetimeCheckoutSession() {
       where: { subscription: { plan: SubscriptionPlan.LIFETIME } },
     });
 
-    const price = lifetimeCount < 100 ? 20000 : 40000; // $200 or $400 in cents
+    const isEarlyBird = EARLY_BIRD_CONFIG.isEligible(lifetimeCount);
+    const price = EARLY_BIRD_CONFIG.getCurrentPriceCents(isEarlyBird);
 
     // Create Stripe checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
@@ -58,6 +60,8 @@ export async function createLifetimeCheckoutSession() {
       metadata: {
         userEmail: session.user.email,
       },
+      allow_promotion_codes: true, // Enable manual promotion code entry
+      payment_method_collection: "if_required", // Skip payment method collection for $0 total
     });
 
     if (!checkoutSession.url) {

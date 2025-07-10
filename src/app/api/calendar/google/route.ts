@@ -9,6 +9,10 @@ import { createAllDayDate, newDate, newDateFromYMD } from "@/lib/date-utils";
 import { createGoogleOAuthClient } from "@/lib/google";
 import { getGoogleCalendarClient } from "@/lib/google-calendar";
 import { prisma } from "@/lib/prisma";
+import {
+  checkCalendarProviderPermission,
+  incrementCalendarProviderUsage,
+} from "@/lib/services/calendar-provider-permissions";
 import { TokenManager } from "@/lib/token-manager";
 
 const LOG_SOURCE = "GoogleCalendarAPI";
@@ -88,6 +92,32 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // Check if this account already exists
+      const existingAccount = await prisma.connectedAccount.findUnique({
+        where: {
+          userId_provider_email: {
+            userId,
+            provider: "GOOGLE",
+            email: userInfo.data.email,
+          },
+        },
+      });
+
+      // If this is a new account, check permissions first
+      if (!existingAccount) {
+        const permissionCheck = await checkCalendarProviderPermission(userId);
+        if (!permissionCheck.canAdd) {
+          // Redirect to pricing page with error message
+          const errorUrl = new URL("/pricing", process.env.NEXTAUTH_URL!);
+          errorUrl.searchParams.set("error", "upgrade_required");
+          errorUrl.searchParams.set(
+            "reason",
+            permissionCheck.reason || "Calendar provider limit reached"
+          );
+          return NextResponse.redirect(errorUrl);
+        }
+      }
+
       // Store tokens
       const tokenManager = TokenManager.getInstance();
       const accountId = await tokenManager.storeTokens(
@@ -100,6 +130,11 @@ export async function GET(request: NextRequest) {
         },
         userId ?? "unknown"
       );
+
+      // Only increment usage count if this was a new account
+      if (!existingAccount) {
+        await incrementCalendarProviderUsage(userId);
+      }
 
       // Get list of calendars
       const calendar = google.calendar({ version: "v3", auth: oauth2Client });

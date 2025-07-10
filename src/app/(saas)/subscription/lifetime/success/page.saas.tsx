@@ -19,6 +19,7 @@ interface PaymentResult {
     metadata?: {
         name?: string;
         email?: string;
+        subscriptionPlan?: string;
     };
 }
 
@@ -46,7 +47,11 @@ export default async function LifetimeSuccessPage(props: {
         }
 
         paymentResult = {
-            metadata: result.metadata ?? {},
+            metadata: {
+                name: result.metadata?.name || undefined,
+                email: result.metadata?.email || undefined,
+                subscriptionPlan: result.metadata?.subscriptionPlan,
+            },
         };
 
         // Get user email from payment metadata
@@ -113,7 +118,7 @@ export default async function LifetimeSuccessPage(props: {
         return (
             <div className="container relative min-h-screen py-10">
                 <LifetimeSuccessClient
-                    paymentResult={paymentResult}
+                    paymentResult={paymentResult!}
                     isExistingUser={isExistingUser}
                     isLoggedIn={isLoggedIn}
                 />

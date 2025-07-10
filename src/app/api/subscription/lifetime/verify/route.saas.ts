@@ -8,6 +8,7 @@ import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_STATUS,
 } from "@/lib/stripe/constants";
+import { LEGACY_LIFETIME_PRICE_IDS } from "@/lib/stripe/price-config";
 
 const LOG_SOURCE = "LifetimeVerify";
 
@@ -60,10 +61,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Subscription already active" });
     }
 
-    // Check if early bird discount was applied based on the price ID used
-    const earlyBirdPriceId = process.env.LIFETIME_ACCESS_DISCOUNTED_PRICE_ID;
+    // Check if early bird discount was applied based on the price ID used (centralized config)
     const discountApplied =
-      stripeSession.line_items?.data[0]?.price?.id === earlyBirdPriceId;
+      stripeSession.line_items?.data[0]?.price?.id ===
+      LEGACY_LIFETIME_PRICE_IDS.earlyBird;
 
     // Create or update subscription
     await prisma.subscription.upsert({

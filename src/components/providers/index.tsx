@@ -1,5 +1,7 @@
 import { PropsWithChildren } from "react";
 
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
+
 import { SessionProvider } from "./SessionProvider";
 import { StoreInitializer } from "./StoreInitializer";
 import { TanstackQueryProvider } from "./TanstackQueryProvider";
@@ -10,8 +12,10 @@ export function Providers({ children }: PropsWithChildren) {
     <TanstackQueryProvider>
       <ThemeProvider attribute="data-theme" enableSystem={true}>
         <SessionProvider>
-          <StoreInitializer />
-          {children}
+          <SubscriptionGuard>
+            <StoreInitializer />
+            {children}
+          </SubscriptionGuard>
         </SessionProvider>
       </ThemeProvider>
     </TanstackQueryProvider>

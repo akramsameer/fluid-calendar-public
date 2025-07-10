@@ -4,7 +4,13 @@ import { SubscriptionPlan } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import stripe from "@/lib/stripe.saas";
+import { stripe } from "@/lib/stripe";
+import { STRIPE_METADATA_KEYS } from "@/lib/stripe/constants";
+import {
+  EARLY_BIRD_CONFIG,
+  LEGACY_LIFETIME_PRICE_IDS,
+  getLifetimePriceId,
+} from "@/lib/stripe/price-config";
 
 const LOG_SOURCE = "LifetimeSubscription";
 
@@ -16,9 +22,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Validate required Stripe price IDs
-    const earlyBirdPriceId = process.env.LIFETIME_ACCESS_DISCOUNTED_PRICE_ID;
-    const regularPriceId = process.env.LIFETIME_ACCESS_PRICE_ID;
+    // Validate required Stripe price IDs using centralized configuration
+    const earlyBirdPriceId = LEGACY_LIFETIME_PRICE_IDS.earlyBird;
+    const regularPriceId = LEGACY_LIFETIME_PRICE_IDS.regular;
 
     if (!earlyBirdPriceId || !regularPriceId) {
       logger.error(
@@ -59,12 +65,32 @@ export async function POST(request: Request) {
       stripeCustomerId = customer.id;
     }
 
-    const isEarlyBird =
-      (await prisma.subscription.count({
-        where: {
-          plan: SubscriptionPlan.LIFETIME,
+    const lifetimeCount = await prisma.subscription.count({
+      where: {
+        plan: SubscriptionPlan.LIFETIME,
+      },
+    });
+
+    const isEarlyBird = EARLY_BIRD_CONFIG.isEligible(lifetimeCount);
+
+    // Get the lifetime price ID and validate it
+    const lifetimePriceId = getLifetimePriceId(isEarlyBird);
+
+    if (!lifetimePriceId) {
+      logger.error(
+        "No valid lifetime price ID found",
+        {
+          isEarlyBird,
+          earlyBirdPriceId: LEGACY_LIFETIME_PRICE_IDS.earlyBird,
+          regularPriceId: LEGACY_LIFETIME_PRICE_IDS.regular,
         },
-      })) < 100;
+        LOG_SOURCE
+      );
+      return NextResponse.json(
+        { error: "Subscription service configuration error" },
+        { status: 500 }
+      );
+    }
 
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
@@ -73,16 +99,19 @@ export async function POST(request: Request) {
       mode: "payment",
       line_items: [
         {
-          price: isEarlyBird ? earlyBirdPriceId : regularPriceId,
+          price: lifetimePriceId,
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription/lifetime/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/beta`,
       metadata: {
         email,
         name: name || "",
+        [STRIPE_METADATA_KEYS.SUBSCRIPTION_PLAN]: SubscriptionPlan.LIFETIME,
       },
+      allow_promotion_codes: true, // Enable manual promotion code entry
+      payment_method_collection: "if_required", // Skip payment method collection for $0 total
     });
 
     logger.info(

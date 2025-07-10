@@ -85,6 +85,8 @@ model User {
   taskProviders        TaskProvider[]
   TaskChange           TaskChange[]
   PasswordReset        PasswordReset[]
+  subscriptionHistory  SubscriptionHistory[]
+  subscriptionUsage    SubscriptionUsage?
 }
 
 model VerificationToken {
@@ -592,6 +594,12 @@ model PasswordReset {
 
 enum SubscriptionPlan {
   FREE
+  BASIC_MONTHLY
+  BASIC_YEARLY
+  PRO_MONTHLY
+  PRO_YEARLY
+  ADVANCED_MONTHLY
+  ADVANCED_YEARLY
   LIFETIME
 }
 
@@ -599,21 +607,129 @@ enum SubscriptionStatus {
   ACTIVE
   PAYMENT_PENDING
   PAYMENT_FAILED
+  TRIALING
+  PAST_DUE
+  CANCELLED
+  UNPAID
 }
 
 model Subscription {
-  id                    String             @id @default(cuid())
-  userId                String             @unique
-  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan                  SubscriptionPlan   @default(FREE)
-  status                SubscriptionStatus @default(ACTIVE)
-  stripeCustomerId      String?            @unique
-  stripePaymentIntentId String?            @unique // For one-time payments like lifetime access
-  amount                Int? // Amount paid in cents
-  discountApplied       Boolean            @default(false)
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Plan identification - direct enum mapping
+  plan   SubscriptionPlan // Direct mapping to enum value
+  status SubscriptionStatus @default(ACTIVE)
+
+  // Stripe Integration
+  stripeCustomerId      String? @unique
+  stripeSubscriptionId  String? @unique // For recurring subscriptions
+  stripePaymentIntentId String? @unique // For one-time payments (lifetime)
+  stripePriceId         String? // Current active price
+
+  // Billing
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+
+  // Pricing snapshot (for historical records)
+  amount          Int? // Amount in cents
+  currency        String? @default("usd")
+  discountApplied Boolean @default(false)
+
+  // Plan limits (denormalized for performance)
+  calendarProviderLimit Int? // NULL = unlimited
+
+  // Relations
+  history SubscriptionHistory[]
+  usage   SubscriptionUsage?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([plan])
   @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
   @@index([stripePaymentIntentId])
+  @@index([status])
+  @@index([currentPeriodEnd])
+}
+
+// Plan configuration for easy management - IMPROVED PRICE-CENTRIC APPROACH
+model SubscriptionPlanConfig {
+  id String @id @default(cuid())
+
+  // Plan identification - direct enum mapping
+  plan SubscriptionPlan @unique // Each record maps to one enum value
+
+  // Display information
+  name        String // "Basic Monthly", "Pro Yearly", etc.
+  description String?
+
+  // Pricing
+  price    Int? // Price in cents (NULL for free)
+  currency String @default("usd")
+
+  // Stripe integration
+  stripePriceId   String? @unique
+  stripeProductId String? // For reference
+
+  // Plan features
+  calendarProviderLimit Int? // NULL = unlimited
+  features              Json // JSON array of features
+
+  // Metadata
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  // Trial support
+  trialDays Int? // Number of trial days
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([plan])
+  @@index([isActive, sortOrder])
+}
+
+// Track subscription changes for analytics and debugging
+model SubscriptionHistory {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  fromStatus SubscriptionStatus?
+  toStatus   SubscriptionStatus
+  fromPlan   SubscriptionPlan?
+  toPlan     SubscriptionPlan
+
+  reason   String? // upgrade, downgrade, cancel, payment_failed, etc.
+  metadata Json? // Additional context
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([createdAt])
+}
+
+// Track calendar provider usage for plan enforcement
+model SubscriptionUsage {
+  id                    String       @id @default(cuid())
+  userId                String       @unique
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionId        String       @unique
+  subscription          Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  calendarProvidersUsed Int          @default(0)
+  lastCalculatedAt      DateTime     @default(now())
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@index([userId])
 }
