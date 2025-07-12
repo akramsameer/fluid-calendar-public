@@ -18,12 +18,12 @@ import { initializeStores } from "@/lib/auth/store-management";
 export function StoreInitializer() {
   const { status, data: session } = useSession();
 
-  useEffect(() => {
-    // Initialize stores on first component mount
-    initializeStores().catch((error) => {
-      console.error("Failed to initialize stores on mount:", error);
-    });
-  }, []);
+  // useEffect(() => {
+  //   // Initialize stores on first component mount
+  //   initializeStores().catch((error) => {
+  //     console.error("Failed to initialize stores on mount:", error);
+  //   });
+  // }, []);
 
   // Re-initialize when user logs in (session status changes to authenticated)
   useEffect(() => {
