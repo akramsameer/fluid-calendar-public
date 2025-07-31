@@ -28,7 +28,6 @@
 - **Grafana**: Log visualization and monitoring dashboards
 - **Docker**: For containerization and local development
 - **Docker Compose**: For multi-container orchestration
-- **GlitchTip / Sentry**: For error logging
 
 ### Development & Testing
 
@@ -63,11 +62,13 @@
 - **Deployment Scripts**: Automated setup in `k8s-logging-setup/deploy.sh`
 
 #### Logging Architecture:
+
 ```
 Application → stdout/stderr → Promtail → Loki → Grafana
 ```
 
 #### Key Configuration Files:
+
 - `k8s-logging-setup/loki-config.yaml` - Loki deployment and service
 - `k8s-logging-setup/promtail-config.yaml` - Log collection DaemonSet with RBAC
 - `k8s-logging-setup/grafana-datasource.yaml` - Loki datasource for Grafana
@@ -97,11 +98,13 @@ export async function GET(
 ## Deployment
 
 ### Local Development
+
 - Docker-based development environment
 - PostgreSQL container via Docker Compose
 - Local logger outputs to console for development
 
 ### Production Infrastructure
+
 - Kubernetes cluster deployment
 - Loki-based logging infrastructure
 - Grafana monitoring at https://grafana.hub.elitecoders.ai/
@@ -109,6 +112,7 @@ export async function GET(
 - Environment-specific settings via environment variables
 
 ### Infrastructure Monitoring
+
 - **Prometheus**: Metrics collection (existing kube-prometheus-stack)
 - **Grafana**: Unified monitoring dashboard for metrics and logs
 - **Loki**: Centralized log aggregation with structured JSON logs
@@ -117,6 +121,7 @@ export async function GET(
 ## Migration Notes
 
 ### Recent Infrastructure Changes
+
 - **Migrated from database-based logging to Kubernetes-native logging**
 - **Removed ~2000+ lines of legacy logging code**
 - **Implemented structured JSON logging with app/environment detection**

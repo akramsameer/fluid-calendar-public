@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import NextError from "next/error";
 
-import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 
 export default function GlobalError({
   error,
@@ -12,7 +12,11 @@ export default function GlobalError({
   error: Error & { digest?: string };
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    logger.error("Global error occurred", {
+      error: error.message,
+      ...(error.stack && { stack: error.stack }),
+      ...(error.digest && { digest: error.digest })
+    }, "global-error");
   }, [error]);
 
   return (

@@ -65,9 +65,6 @@ dist/
 Dockerfile.worker
 scripts/test-outlook-task-api.sh
 
-# Sentry Config File
-.env.sentry-build-plugin
-
 # Kubernetes configs
 developer-staging-kubeconfig.yaml
 developer-kubeconfig.yaml
