@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -109,12 +110,13 @@ export default function Home() {
               rel="noopener noreferrer"
               className="transition-transform duration-200 hover:scale-105"
             >
-              <img 
+              <Image 
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=995295&theme=light&t=1753020464257" 
                 alt="FluidCalendar - Smarter task scheduling for your day | Product Hunt" 
                 className="w-[250px] h-[54px]" 
-                width="250" 
-                height="54" 
+                width={250} 
+                height={54}
+                unoptimized
               />
             </a>
           </div>

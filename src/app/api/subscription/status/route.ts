@@ -32,15 +32,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find user with subscription
-    const user = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-      include: {
-        subscription: true,
-      },
-    });
+    // Find user with subscription with timeout
+    const user = await Promise.race([
+      prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+        include: {
+          subscription: true,
+        },
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Database query timeout")), 5000)
+      ),
+    ]);
 
     if (!user) {
       logger.warn("User not found", { email, userId }, LOG_SOURCE);
