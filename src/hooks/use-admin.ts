@@ -32,13 +32,28 @@ export function useAdmin(): { isAdmin: boolean; isLoading: boolean } {
     // Then verify with the server
     const verifyAdmin = async () => {
       try {
-        const response = await fetch("/api/auth/check-admin");
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch("/api/auth/check-admin", {
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (response.ok) {
           const data = await response.json();
           setIsAdmin(data.isAdmin);
+        } else {
+          console.error("Admin verification failed:", response.status, response.statusText);
+          // Fall back to client-side check if server verification fails
+          setIsAdmin(clientSideIsAdmin);
         }
       } catch (error) {
         console.error("Failed to verify admin status:", error);
+        // Fall back to client-side check on network errors
+        setIsAdmin(clientSideIsAdmin);
       } finally {
         setIsLoading(false);
       }

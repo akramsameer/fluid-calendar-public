@@ -49,15 +49,10 @@ model Account {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
-}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
 }
 
 model User {
@@ -69,7 +64,6 @@ model User {
   role                 String                @default("user") // Possible values: "user", "admin"
   subscription         Subscription?
   accounts             Account[]
-  sessions             Session[]
   calendars            CalendarFeed[]
   autoScheduleSettings AutoScheduleSettings?
   userSettings         UserSettings?
@@ -87,6 +81,8 @@ model User {
   PasswordReset        PasswordReset[]
   subscriptionHistory  SubscriptionHistory[]
   subscriptionUsage    SubscriptionUsage?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @default(now()) @updatedAt
 }
 
 model VerificationToken {

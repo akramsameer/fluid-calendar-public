@@ -43,19 +43,37 @@ export interface SubscriptionStatus {
 export const subscriptionService = {
   // Get subscription status
   getSubscriptionStatus: async (): Promise<SubscriptionStatus> => {
-    const response = await fetch("/api/subscription/status");
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-    if (response.status === 401) {
-      throw new Error("Authentication required");
+    try {
+      const response = await fetch("/api/subscription/status", {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 401) {
+        throw new Error("Authentication required");
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch subscription status: ${response.status}`
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error("Request timeout - subscription check took too long");
+      }
+      
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch subscription status: ${response.status}`
-      );
-    }
-
-    return response.json();
   },
 
   // Universal checkout method

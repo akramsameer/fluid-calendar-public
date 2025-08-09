@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -100,6 +101,26 @@ export default function Home() {
             seamless task scheduling powered by AI, designed to make your time
             management effortless. Try all features free for 14 days.
           </p>
+
+          {/* Product Hunt Badge */}
+          <div className="mb-8 flex justify-center">
+            <a 
+              href="https://www.producthunt.com/products/fluidcalendar?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-fluidcalendar-2" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-transform duration-200 hover:scale-105"
+            >
+              <Image 
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=995295&theme=light&t=1753020464257" 
+                alt="FluidCalendar - Smarter task scheduling for your day | Product Hunt" 
+                className="w-[250px] h-[54px]" 
+                width={250} 
+                height={54}
+                unoptimized
+              />
+            </a>
+          </div>
+
           <div className="mb-12 space-y-3 text-gray-500">
             <div className="text-lg">
               <strong>Free 14-day trial</strong> • No credit card required •

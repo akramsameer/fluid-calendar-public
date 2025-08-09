@@ -37,10 +37,10 @@ export function useSubscription(): SubscriptionStatus {
         if (error.message.includes("401")) return false;
         if (error.message.includes("403")) return false;
       }
-      // Retry other errors up to 2 times
-      return failureCount < 2;
+      // Retry other errors only once to avoid blocking the app
+      return failureCount < 1;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
+    retryDelay: 2000, // Fixed 2 second delay instead of exponential backoff
     refetchOnWindowFocus: true, // Refresh when user returns to tab
     refetchOnMount: false, // Don't refetch if we have cached data
     refetchInterval: 1000 * 60 * 5, // Background refresh every 5 minutes
