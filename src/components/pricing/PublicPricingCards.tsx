@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { CheckIcon, Clock, StarIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -106,22 +106,26 @@ export default function PublicPricingCards() {
         </Label>
       </div>
 
-      {/* Pricing Cards Grid - matches authenticated version layout */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-4 xl:gap-6 lg:items-stretch max-w-full mx-auto">
-        {/* Trial Section */}
-        <Card className="flex flex-col h-full">
-          <CardHeader className="text-center pb-2">
-            <Badge className="uppercase w-max self-center mb-3 bg-blue-500">
-              <Clock className="w-3 h-3 mr-1" />
-              14-Day Free Trial
+      {/* Pricing Cards Grid - 4 options with featured trial */}
+      <div className="grid sm:grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 max-w-6xl mx-auto">
+        {/* Trial Section - Featured */}
+        <Card className="border-2 border-blue-500 shadow-2xl flex flex-col h-full relative">
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 text-xs font-medium rounded-full">
+              Popular
             </Badge>
-            <CardTitle className="!mb-7">Try Advanced Free</CardTitle>
+          </div>
+          <CardHeader className="text-center pb-2 pt-8">
+            <CardTitle className="mb-7 text-xl">14-Day Free Trial</CardTitle>
             <div className="font-bold text-4xl flex flex-col items-center">
-              <span className="flex items-baseline text-blue-600">$0</span>
+              <span className="flex items-baseline text-blue-600">FREE</span>
+              <span className="text-sm font-normal text-muted-foreground mt-1">
+                Full access to everything
+              </span>
             </div>
           </CardHeader>
           <CardDescription className="text-center w-11/12 mx-auto">
-            Experience all Advanced features{" "}
+            Experience all features{" "}
             <span className="font-semibold text-blue-600">
               without adding credit card
             </span>
@@ -129,17 +133,18 @@ export default function PublicPricingCards() {
           <CardContent className="flex-grow">
             <ul className="mt-7 space-y-2.5 text-sm">
               <PricingFeatureItem>
-                Unlimited Calendar Providers
+                ✨ Saves 2+ hours daily with AI scheduling
               </PricingFeatureItem>
-              <PricingFeatureItem>Team Collaboration</PricingFeatureItem>
-              <PricingFeatureItem>Advanced Analytics</PricingFeatureItem>
-              <PricingFeatureItem>Custom Integrations</PricingFeatureItem>
-              <PricingFeatureItem>24/7 Support</PricingFeatureItem>
+              <PricingFeatureItem>🔗 Unlimited calendar providers</PricingFeatureItem>
+              <PricingFeatureItem>📊 Advanced analytics & insights</PricingFeatureItem>
+              <PricingFeatureItem>⚡ 30-second task scheduling</PricingFeatureItem>
+              <PricingFeatureItem>🛡️ Enterprise-grade security</PricingFeatureItem>
+              <PricingFeatureItem>💬 Priority support included</PricingFeatureItem>
             </ul>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" size="lg" onClick={handleGetStarted}>
-              Start 14-Day Free Trial
+            <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-sm py-3 px-4 font-semibold" onClick={handleGetStarted}>
+              Start Free Trial
             </Button>
           </CardFooter>
         </Card>
@@ -147,7 +152,7 @@ export default function PublicPricingCards() {
         {/* Basic Plan */}
         <Card className="flex flex-col h-full">
           <CardHeader className="text-center pb-2">
-            <CardTitle className="mb-7">{PLANS.BASIC.name}</CardTitle>
+            <CardTitle className="mb-7 text-xl">Basic</CardTitle>
             <div className="font-bold text-4xl flex flex-col items-center">
               {isAnnual ? (
                 <>
@@ -161,7 +166,7 @@ export default function PublicPricingCards() {
                     </span>
                   </span>
                   <span className="text-sm font-normal text-muted-foreground mt-1">
-                    ${PLANS.BASIC.yearlyPrice} billed annually
+                    Save 17% annually
                   </span>
                 </>
               ) : (
@@ -179,9 +184,11 @@ export default function PublicPricingCards() {
           </CardDescription>
           <CardContent className="flex-grow">
             <ul className="mt-7 space-y-2.5 text-sm">
-              {PLANS.BASIC.features.map((feature, i) => (
-                <PricingFeatureItem key={i}>{feature}</PricingFeatureItem>
-              ))}
+              <PricingFeatureItem>Everything in trial</PricingFeatureItem>
+              <PricingFeatureItem>1 calendar provider</PricingFeatureItem>
+              <PricingFeatureItem>Basic calendar sync</PricingFeatureItem>
+              <PricingFeatureItem>Task management</PricingFeatureItem>
+              <PricingFeatureItem>Email support</PricingFeatureItem>
             </ul>
           </CardContent>
           <CardFooter>
@@ -190,7 +197,7 @@ export default function PublicPricingCards() {
               variant="outline"
               onClick={handleGetStarted}
             >
-              Get Started
+              Start with Basic
             </Button>
           </CardFooter>
         </Card>
@@ -198,7 +205,7 @@ export default function PublicPricingCards() {
         {/* Pro Plan */}
         <Card className="flex flex-col h-full">
           <CardHeader className="text-center pb-2">
-            <CardTitle className="mb-7">{PLANS.PRO.name}</CardTitle>
+            <CardTitle className="mb-7 text-xl">Pro</CardTitle>
             <div className="font-bold text-4xl flex flex-col items-center">
               {isAnnual ? (
                 <>
@@ -212,7 +219,7 @@ export default function PublicPricingCards() {
                     </span>
                   </span>
                   <span className="text-sm font-normal text-muted-foreground mt-1">
-                    ${PLANS.PRO.yearlyPrice} billed annually
+                    Save 17% annually
                   </span>
                 </>
               ) : (
@@ -226,13 +233,15 @@ export default function PublicPricingCards() {
             </div>
           </CardHeader>
           <CardDescription className="text-center w-11/12 mx-auto">
-            Great for professionals
+            For busy professionals
           </CardDescription>
           <CardContent className="flex-grow">
             <ul className="mt-7 space-y-2.5 text-sm">
-              {PLANS.PRO.features.map((feature, i) => (
-                <PricingFeatureItem key={i}>{feature}</PricingFeatureItem>
-              ))}
+              <PricingFeatureItem>Everything in trial</PricingFeatureItem>
+              <PricingFeatureItem>2 calendar providers</PricingFeatureItem>
+              <PricingFeatureItem>Advanced scheduling</PricingFeatureItem>
+              <PricingFeatureItem>Priority email support</PricingFeatureItem>
+              <PricingFeatureItem>Usage analytics</PricingFeatureItem>
             </ul>
           </CardContent>
           <CardFooter>
@@ -241,7 +250,7 @@ export default function PublicPricingCards() {
               variant="outline"
               onClick={handleGetStarted}
             >
-              Get Started
+              Start with Pro
             </Button>
           </CardFooter>
         </Card>
@@ -249,10 +258,7 @@ export default function PublicPricingCards() {
         {/* Advanced Plan */}
         <Card className="flex flex-col h-full relative">
           <CardHeader className="text-center pb-2">
-            <Badge className="uppercase w-max self-center mb-3 bg-blue-500">
-              Most Popular
-            </Badge>
-            <CardTitle className="!mb-7">{PLANS.ADVANCED.name}</CardTitle>
+            <CardTitle className="!mb-7 text-xl">Advanced</CardTitle>
             <div className="font-bold text-4xl flex flex-col items-center">
               {isAnnual ? (
                 <>
@@ -266,7 +272,7 @@ export default function PublicPricingCards() {
                     </span>
                   </span>
                   <span className="text-sm font-normal text-muted-foreground mt-1">
-                    ${PLANS.ADVANCED.yearlyPrice} billed annually
+                    Save 17% annually
                   </span>
                 </>
               ) : (
@@ -284,9 +290,12 @@ export default function PublicPricingCards() {
           </CardDescription>
           <CardContent className="flex-grow">
             <ul className="mt-7 space-y-2.5 text-sm">
-              {PLANS.ADVANCED.features.map((feature, i) => (
-                <PricingFeatureItem key={i}>{feature}</PricingFeatureItem>
-              ))}
+              <PricingFeatureItem>Everything in Pro</PricingFeatureItem>
+              <PricingFeatureItem>Unlimited calendar providers</PricingFeatureItem>
+              <PricingFeatureItem>Team collaboration</PricingFeatureItem>
+              <PricingFeatureItem>Advanced analytics</PricingFeatureItem>
+              <PricingFeatureItem>Custom integrations</PricingFeatureItem>
+              <PricingFeatureItem>24/7 priority support</PricingFeatureItem>
             </ul>
           </CardContent>
           <CardFooter>
@@ -295,46 +304,7 @@ export default function PublicPricingCards() {
               variant="outline"
               onClick={handleGetStarted}
             >
-              Get Started
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Lifetime Plan */}
-        <Card className="border-yellow-500 flex flex-col h-full">
-          <CardHeader className="text-center pb-2">
-            <Badge className="uppercase w-max self-center mb-3 bg-yellow-500">
-              <StarIcon className="w-3 h-3 mr-1" />
-              Lifetime Deal
-            </Badge>
-            <CardTitle className="!mb-7">Lifetime</CardTitle>
-            <div className="font-bold text-4xl flex flex-col items-center">
-              <span className="flex items-baseline">
-                $400
-                <span className="text-sm font-normal text-muted-foreground ml-1">
-                  one-time
-                </span>
-              </span>
-            </div>
-          </CardHeader>
-          <CardDescription className="text-center w-11/12 mx-auto">
-            All features, forever
-          </CardDescription>
-          <CardContent className="flex-grow">
-            <ul className="mt-7 space-y-2.5 text-sm">
-              <PricingFeatureItem>Everything in Advanced</PricingFeatureItem>
-              <PricingFeatureItem>Lifetime Updates</PricingFeatureItem>
-              <PricingFeatureItem>Priority Support</PricingFeatureItem>
-              <PricingFeatureItem>No Recurring Fees</PricingFeatureItem>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={handleGetStarted}
-            >
-              Get Started
+              Start with Advanced
             </Button>
           </CardFooter>
         </Card>

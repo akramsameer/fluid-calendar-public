@@ -5,7 +5,8 @@
       "Bash(grep:*)",
       "Bash(npm run type-check:*)",
       "Bash(gh label create:*)",
-      "Bash(gh issue list:*)"
+      "Bash(gh issue list:*)",
+      "WebFetch(domain:fluidcalendar.com)"
     ],
     "deny": []
   }
