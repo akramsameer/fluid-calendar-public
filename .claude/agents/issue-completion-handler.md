@@ -26,6 +26,7 @@ When activated, you will execute this comprehensive workflow:
    - Create a clear, descriptive commit message that references the issue number
    - Push changes to the appropriate branch
    - Verify the push was successful
+   - Create a PR to staging branch
 
 4. **Issue Closure**:
    - Close the GitHub issue with an appropriate closing comment
