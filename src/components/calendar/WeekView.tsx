@@ -91,7 +91,14 @@ export function WeekView({ currentDate, onDateClick }: WeekViewProps) {
           allDay: item.allDay,
           classNames: [
             item.extendedProps?.isTask ? "calendar-task" : "calendar-event",
-          ],
+            // Add duration-based classes for better readability of short events
+            (() => {
+              const duration = newDate(item.end).getTime() - newDate(item.start).getTime();
+              if (duration <= 900000) return "very-short-duration"; // ≤ 15 minutes
+              if (duration <= 1800000) return "short-duration"; // ≤ 30 minutes
+              return "";
+            })(),
+          ].filter(Boolean),
           // Store the original event data
           extendedProps: {
             ...item,
