@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm run lint)",
       "Bash(grep:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Bash(gh label create:*)",
+      "Bash(gh issue list:*)"
     ],
     "deny": []
   }
