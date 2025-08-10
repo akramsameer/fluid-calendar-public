@@ -3,7 +3,7 @@
 ## 🔴 CRITICAL ISSUES (Fix Immediately)
 
 ### System Stability
-- [ ] **Auto-scheduling creating tasks in the past** (off by one day bug)
+- [x] **Auto-scheduling creating tasks in the past** (off by one day bug)
 - [ ] **Auto-scheduling not prioritizing high priority tasks first**
 - [ ] **Synced tasks are not set to auto-schedule by default**
 - [ ] **Hide upcoming tasks not working**
