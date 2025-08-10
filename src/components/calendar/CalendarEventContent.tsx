@@ -55,7 +55,9 @@ export const CalendarEventContent = memo(function CalendarEventContent({
     <div
       data-testid={isTask ? "calendar-task" : "calendar-event"}
       className={cn(
-        "flex h-full flex-col justify-start gap-1 overflow-hidden text-[11px]",
+        "flex h-full flex-col justify-start overflow-hidden text-[11px]",
+        // Adjust spacing based on event duration
+        duration <= 900000 ? "gap-0 py-0.5" : "gap-1",
         isTask && "border-l-4",
         isTask && "text-gray-700",
         isTask && priority && priorityColors[priority as Priority],
@@ -69,45 +71,74 @@ export const CalendarEventContent = memo(function CalendarEventContent({
         status === TaskStatus.COMPLETED && "text-gray-500 line-through"
       )}
     >
-      <div className="flex w-full items-center gap-1.5">
+      <div className={cn(
+        "flex w-full items-center",
+        duration <= 900000 ? "gap-1" : "gap-1.5"
+      )}>
         {isTask ? (
-          <IoCheckmarkCircle className="h-3.5 w-3.5 flex-shrink-0 text-current opacity-75" />
+          <IoCheckmarkCircle className={cn(
+            "flex-shrink-0 text-current opacity-75",
+            duration <= 900000 ? "h-3 w-3" : "h-3.5 w-3.5"
+          )} />
         ) : isRecurring ? (
           <div className="flex items-center gap-1">
             <div
-              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+              className={cn(
+                "rounded-full flex-shrink-0",
+                duration <= 900000 ? "h-2 w-2" : "h-2.5 w-2.5"
+              )}
               style={{ backgroundColor: calendarColor }}
             />
-            <IoRepeat className="h-3.5 w-3.5 flex-shrink-0 text-current opacity-75" />
+            <IoRepeat className={cn(
+              "flex-shrink-0 text-current opacity-75",
+              duration <= 900000 ? "h-3 w-3" : "h-3.5 w-3.5"
+            )} />
           </div>
         ) : !isAllDay ? (
           <div className="flex items-center gap-1">
             <div
-              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+              className={cn(
+                "rounded-full flex-shrink-0",
+                duration <= 900000 ? "h-2 w-2" : "h-2.5 w-2.5"
+              )}
               style={{ backgroundColor: calendarColor }}
             />
-            <IoTimeOutline className="h-3 w-3 flex-shrink-0 text-current opacity-75" />
+            <IoTimeOutline className={cn(
+              "flex-shrink-0 text-current opacity-75",
+              duration <= 900000 ? "h-2.5 w-2.5" : "h-3 w-3"
+            )} />
           </div>
         ) : (
           <div className="flex items-center gap-1">
             <div
-              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+              className={cn(
+                "rounded-full flex-shrink-0",
+                duration <= 900000 ? "h-2 w-2" : "h-2.5 w-2.5"
+              )}
               style={{ backgroundColor: calendarColor }}
             />
-            <IoTimeOutline className="h-3.5 w-3.5 flex-shrink-0 text-current opacity-75" />
+            <IoTimeOutline className={cn(
+              "flex-shrink-0 text-current opacity-75",
+              duration <= 900000 ? "h-3 w-3" : "h-3.5 w-3.5"
+            )} />
           </div>
         )}
         <div className="min-w-0 flex-1">
           <div
             className={cn(
-              "calendar-event-title font-medium leading-snug",
-              duration <= 1800000 ? "truncate" : "line-clamp-2 break-words"
+              "calendar-event-title font-medium",
+              // Very short events (≤ 15 min): smaller font, tight leading, allow wrap
+              duration <= 900000 ? "text-[10px] leading-tight line-clamp-2 break-words" :
+              // Short events (≤ 30 min): normal font, allow some wrapping  
+              duration <= 1800000 ? "text-[11px] leading-snug line-clamp-2 break-words" :
+              // Longer events: standard formatting
+              "leading-snug line-clamp-2 break-words"
             )}
           >
             {title}
           </div>
-          {/* Display time for timed events */}
-          {!isTask && !isAllDay && eventStartTime && (
+          {/* Display time for timed events - hide for very short events to save space */}
+          {!isTask && !isAllDay && eventStartTime && duration > 900000 && (
             <div className="text-[10px] leading-snug opacity-80 truncate">
               {eventStartTime}
             </div>
