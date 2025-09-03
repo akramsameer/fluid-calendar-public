@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
@@ -10,6 +12,8 @@ import {
 } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
+import { trackUserSignup } from "@/lib/x-tracking";
 
 interface PaymentResult {
   metadata?: {
@@ -35,9 +39,15 @@ export default function SuccessClient({
   isLoggedIn = false,
   redirectUrl,
 }: SuccessClientProps) {
-  // No debug state needed anymore
-
   const isLifetime = paymentResult.isLifetime;
+
+  // Track signup conversion when component mounts
+  useEffect(() => {
+    const email = paymentResult.metadata?.email;
+    if (email) {
+      trackUserSignup(email, "subscription");
+    }
+  }, [paymentResult.metadata?.email]);
 
   return (
     <motion.div
@@ -56,7 +66,9 @@ export default function SuccessClient({
         </motion.div>
         <PageHeader className="text-center">
           <PageHeaderHeading>
-            {isLifetime ? "Welcome to the Lifetime Club!" : "Your Subscription is Active!"}
+            {isLifetime
+              ? "Welcome to the Lifetime Club!"
+              : "Your Subscription is Active!"}
           </PageHeaderHeading>
           <PageHeaderDescription>
             {isLifetime
@@ -73,8 +85,7 @@ export default function SuccessClient({
             <p className="text-muted-foreground">
               {redirectUrl
                 ? "Your subscription is active! You can now continue to the feature you were trying to access."
-                : "Your subscription is active! You can now start using FluidCalendar."
-              }
+                : "Your subscription is active! You can now start using FluidCalendar."}
             </p>
           </div>
 
@@ -95,9 +106,10 @@ export default function SuccessClient({
               }}
             >
               {isLoggedIn
-                ? (redirectUrl ? "Continue to App" : "Go to Calendar")
-                : "Go to Login"
-              }
+                ? redirectUrl
+                  ? "Continue to App"
+                  : "Go to Calendar"
+                : "Go to Login"}
             </Button>
 
             {/* Debug section removed */}
@@ -122,9 +134,10 @@ export default function SuccessClient({
       <div className="text-center text-sm text-muted-foreground">
         <p>
           We&apos;ve sent a confirmation email to your inbox with important
-          information about your {isLifetime ? "lifetime access" : "subscription"}.
+          information about your{" "}
+          {isLifetime ? "lifetime access" : "subscription"}.
         </p>
       </div>
     </motion.div>
   );
-} 
+}

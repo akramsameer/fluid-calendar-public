@@ -37,7 +37,7 @@ interface RegistrationFormProps {
   email?: string;
   name?: string;
   invitationToken?: string;
-  onSuccess: () => void;
+  onSuccess: (email?: string) => void;
 }
 
 export default function RegistrationForm({
@@ -86,7 +86,7 @@ export default function RegistrationForm({
       }
 
       toast.success("Registration successful!");
-      onSuccess();
+      onSuccess(data.email);
     } catch (error) {
       toast.error(
         error instanceof Error
