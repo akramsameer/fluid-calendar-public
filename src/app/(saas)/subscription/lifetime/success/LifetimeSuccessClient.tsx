@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
@@ -10,6 +12,8 @@ import {
 } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
+import { trackUserSignup } from "@/lib/x-tracking";
 
 interface PaymentResult {
   metadata?: {
@@ -30,6 +34,15 @@ export default function LifetimeSuccessClient({
   isLoggedIn = false,
 }: LifetimeSuccessClientProps) {
   console.log("Payment result:", paymentResult);
+
+  // Track signup conversion when component mounts
+  useEffect(() => {
+    const email = paymentResult.metadata?.email;
+    if (email) {
+      trackUserSignup(email, "lifetime");
+    }
+  }, [paymentResult.metadata?.email]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

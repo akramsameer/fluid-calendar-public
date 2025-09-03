@@ -16,6 +16,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { trackUserSignup } from "@/lib/x-tracking";
+
 import RegistrationForm from "./registration-form";
 
 interface WaitlistEntry {
@@ -114,7 +116,12 @@ export default function JoinPageClient() {
     }
   };
 
-  const handleRegistrationSuccess = () => {
+  const handleRegistrationSuccess = (email?: string) => {
+    const emailToTrack = email || waitlistEntry?.email;
+    if (emailToTrack) {
+      // Track the signup conversion
+      trackUserSignup(emailToTrack, "waitlist");
+    }
     setRegistrationSuccess(true);
   };
 

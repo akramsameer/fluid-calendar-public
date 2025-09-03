@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isPublicSignupEnabledClient } from "@/lib/auth/client-public-signup";
 import { initializeStores } from "@/lib/auth/store-management";
 import { logger } from "@/lib/logger";
+import { trackUserSignup } from "@/lib/x-tracking";
 
 const LOG_SOURCE = "SignInForm";
 
@@ -119,6 +120,9 @@ export function SignInForm() {
           description: data.error || "Please try again later.",
         });
       } else {
+        // Track successful signup conversion
+        trackUserSignup(email, "regular");
+
         toast.success("Account created successfully", {
           description: "You can now sign in with your credentials.",
         });
