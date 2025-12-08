@@ -10,19 +10,15 @@ export async function GET(request: NextRequest) {
 
   try {
     // Fetch all stats in parallel
-    const [
-      totalUsers,
-      totalTasks,
-      completedTasks,
-      totalCalendars,
-      totalProjects,
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.task.count(),
-      prisma.task.count({ where: { status: 'completed' } }),
-      prisma.calendarFeed.count(),
-      prisma.project.count(),
-    ]);
+    const [totalUsers, lastUser, totalTasks, completedTasks, totalCalendars, totalProjects] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.user.findFirst({ orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
+        prisma.task.count(),
+        prisma.task.count({ where: { status: 'completed' } }),
+        prisma.calendarFeed.count(),
+        prisma.project.count(),
+      ]);
 
     return NextResponse.json({
       app: 'fluid-calendar',
@@ -30,6 +26,7 @@ export async function GET(request: NextRequest) {
       stats: {
         users: {
           total: totalUsers,
+          lastSignup: lastUser?.createdAt?.toISOString() ?? null,
         },
         tasks: {
           total: totalTasks,
