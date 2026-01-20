@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Sync calendar provider usage with actual account count
     await syncCalendarProviderUsage(userId);
 
-    logger.info(
+    logger.debug(
       "Calendar provider usage synced successfully",
       { userId },
       LOG_SOURCE

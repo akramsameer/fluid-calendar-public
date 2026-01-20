@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Check calendar provider permissions
     const permissionResult = await checkCalendarProviderPermission(userId);
 
-    logger.info(
+    logger.debug(
       "Calendar provider permission check completed",
       {
         userId,

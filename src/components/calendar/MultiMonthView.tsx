@@ -100,6 +100,8 @@ export function MultiMonthView({
             isRecurring: item.isRecurring,
             status: item.extendedProps?.status,
             priority: item.extendedProps?.priority,
+            transparency: item.transparency,
+            location: item.location,
           },
         }));
 

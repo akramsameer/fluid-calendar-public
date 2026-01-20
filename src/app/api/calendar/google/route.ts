@@ -343,6 +343,7 @@ export async function POST(request: NextRequest) {
             ),
             recurringEventId: masterEventData.recurringEventId,
             allDay: isAllDay,
+            transparency: masterEventData.transparency || "opaque",
             status: masterEventData.status,
             sequence: masterEventData.sequence,
             created: masterEventData.created
@@ -417,6 +418,7 @@ export async function POST(request: NextRequest) {
                     : undefined
                 ),
             allDay: isAllDay,
+            transparency: event.transparency || "opaque",
             status: event.status,
             sequence: event.sequence,
             created: event.created ? newDate(event.created) : undefined,
@@ -502,7 +504,6 @@ export async function PUT(request: NextRequest) {
       feed.accountId,
       userId
     );
-    console.log("Fetching events from Google Calendar:", feed.url);
 
     // Fetch events from Google Calendar
     const eventsResponse = await googleCalendarClient.events.list({
@@ -515,8 +516,6 @@ export async function PUT(request: NextRequest) {
 
     //events sorted by master events first
     const events = eventsResponse.data.items || [];
-
-    console.log(`Found ${events.length} events in Google Calendar`);
 
     // Pre-fetch all master events for recurring events
     const recurringEvents = events.filter(
@@ -538,7 +537,6 @@ export async function PUT(request: NextRequest) {
             calendarId: feed.url as string,
             eventId,
           });
-          console.log("Master event", masterEvent);
 
           const recurrence = masterEvent.data?.recurrence;
           if (Array.isArray(recurrence)) {
@@ -550,15 +548,23 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // De-duplicate events by ID (family/shared calendars can return duplicates)
+    const seenEventIds = new Set<string>();
+    const uniqueEvents = events.filter((event) => {
+      if (!event.id) return true; // Keep events without IDs
+      if (seenEventIds.has(event.id)) return false; // Skip duplicates
+      seenEventIds.add(event.id);
+      return true;
+    });
+
     // Now perform database operations in transaction
     await prisma.$transaction(async (tx) => {
-      console.log("Deleting existing events");
       await tx.calendarEvent.deleteMany({
         where: { feedId },
       });
 
       // Create new events
-      for (const event of events) {
+      for (const event of uniqueEvents) {
         if (!event.start?.dateTime && !event.start?.date) continue;
 
         // Get recurrence rule from pre-fetched master events
@@ -567,6 +573,17 @@ export async function PUT(request: NextRequest) {
         }
 
         const isAllDay = event.start ? !event.start.dateTime : false;
+
+        // Skip if event with this ID already exists (can happen with shared/family calendars)
+        if (event.id) {
+          const existingEvent = await tx.calendarEvent.findUnique({
+            where: { id: event.id },
+            select: { id: true },
+          });
+          if (existingEvent) {
+            continue;
+          }
+        }
 
         await tx.calendarEvent.create({
           data: {
@@ -591,6 +608,7 @@ export async function PUT(request: NextRequest) {
                 : undefined
             ),
             allDay: isAllDay,
+            transparency: event.transparency || "opaque",
             status: event.status,
             sequence: event.sequence,
             created: event.created ? newDate(event.created) : undefined,
@@ -622,7 +640,6 @@ export async function PUT(request: NextRequest) {
       });
     });
 
-    console.log("Successfully synced calendar:", feedId);
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error("Failed to sync Google calendar:", error);

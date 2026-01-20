@@ -6,7 +6,18 @@
       "Bash(npm run type-check:*)",
       "Bash(gh label create:*)",
       "Bash(gh issue list:*)",
-      "WebFetch(domain:fluidcalendar.com)"
+      "WebFetch(domain:fluidcalendar.com)",
+      "Bash(wc:*)",
+      "Bash(tail:*)",
+      "WebSearch",
+      "Bash(npx openspec:*)",
+      "Bash(stripe subscriptions list:*)",
+      "Bash(stripe customers list:*)",
+      "Bash(kubectl get:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(openspec list:*)",
+      "Skill(openspec:proposal)",
+      "Bash(openspec validate:*)"
     ],
     "deny": []
   }

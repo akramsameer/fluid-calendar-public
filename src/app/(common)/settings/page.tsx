@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 
 import { AccountManager } from "@/components/settings/AccountManager";
 import { AutoScheduleSettings } from "@/components/settings/AutoScheduleSettings";
+import { BookingLinksSettings } from "@/components/settings/BookingLinksSettings";
 import { CalendarSettings } from "@/components/settings/CalendarSettings";
 import { ImportExportSettings } from "@/components/settings/ImportExportSettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
@@ -50,7 +51,8 @@ type SettingsTab =
   | "waitlist"
   | "import-export"
   | "admin-dashboard"
-  | "notifications";
+  | "notifications"
+  | "booking-links";
 
 export default function SettingsPage() {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -68,6 +70,7 @@ export default function SettingsPage() {
       { id: "user", label: "User" },
       { id: "calendar", label: "Calendar" },
       { id: "auto-schedule", label: "Auto-Schedule" },
+      { id: "booking-links", label: "Booking Links" },
       { id: "task-sync", label: "Task Sync" },
       { id: "notifications", label: "Notifications" },
       { id: "import-export", label: "Import/Export" },
@@ -109,6 +112,7 @@ export default function SettingsPage() {
         "user",
         "calendar",
         "auto-schedule",
+        "booking-links",
         "task-sync",
         "system",
         "user-management",
@@ -182,6 +186,8 @@ export default function SettingsPage() {
         return <CalendarSettings />;
       case "auto-schedule":
         return <AutoScheduleSettings />;
+      case "booking-links":
+        return <BookingLinksSettings />;
       case "task-sync":
         return <TaskSyncSettings />;
       case "notifications":

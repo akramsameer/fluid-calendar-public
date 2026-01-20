@@ -9,6 +9,14 @@
 - [ ] **Hide upcoming tasks not working**
 - [ ] **Project sidebar edit/sync not shown properly in production** when project name is too long
 - [ ] **Pending waitlist** - need a way to resend emails with new tokens or for users that signup again to get a new email
+- [ ] page title always says loading fluid calendar
+- [ ] google sync in prod not working
+- [ ] does the server sync automatically?
+- [ ] improve calendar grouping in sidebar by account
+- [ ] allow me to set account name
+- [ ] trials are not expiring
+- [ ] pSEO
+- [ ] 
 
 ### Performance Issues
 - [ ] **Event creation slows down significantly** due to sync operations (API should just create in database)

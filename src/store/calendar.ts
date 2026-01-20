@@ -163,7 +163,6 @@ interface CalendarStoreActions {
   getTasksAsEvents: (start: Date, end: Date) => CalendarEvent[];
   getAllCalendarItems: (start: Date, end: Date) => CalendarEvent[];
 
-  syncCalendar: (feedId: string) => Promise<void>;
 }
 
 // Main calendar store for data management
@@ -831,45 +830,6 @@ export const useCalendarStore = createStandardStore({
           if (!response.ok) throw new Error("Failed to fetch calendar events");
           const events = await response.json();
           set({ events });
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      syncCalendar: async (feedId: string) => {
-        try {
-          set({ isLoading: true, error: undefined });
-
-          // Get the feed to determine its type
-          const feed = get().feeds.find((f) => f.id === feedId);
-          if (!feed) throw new Error("Calendar not found");
-
-          const endpoint =
-            feed.type === "GOOGLE"
-              ? `/api/calendar/google/${feedId}`
-              : feed.type === "CALDAV"
-                ? `/api/calendar/caldav/sync`
-                : `/api/calendar/outlook/sync`;
-
-          const response = await fetch(endpoint, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ feedId }),
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || "Failed to sync calendar");
-          }
-
-          // Refresh events after sync
-          await (
-            get() as CalendarStoreState & CalendarStoreActions
-          ).refreshEvents();
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : "Unknown error",

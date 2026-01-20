@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AlertCircle, Crown, Lock } from "lucide-react";
 
@@ -55,8 +55,16 @@ export function AccountManager() {
   // Hook to invalidate permissions cache
   const invalidatePermissions = useInvalidateCalendarProviderPermissions();
 
+  // Use ref to prevent double-execution in React StrictMode
+  const hasInitializedRef = useRef(false);
+
   useEffect(() => {
+    // Only run once per component lifecycle
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
     refreshAccounts();
+
     // Sync usage count when component loads to ensure accuracy
     fetch("/api/calendar-providers/sync-usage", { method: "POST" })
       .then(() => invalidatePermissions())
@@ -67,7 +75,8 @@ export function AccountManager() {
           LOG_SOURCE
         );
       });
-  }, [refreshAccounts, invalidatePermissions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // Fetch integration status
@@ -263,7 +272,7 @@ export function AccountManager() {
                           variant="outline"
                           onClick={() => toggleAvailableCalendars(account.id)}
                         >
-                          {showAvailableFor === account.id ? "Hide" : "Show"}{" "}
+                          {showAvailableFor === account.id ? "Hide" : "Add More"}{" "}
                           Calendars
                         </Button>
                         <Button

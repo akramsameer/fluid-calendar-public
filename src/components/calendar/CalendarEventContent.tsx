@@ -31,6 +31,8 @@ export const CalendarEventContent = memo(function CalendarEventContent({
   const status = eventInfo.event.extendedProps.status;
   const priority = eventInfo.event.extendedProps.priority;
   const location = eventInfo.event.extendedProps.location;
+  const transparency = eventInfo.event.extendedProps.transparency;
+  const isFreeEvent = transparency === "transparent";
   const dueDate = eventInfo.event.extendedProps?.extendedProps?.dueDate;
   const title = eventInfo.event.title;
   const endTime = eventInfo.event.end?.getTime() ?? 0;
@@ -68,7 +70,9 @@ export const CalendarEventContent = memo(function CalendarEventContent({
           "border-gray-500": status === TaskStatus.TODO,
         },
         isOverdue && "border-red-500 font-medium text-red-600",
-        status === TaskStatus.COMPLETED && "text-gray-500 line-through"
+        status === TaskStatus.COMPLETED && "text-gray-500 line-through",
+        // Free events (transparency: "transparent") - shown with reduced opacity and dashed border
+        isFreeEvent && !isTask && "opacity-60 border-l-2 border-dashed border-current"
       )}
     >
       <div className={cn(

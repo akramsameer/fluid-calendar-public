@@ -97,6 +97,8 @@ export function MonthView({ currentDate, onDateClick }: MonthViewProps) {
             isRecurring: item.isRecurring,
             status: item.extendedProps?.status,
             priority: item.extendedProps?.priority,
+            transparency: item.transparency,
+            location: item.location,
           },
         }));
 

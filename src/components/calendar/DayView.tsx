@@ -104,6 +104,8 @@ export function DayView({ currentDate, onDateClick }: DayViewProps) {
             isRecurring: item.isRecurring,
             status: item.extendedProps?.status,
             priority: item.extendedProps?.priority,
+            transparency: item.transparency,
+            location: item.location,
           },
         }));
 

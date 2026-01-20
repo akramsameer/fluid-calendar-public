@@ -50,7 +50,7 @@ export async function checkCalendarProviderPermission(
     const status = subscription?.status || SubscriptionStatus.CANCELLED;
     const limit = getCalendarProviderLimit(plan);
 
-    logger.info(
+    logger.debug(
       "Checking calendar provider permission",
       {
         userId,
@@ -176,7 +176,7 @@ export async function incrementCalendarProviderUsage(
       },
     });
 
-    logger.info("Incremented calendar provider usage", { userId }, LOG_SOURCE);
+    logger.debug("Incremented calendar provider usage", { userId }, LOG_SOURCE);
   } catch (error) {
     logger.error(
       "Failed to increment calendar provider usage",
@@ -220,7 +220,7 @@ export async function decrementCalendarProviderUsage(
       },
     });
 
-    logger.info(
+    logger.debug(
       "Decremented calendar provider usage",
       { userId, newUsage },
       LOG_SOURCE
@@ -281,7 +281,7 @@ export async function syncCalendarProviderUsage(userId: string): Promise<void> {
       },
     });
 
-    logger.info(
+    logger.debug(
       "Synced calendar provider usage",
       { userId, actualCount },
       LOG_SOURCE

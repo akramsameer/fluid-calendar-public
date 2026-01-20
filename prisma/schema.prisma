@@ -61,6 +61,7 @@ model User {
   email                String?               @unique
   emailVerified        DateTime?
   image                String?
+  username             String?               @unique // For booking URL: /book/[username]/[slug]
   role                 String                @default("user") // Possible values: "user", "admin"
   subscription         Subscription?
   accounts             Account[]
@@ -81,6 +82,8 @@ model User {
   PasswordReset        PasswordReset[]
   subscriptionHistory  SubscriptionHistory[]
   subscriptionUsage    SubscriptionUsage?
+  bookingLinks         BookingLink[]
+  bookings             Booking[]             @relation("HostBookings")
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @default(now()) @updatedAt
 }
@@ -133,6 +136,7 @@ model CalendarEvent {
   isRecurring     Boolean      @default(false)
   recurrenceRule  String?
   allDay          Boolean      @default(false)
+  transparency    String?      // "opaque" (busy) or "transparent" (free) - from Google/Outlook
   status          String?
   sequence        Int?
   created         DateTime?
@@ -728,4 +732,87 @@ model SubscriptionUsage {
   updatedAt             DateTime     @updatedAt
 
   @@index([userId])
+}
+
+// Booking Links for scheduling (cal.com-like feature)
+model BookingLink {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Link identity
+  name        String // "30 Minute Meeting"
+  slug        String // "30min" -> /book/username/30min
+  description String?
+
+  // Availability settings
+  duration          Int    // minutes (15, 30, 45, 60)
+  selectedCalendars String @default("[]") // JSON array of CalendarFeed IDs to check for conflicts
+  targetCalendarId  String // CalendarFeed ID to create events in
+
+  // Time settings
+  availabilityType   String  @default("working_hours") // "working_hours" | "custom"
+  customAvailability String? // JSON for custom hours per day (premium)
+  bufferBefore       Int     @default(0) // minutes (premium)
+  bufferAfter        Int     @default(0) // minutes (premium)
+  minNotice          Int     @default(60) // minimum minutes before booking
+  maxFutureDays      Int     @default(60) // how far in advance can book
+
+  // Video conferencing (premium)
+  videoProvider String? // "google_meet" | "zoom" | null
+
+  // Status
+  enabled Boolean @default(true)
+
+  // Relations
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+model Booking {
+  id            String      @id @default(cuid())
+  bookingLinkId String
+  bookingLink   BookingLink @relation(fields: [bookingLinkId], references: [id], onDelete: Cascade)
+
+  // Host reference (denormalized for easier queries)
+  hostId String
+  host   User   @relation("HostBookings", fields: [hostId], references: [id], onDelete: Cascade)
+
+  // Guest info
+  guestName     String
+  guestEmail    String
+  guestNotes    String?
+  guestTimezone String
+
+  // Booking details
+  startTime DateTime
+  endTime   DateTime
+
+  // Created event reference
+  calendarEventId String?
+
+  // Video link (if applicable)
+  videoLink String?
+
+  // Cancellation token for guest to cancel
+  cancelToken String @unique @default(cuid())
+
+  // Status
+  status       String    @default("confirmed") // "confirmed" | "cancelled"
+  cancelledAt  DateTime?
+  cancelReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookingLinkId])
+  @@index([hostId])
+  @@index([guestEmail])
+  @@index([startTime])
+  @@index([status])
 }
