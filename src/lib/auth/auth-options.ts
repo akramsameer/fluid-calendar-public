@@ -129,13 +129,15 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
         return token;
       },
       async session({ session, token }) {
-        // Add user role to the session
-        if (session.user) {
-          session.user.role = token.role;
-        }
-
+        // Explicitly include user with role in the returned session
+        // This ensures the role is exposed to the client
         return {
           ...session,
+          user: {
+            ...session.user,
+            id: token.sub,
+            role: token.role,
+          },
           accessToken: token.accessToken,
           refreshToken: token.refreshToken,
           expiresAt: token.expiresAt,
