@@ -20,7 +20,8 @@
       "Bash(openspec validate:*)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(kubectl describe:*)"
     ],
     "deny": []
   }

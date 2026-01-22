@@ -37,9 +37,8 @@ COPY . .
 # Generate Prisma Client
 RUN infisical run --token="${INFISICAL_TOKEN}" --projectId="${PROJECT_ID}" --env="${INFISICAL_SECRET_ENV}" --domain="${INFISICAL_API_URL}" -- npx prisma generate
 
-# Build the application with persistent Next.js cache for faster incremental builds
-RUN --mount=type=cache,target=/app/.next/cache \
-    NODE_OPTIONS="--max-old-space-size=4096" infisical run --token="${INFISICAL_TOKEN}" \
+# Build the application
+RUN NODE_OPTIONS="--max-old-space-size=4096" infisical run --token="${INFISICAL_TOKEN}" \
     --projectId="${PROJECT_ID}" \
     --env="${INFISICAL_SECRET_ENV}" \
     --domain="${INFISICAL_API_URL}" \
