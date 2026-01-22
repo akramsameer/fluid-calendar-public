@@ -62,7 +62,23 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        {/* Add more admin sections here as they are developed */}
+        <Card>
+          <CardHeader>
+            <CardTitle>SEO Articles</CardTitle>
+            <CardDescription>
+              Manage AI-generated SEO content
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">
+              Generate, review, and publish SEO articles. Monitor generation
+              costs and quality.
+            </p>
+            <Button asChild>
+              <Link href="/admin/articles">Manage Articles</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

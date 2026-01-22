@@ -108,6 +108,14 @@ The SaaS version exists for people who want a managed experience without the hos
 
 ---
 
+## See It In Action
+
+Want to try the booking feature yourself? Schedule a chat with me about FluidCalendar, AI, or software development:
+
+**Book a time:** https://fluidcalendar.com/book/eibrahim/fcchat
+
+---
+
 ## What Should I Build Next?
 
 This is where you come in.

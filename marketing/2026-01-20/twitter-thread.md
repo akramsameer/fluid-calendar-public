@@ -61,12 +61,21 @@ FluidCalendar is open source and built as an alternative to Motion.
 
 If you want a calendar app that actually helps you manage your time instead of just showing it, check it out.
 
-Hosted: https://www.fluidcalendar.com 
+Hosted: https://www.fluidcalendar.com
 GitHub: https://github.com/dotnetfactory/fluid-calendar
 
 ---
 
 **Tweet 7:**
+Want to see the booking feature in action?
+
+Schedule a chat with me about FluidCalendar, AI, or software dev:
+
+https://fluidcalendar.com/book/eibrahim/fcchat
+
+---
+
+**Tweet 8:**
 This is just the first Version 2 update. More coming.
 
 What features would make FluidCalendar your go-to calendar app?

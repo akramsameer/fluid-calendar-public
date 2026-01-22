@@ -32,4 +32,6 @@ Currently focusing on the SaaS version to nail the experience, then I'll backpor
 
 **GitHub:** https://github.com/dotnetfactory/fluid-calendar
 
+**Try it yourself:** Want to see the booking feature in action? Schedule a chat with me about FluidCalendar, AI, or software dev: https://fluidcalendar.com/book/eibrahim/fcchat
+
 Would love to hear what features you'd want to see in a self-hosted calendar/scheduling tool. What's missing from existing options? Feature requests and feedback welcome!

@@ -66,6 +66,14 @@ Early stage by any measure, but growing.
 
 ---
 
+## See It In Action
+
+Want to try the booking feature yourself? Schedule a chat with me about FluidCalendar, AI, or software development:
+
+**Book a time:** https://fluidcalendar.com/book/eibrahim/fcchat
+
+---
+
 ## What Should Come Next?
 
 This is where I need your input.

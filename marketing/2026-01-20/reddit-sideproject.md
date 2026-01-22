@@ -28,4 +28,6 @@ The plan: Focus on making the SaaS version rock solid first, then push updates t
 
 **GitHub:** https://github.com/dotnetfactory/fluid-calendar
 
+**Try it yourself:** Want to see the booking feature in action? Schedule a chat with me about FluidCalendar, AI, or software dev: https://fluidcalendar.com/book/eibrahim/fcchat
+
 What features would you want to see next? Always looking for feedback and feature requests!

@@ -33,4 +33,6 @@ The key difference from standalone scheduling tools: it's integrated with your t
 
 **GitHub:** https://github.com/dotnetfactory/fluid-calendar
 
+**Try it yourself:** Want to see the booking feature in action? Schedule a chat with me about FluidCalendar, AI, or software dev: https://fluidcalendar.com/book/eibrahim/fcchat
+
 I'd love to hear what features would be most valuable to you. Drop your feedback or feature requests — they directly shape what I build next.

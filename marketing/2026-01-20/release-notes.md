@@ -52,6 +52,14 @@ I'm excited to announce that I'm now dedicating all my development efforts to bu
 
 ---
 
+## See It In Action
+
+Want to try the booking feature yourself? Schedule a chat with me about FluidCalendar, AI, or software development:
+
+**Book a time:** https://fluidcalendar.com/book/eibrahim/fcchat
+
+---
+
 ## What's Next?
 
 This is just the beginning of Version 2. I'd love to hear what features matter most to you — drop your feedback and feature requests on GitHub!

@@ -17,6 +17,7 @@ const publicRoutes = [
   "/subscription/lifetime/setup-password",
   "/subscription/success", // Added universal success page
   "/book", // Public booking pages
+  "/learn", // pSEO articles
 ];
 
 // Routes that only admins can access

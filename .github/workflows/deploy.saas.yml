@@ -100,6 +100,29 @@ jobs:
           kubectl rollout status deployment/fluid-calendar -n $NAMESPACE --timeout=2m
           kubectl rollout status deployment/fluid-calendar-worker -n $NAMESPACE --timeout=2m
 
+      - name: Deploy SEO Article Generation CronJob
+        run: |
+          # Install Infisical CLI
+          curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' | sudo -E bash
+          sudo apt-get update && sudo apt-get install -y infisical
+
+          # Fetch CRON_SECRET from Infisical
+          CRON_SECRET=$(infisical secrets get CRON_SECRET \
+            --token=$INFISICAL_TOKEN \
+            --projectId=$PROJECT_ID \
+            --env=$INFISICAL_SECRET_ENV \
+            --domain=$INFISICAL_API_URL \
+            --plain --silent)
+
+          # Create cron secrets
+          kubectl create secret generic cron-secrets \
+            --namespace=$NAMESPACE \
+            --from-literal=CRON_SECRET=$CRON_SECRET \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          # Deploy the CronJob
+          kubectl apply -f k8s/cron-generate-articles.yaml -n $NAMESPACE
+
       - name: Verify Deployment
         run: |
           echo "Checking deployment status..."
@@ -112,3 +135,5 @@ jobs:
           kubectl get deployment/fluid-calendar-worker -n $NAMESPACE
           echo "Checking ingress status..."
           kubectl get ingress -n $NAMESPACE
+          echo "Checking SEO CronJob status..."
+          kubectl get cronjob -n $NAMESPACE

@@ -816,3 +816,137 @@ model Booking {
   @@index([startTime])
   @@index([status])
 }
+
+// =============================================
+// pSEO (Programmatic SEO) Models
+// =============================================
+
+enum ArticleClusterType {
+  use_case
+  productivity_tip
+  feature_guide
+  comparison
+  integration
+  industry
+  role
+  problem_solution
+  best_practice
+  seasonal
+  template
+  long_tail
+}
+
+enum ArticleClusterStatus {
+  pending
+  generating
+  published
+  needs_review
+  failed
+  skipped
+}
+
+enum AICallType {
+  SEO_CONTENT_GENERATION
+}
+
+model Article {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String   @db.Text
+  excerpt   String
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cluster ArticleCluster?
+
+  @@index([slug])
+  @@index([published])
+}
+
+model ArticleCluster {
+  id          String             @id @default(cuid())
+  clusterType ArticleClusterType
+
+  // Cluster parameters
+  useCase        String?
+  targetAudience String?
+  competitor     String?
+  industry       String?
+  role           String?
+  provider       String?
+  focusArea      String?
+  scenario       String?
+
+  // SEO metadata
+  slug            String  @unique
+  title           String
+  metaDescription String
+  keywords        String? // JSON array
+  priorityScore   Int // 35-100
+
+  // Generation tracking
+  status             ArticleClusterStatus @default(pending)
+  generationAttempts Int                  @default(0)
+  contentHash        String?
+  publishedAt        DateTime?
+  errorMessage       String?
+
+  // Metadata
+  metadata  String? // JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  articleId String?                @unique
+  article   Article?               @relation(fields: [articleId], references: [id])
+  logs      ArticleGenerationLog[]
+
+  @@index([status, priorityScore(sort: Desc)])
+  @@index([clusterType])
+}
+
+model ArticleGenerationLog {
+  id        String         @id @default(cuid())
+  clusterId String
+  cluster   ArticleCluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+
+  status      String // 'running', 'success', 'failure'
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  durationMs  Int?
+  wordCount   Int?
+  errorMessage String?
+  errorStack   String?
+
+  // Email tracking
+  emailSent  Boolean @default(false)
+  emailError String?
+
+  @@index([clusterId])
+  @@index([startedAt])
+}
+
+model AICallLog {
+  id               String     @id @default(cuid())
+  type             AICallType
+  model            String
+  startTime        DateTime
+  endTime          DateTime?
+  durationMs       Int?
+  prompt           String?    @db.Text
+  response         String?    @db.Text
+  tokensPrompt     Int?
+  tokensCompletion Int?
+  tokensTotal      Int?
+  costUsd          Float?
+  metadata         String? // JSON
+  error            String?
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+  @@index([model])
+}
