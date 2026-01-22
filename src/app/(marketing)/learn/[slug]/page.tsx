@@ -252,16 +252,12 @@ export default async function ArticlePage({ params }: PageProps) {
   );
 }
 
-export async function generateStaticParams() {
-  // Only pre-generate the most recent articles
-  const articles = await prisma.article.findMany({
-    where: { published: true },
-    select: { slug: true },
-    take: 100,
-    orderBy: { createdAt: "desc" },
-  });
+// Generate pages on-demand (SSR) since we can't access DB during Docker build
+// and articles change frequently anyway
+export const dynamicParams = true;
 
-  return articles.map((article) => ({
-    slug: article.slug,
-  }));
+export async function generateStaticParams() {
+  // Return empty array - pages will be generated on first request
+  // This avoids requiring database access during build time
+  return [];
 }

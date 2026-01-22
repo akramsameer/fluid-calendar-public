@@ -17,7 +17,8 @@
       "Bash(kubectl logs:*)",
       "Bash(openspec list:*)",
       "Skill(openspec:proposal)",
-      "Bash(openspec validate:*)"
+      "Bash(openspec validate:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": []
   }

@@ -51,6 +51,9 @@ RUN npm run build:worker
 RUN cp src/saas/jobs/register-aliases.js dist/saas/jobs/register-aliases.js
 RUN cp src/saas/jobs/worker-with-aliases.js dist/saas/jobs/worker-with-aliases.js
 
+# Prune dev dependencies to reduce image size and transfer time
+RUN npm prune --omit=dev --legacy-peer-deps
+
 # Production image, copy all the files and run next
 FROM --platform=linux/amd64 base AS runner
 WORKDIR /app
