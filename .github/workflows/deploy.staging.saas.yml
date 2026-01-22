@@ -53,11 +53,9 @@ jobs:
           tags: |
             registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:${{ github.sha }}
             registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest
-          # Use registry cache for better cache retention (GHA cache can get evicted)
-          cache-from: |
-            type=registry,ref=registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:buildcache
-            type=gha
-          cache-to: type=registry,ref=registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:buildcache,mode=max
+          # Use inline cache (embedded in image) for faster cache export
+          cache-from: type=registry,ref=registry.digitalocean.com/curatedletters/fluid-calendar-website-staging:latest
+          cache-to: type=inline
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
