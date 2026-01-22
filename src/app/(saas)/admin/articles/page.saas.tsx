@@ -23,6 +23,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -151,6 +152,7 @@ export default function ArticlesAdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [previewCluster, setPreviewCluster] = useState<ArticleCluster | null>(null);
+  const [showReseedConfirm, setShowReseedConfirm] = useState(false);
 
   // Fetch stats
   const { data: stats } = useQuery<ArticleStats>({
@@ -226,6 +228,26 @@ export default function ArticlesAdminPage() {
     },
   });
 
+  // Seed mutation
+  const seedMutation = useMutation({
+    mutationFn: async (options: { force?: boolean }) => {
+      const params = new URLSearchParams();
+      if (options.force) params.set("force", "true");
+      const res = await fetch(`/api/admin/articles/seed?${params}`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to seed");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["article-stats"] });
+    },
+  });
+
   // Fetch full article for preview
   const { data: previewData } = useQuery({
     queryKey: ["article-preview", previewCluster?.id],
@@ -265,7 +287,71 @@ export default function ArticlesAdminPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="mb-6 text-3xl font-bold">Article Management</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Article Management</h1>
+        <div className="flex gap-2">
+          {stats && stats.clusters.total === 0 ? (
+            <Button
+              onClick={() => seedMutation.mutate({})}
+              disabled={seedMutation.isPending}
+            >
+              {seedMutation.isPending ? "Seeding..." : "Seed Clusters"}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => setShowReseedConfirm(true)}
+              disabled={seedMutation.isPending}
+            >
+              {seedMutation.isPending ? "Seeding..." : "Reseed Clusters"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Reseed Confirmation Dialog */}
+      <Dialog open={showReseedConfirm} onOpenChange={setShowReseedConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reseed Article Clusters?</DialogTitle>
+            <DialogDescription>
+              This will delete all existing clusters, articles, and generation logs,
+              then create ~1,000 new cluster templates. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReseedConfirm(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                seedMutation.mutate({ force: true });
+                setShowReseedConfirm(false);
+              }}
+            >
+              Yes, Reseed All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Seed Result Message */}
+      {seedMutation.isSuccess && (
+        <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
+          <p className="text-green-800 dark:text-green-200">
+            Successfully seeded {seedMutation.data.inserted} clusters
+            {seedMutation.data.skipped > 0 && ` (${seedMutation.data.skipped} skipped)`}
+          </p>
+        </div>
+      )}
+      {seedMutation.isError && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
+          <p className="text-red-800 dark:text-red-200">
+            Failed to seed: {seedMutation.error?.message}
+          </p>
+        </div>
+      )}
 
       {/* Stats Cards */}
       {stats && (
