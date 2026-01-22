@@ -159,6 +159,7 @@ The project uses a sophisticated dual-version architecture controlled by `NEXT_P
 - Multi-user schema with user isolation across all models
 - Subscription management with Stripe integration
 - Advanced task synchronization with external providers (Google, Outlook)
+- you MUST create a migration whenever you make database schema changes
 
 #### Authentication & Authorization
 - **NextAuth.js** with multiple providers (Google, Outlook, credentials)

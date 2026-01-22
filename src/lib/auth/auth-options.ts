@@ -7,6 +7,7 @@ import { getGoogleCredentials, getOutlookCredentials } from "@/lib/auth";
 import { authenticateUser } from "@/lib/auth/credentials-provider";
 import { logger } from "@/lib/logger";
 import { MICROSOFT_GRAPH_SCOPES } from "@/lib/outlook";
+import { prisma } from "@/lib/prisma";
 
 // Define a type for our user with role
 interface UserWithRole {
@@ -92,22 +93,37 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
     ],
     callbacks: {
       async jwt({ token, account, profile, user }) {
-        // Initial sign in
+        // Initial sign in with OAuth
         if (account && profile) {
-          return {
-            ...token,
-            accessToken: account.access_token,
-            refreshToken: account.refresh_token,
-            expiresAt: account.expires_at,
-            provider: account.provider,
-          };
+          token.accessToken = account.access_token;
+          token.refreshToken = account.refresh_token;
+          token.expiresAt = account.expires_at;
+          token.provider = account.provider;
         }
 
-        // Include user role in the token if available
+        // Include user role in the token if available (credentials login)
         if (user) {
-          // Add role from user object to token
-          // TypeScript doesn't know about our custom role property
           token.role = (user as UserWithRole).role;
+        }
+
+        // If we don't have a role yet, fetch it from the database
+        // This handles OAuth logins where the user object doesn't include role
+        if (!token.role && token.email) {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { email: token.email as string },
+              select: { role: true },
+            });
+            if (dbUser?.role) {
+              token.role = dbUser.role;
+            }
+          } catch (error) {
+            logger.error(
+              "Failed to fetch user role from database",
+              { error: error instanceof Error ? error.message : "Unknown error" },
+              LOG_SOURCE
+            );
+          }
         }
 
         return token;

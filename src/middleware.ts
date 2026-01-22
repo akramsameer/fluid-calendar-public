@@ -141,6 +141,14 @@ export async function middleware(request: NextRequest) {
 
   // Check if the route is admin-only
   if (adminRoutes.some((route) => pathname.startsWith(route))) {
+    // Debug: log token role for admin route access
+    console.log("[Middleware] Admin route access attempt:", {
+      pathname,
+      email: token.email,
+      role: token.role,
+      hasRole: !!token.role,
+    });
+
     // If the user is not an admin, redirect to the home page
     if (token.role !== "admin") {
       return NextResponse.redirect(new URL("/", request.url));
