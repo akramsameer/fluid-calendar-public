@@ -18,7 +18,8 @@
       "Bash(openspec list:*)",
       "Skill(openspec:proposal)",
       "Bash(openspec validate:*)",
-      "Bash(gh run list:*)"
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)"
     ],
     "deny": []
   }

@@ -20,82 +20,139 @@ export const QUEUE_NAMES = {
   TASK_SYNC: "task-sync",
 };
 
-// Queue options
-const defaultQueueOptions = {
-  ...getRedisOptions(),
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 1000,
+// Lazy-loaded queue options (don't call getRedisOptions at module load time)
+function getDefaultQueueOptions() {
+  return {
+    ...getRedisOptions(),
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: {
+        type: "exponential" as const,
+        delay: 1000,
+      },
+      removeOnComplete: {
+        age: 24 * 3600, // Keep successful jobs for 24 hours
+        count: 1000, // Keep at most 1000 successful jobs
+      },
+      removeOnFail: {
+        age: 7 * 24 * 3600, // Keep failed jobs for 7 days
+      },
     },
-    removeOnComplete: {
-      age: 24 * 3600, // Keep successful jobs for 24 hours
-      count: 1000, // Keep at most 1000 successful jobs
-    },
-    removeOnFail: {
-      age: 7 * 24 * 3600, // Keep failed jobs for 7 days
-    },
-  },
-};
+  };
+}
 
 // Email queue options with rate limiter (2 emails per second)
-const emailQueueOptions = {
-  ...defaultQueueOptions,
-  limiter: {
-    max: 1, // Maximum 2 jobs
-    duration: 1000, // Per 1 second (1000ms)
-  },
-};
-
-// Create queues
-export const calendarSyncQueue = new Queue(
-  QUEUE_NAMES.CALENDAR_SYNC,
-  defaultQueueOptions
-);
-export const emailQueue = new Queue(QUEUE_NAMES.EMAIL, emailQueueOptions);
-export const dailySummaryQueue = new Queue(
-  QUEUE_NAMES.DAILY_SUMMARY,
-  defaultQueueOptions
-);
-export const taskReminderQueue = new Queue(
-  QUEUE_NAMES.TASK_REMINDER,
-  defaultQueueOptions
-);
-export const maintenanceQueue = new Queue(
-  QUEUE_NAMES.MAINTENANCE,
-  defaultQueueOptions
-);
-export const taskScheduleQueue = new Queue(
-  QUEUE_NAMES.TASK_SCHEDULE,
-  defaultQueueOptions
-);
-export const testCronQueue = new Queue(
-  QUEUE_NAMES.TEST_CRON,
-  defaultQueueOptions
-);
-export const taskSyncQueue = new Queue<TaskSyncJobData>(QUEUE_NAMES.TASK_SYNC, {
-  ...defaultQueueOptions,
-  defaultJobOptions: {
-    ...defaultQueueOptions.defaultJobOptions,
-    attempts: 5, // More attempts for task sync due to possible API limits
-    backoff: {
-      type: "exponential",
-      delay: 5000, // Start with 5 seconds, then exponential backoff
+function getEmailQueueOptions() {
+  return {
+    ...getDefaultQueueOptions(),
+    limiter: {
+      max: 1, // Maximum 2 jobs
+      duration: 1000, // Per 1 second (1000ms)
     },
-  },
-});
+  };
+}
 
-// Queue map for easy access
+// Lazy-loaded queue instances (created on first access to avoid Redis connection during build)
+let _calendarSyncQueue: Queue | null = null;
+let _emailQueue: Queue | null = null;
+let _dailySummaryQueue: Queue | null = null;
+let _taskReminderQueue: Queue | null = null;
+let _maintenanceQueue: Queue | null = null;
+let _taskScheduleQueue: Queue | null = null;
+let _testCronQueue: Queue | null = null;
+let _taskSyncQueue: Queue<TaskSyncJobData> | null = null;
+
+// Lazy getters for queues
+export function getCalendarSyncQueue(): Queue {
+  if (!_calendarSyncQueue) {
+    _calendarSyncQueue = new Queue(QUEUE_NAMES.CALENDAR_SYNC, getDefaultQueueOptions());
+  }
+  return _calendarSyncQueue;
+}
+
+export function getEmailQueue(): Queue {
+  if (!_emailQueue) {
+    _emailQueue = new Queue(QUEUE_NAMES.EMAIL, getEmailQueueOptions());
+  }
+  return _emailQueue;
+}
+
+export function getDailySummaryQueue(): Queue {
+  if (!_dailySummaryQueue) {
+    _dailySummaryQueue = new Queue(QUEUE_NAMES.DAILY_SUMMARY, getDefaultQueueOptions());
+  }
+  return _dailySummaryQueue;
+}
+
+export function getTaskReminderQueue(): Queue {
+  if (!_taskReminderQueue) {
+    _taskReminderQueue = new Queue(QUEUE_NAMES.TASK_REMINDER, getDefaultQueueOptions());
+  }
+  return _taskReminderQueue;
+}
+
+export function getMaintenanceQueue(): Queue {
+  if (!_maintenanceQueue) {
+    _maintenanceQueue = new Queue(QUEUE_NAMES.MAINTENANCE, getDefaultQueueOptions());
+  }
+  return _maintenanceQueue;
+}
+
+export function getTaskScheduleQueue(): Queue {
+  if (!_taskScheduleQueue) {
+    _taskScheduleQueue = new Queue(QUEUE_NAMES.TASK_SCHEDULE, getDefaultQueueOptions());
+  }
+  return _taskScheduleQueue;
+}
+
+export function getTestCronQueue(): Queue {
+  if (!_testCronQueue) {
+    _testCronQueue = new Queue(QUEUE_NAMES.TEST_CRON, getDefaultQueueOptions());
+  }
+  return _testCronQueue;
+}
+
+export function getTaskSyncQueue(): Queue<TaskSyncJobData> {
+  if (!_taskSyncQueue) {
+    _taskSyncQueue = new Queue<TaskSyncJobData>(QUEUE_NAMES.TASK_SYNC, {
+      ...getDefaultQueueOptions(),
+      defaultJobOptions: {
+        ...getDefaultQueueOptions().defaultJobOptions,
+        attempts: 5, // More attempts for task sync due to possible API limits
+        backoff: {
+          type: "exponential" as const,
+          delay: 5000, // Start with 5 seconds, then exponential backoff
+        },
+      },
+    });
+  }
+  return _taskSyncQueue;
+}
+
+// Queue map for easy access (lazy-loaded)
+export function getQueues() {
+  return {
+    [QUEUE_NAMES.CALENDAR_SYNC]: getCalendarSyncQueue(),
+    [QUEUE_NAMES.EMAIL]: getEmailQueue(),
+    [QUEUE_NAMES.DAILY_SUMMARY]: getDailySummaryQueue(),
+    [QUEUE_NAMES.TASK_REMINDER]: getTaskReminderQueue(),
+    [QUEUE_NAMES.MAINTENANCE]: getMaintenanceQueue(),
+    [QUEUE_NAMES.TASK_SCHEDULE]: getTaskScheduleQueue(),
+    [QUEUE_NAMES.TEST_CRON]: getTestCronQueue(),
+    [QUEUE_NAMES.TASK_SYNC]: getTaskSyncQueue(),
+  };
+}
+
+// Legacy export for backward compatibility
 export const queues = {
-  [QUEUE_NAMES.CALENDAR_SYNC]: calendarSyncQueue,
-  [QUEUE_NAMES.EMAIL]: emailQueue,
-  [QUEUE_NAMES.DAILY_SUMMARY]: dailySummaryQueue,
-  [QUEUE_NAMES.TASK_REMINDER]: taskReminderQueue,
-  [QUEUE_NAMES.MAINTENANCE]: maintenanceQueue,
-  [QUEUE_NAMES.TASK_SCHEDULE]: taskScheduleQueue,
-  [QUEUE_NAMES.TEST_CRON]: testCronQueue,
-  [QUEUE_NAMES.TASK_SYNC]: taskSyncQueue,
+  get [QUEUE_NAMES.CALENDAR_SYNC]() { return getCalendarSyncQueue(); },
+  get [QUEUE_NAMES.EMAIL]() { return getEmailQueue(); },
+  get [QUEUE_NAMES.DAILY_SUMMARY]() { return getDailySummaryQueue(); },
+  get [QUEUE_NAMES.TASK_REMINDER]() { return getTaskReminderQueue(); },
+  get [QUEUE_NAMES.MAINTENANCE]() { return getMaintenanceQueue(); },
+  get [QUEUE_NAMES.TASK_SCHEDULE]() { return getTaskScheduleQueue(); },
+  get [QUEUE_NAMES.TEST_CRON]() { return getTestCronQueue(); },
+  get [QUEUE_NAMES.TASK_SYNC]() { return getTaskSyncQueue(); },
 };
 
 // Initialize all queues
@@ -103,7 +160,8 @@ export async function initializeQueues() {
   logger.info("Initializing BullMQ queues", {}, LOG_SOURCE);
 
   // Add event listeners to each queue
-  Object.entries(queues).forEach(([name, queue]) => {
+  const queueMap = getQueues();
+  Object.entries(queueMap).forEach(([name, queue]) => {
     queue.on("error", (error) => {
       logger.error(
         `Error in queue ${name}`,
@@ -120,8 +178,9 @@ export async function initializeQueues() {
 export async function closeQueues() {
   logger.info("Closing BullMQ queues", {}, LOG_SOURCE);
 
+  const queueMap = getQueues();
   await Promise.all(
-    Object.entries(queues).map(async ([name, queue]) => {
+    Object.entries(queueMap).map(async ([name, queue]) => {
       try {
         await queue.close();
         logger.info(`Queue ${name} closed`, {}, LOG_SOURCE);
@@ -214,7 +273,7 @@ export async function addCalendarSyncJob(
   );
 
   // Then add the job to the queue
-  const job = await calendarSyncQueue.add("sync", data, {
+  const job = await getCalendarSyncQueue().add("sync", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });
@@ -236,7 +295,7 @@ export async function addEmailJob(data: EmailJobData, options?: JobsOptions) {
   );
 
   // Then add the job to the queue
-  const job = await emailQueue.add("send", data, {
+  const job = await getEmailQueue().add("send", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });
@@ -261,7 +320,7 @@ export async function addDailySummaryJob(
   );
 
   // Then add the job to the queue
-  const job = await dailySummaryQueue.add("generate", data, {
+  const job = await getDailySummaryQueue().add("generate", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });
@@ -286,7 +345,7 @@ export async function addTaskReminderJob(
   );
 
   // Then add the job to the queue
-  const job = await taskReminderQueue.add("remind", data, {
+  const job = await getTaskReminderQueue().add("remind", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });
@@ -311,7 +370,7 @@ export async function addCleanupOrphanedRecordsJob(
   );
 
   // Then add the job to the queue
-  const job = await maintenanceQueue.add("cleanup-orphaned-records", data, {
+  const job = await getMaintenanceQueue().add("cleanup-orphaned-records", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });
@@ -335,7 +394,8 @@ export async function addTaskScheduleJob(
     const baseJobId = `schedule-tasks-${data.userId}`;
 
     // Check if a job with this base ID already exists and is waiting, active, or delayed
-    const existingJobs = await taskScheduleQueue.getJobs([
+    const queue = getTaskScheduleQueue();
+    const existingJobs = await queue.getJobs([
       "waiting",
       "active",
       "delayed",
@@ -366,7 +426,7 @@ export async function addTaskScheduleJob(
     );
 
     // Add the job with a delay to allow for batching multiple task changes
-    const job = await taskScheduleQueue.add("schedule-tasks", data, {
+    const job = await queue.add("schedule-tasks", data, {
       jobId,
       delay: 5000, // 5 second delay to allow for batching
       ...options,
@@ -412,7 +472,7 @@ export async function addTestCronJob(
   );
 
   // Then add the job to the queue
-  const job = await testCronQueue.add("send", data, {
+  const job = await getTestCronQueue().add("send", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });
@@ -440,7 +500,7 @@ export async function addTaskSyncJob(
   );
 
   // Then add the job to the queue
-  const job = await taskSyncQueue.add("sync", data, {
+  const job = await getTaskSyncQueue().add("sync", data, {
     ...options,
     jobId, // Use the generated UUID as the job ID
   });
