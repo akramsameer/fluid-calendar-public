@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 
+// Force dynamic rendering - this page queries the database at runtime
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

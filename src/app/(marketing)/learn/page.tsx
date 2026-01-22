@@ -3,6 +3,9 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 
+// Force dynamic rendering - this page queries the database at runtime
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Learn - FluidCalendar",
   description:
