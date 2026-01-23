@@ -193,9 +193,10 @@ export async function sendArticleGenerationNotification(
         const { getResend } = await import("@/lib/email/resend");
         const resend = await getResend();
 
+        const fromEmail = process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com";
         await resend.emails.send({
           to: adminEmail,
-          from: process.env.RESEND_FROM_EMAIL || "noreply@fluidcalendar.com",
+          from: `FluidCalendar Articles <${fromEmail}>`,
           subject,
           html: emailHtml,
         });
