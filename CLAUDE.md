@@ -34,7 +34,7 @@ This project follows a **plan-first approach** adapted from Cursor rules:
 ### Memory Bank Integration
 This project maintains comprehensive documentation following a memory bank pattern:
 - **CLAUDE.md**: Primary guidance for Claude Code (this file)
-- **Project Documentation**: Found in `/memory-bank/` and `/docs/` directories
+- **Project Documentation**: Found in `/docs/` directory and `/saas/memory-bank/` (submodule)
 - **Active Context**: Current development state and ongoing work
 - **System Patterns**: Established architectural patterns and conventions
 
@@ -127,31 +127,25 @@ npm run start:worker
 npm run start:worker:prod
 ```
 
-### Repository Sync
-```bash
-# Sync to open-source repo
-npm run sync
-
-# Reverse sync from open-source repo
-npm run sync:reverse
-```
-
 ## Architecture Overview
 
-### Dual-Version System
-The project uses a sophisticated dual-version architecture controlled by `NEXT_PUBLIC_ENABLE_SAAS_FEATURES`:
+### Open-Core Architecture
+The project uses an open-core model with a Git submodule for SaaS features:
 
-- **Feature Flag System**: `src/lib/config.ts` provides centralized feature toggling
-- **File Extensions**: `.saas.tsx` files for SaaS-only components, `.open.tsx` for open-source only
-- **Build Configuration**: `next.config.ts` conditionally includes/excludes files based on the feature flag
-- **Package Scripts**: Separate build commands for SAAS (`build`) and open-source (`build:os`) versions
+- **Public Repository**: Core calendar/task functionality (open-source, MIT license)
+- **Private Submodule** (`saas/`): Proprietary SaaS features (subscriptions, pSEO, admin)
+- **Feature Detection**: `next.config.ts` auto-detects if `saas/` submodule is present
+- **Build Modes**:
+  - `npm run build` - Full build (includes SaaS if submodule present)
+  - `npm run build:os` - Open-source only build
+- **Setup Script**: `scripts/setup-saas.ts` integrates the submodule (symlinks, schema merge)
 
 ### Core Application Structure
 
 #### Route Organization
-- `(common)/` - Shared routes for both versions (calendar, tasks, settings)
-- `(open)/` - Open-source specific routes and components
-- `(saas)/` - SaaS-only routes (billing, admin, waitlist, pricing)
+- `src/app/(common)/` - Core routes (calendar, tasks, settings)
+- `src/app/(open)/` - Open-source landing page and variants
+- `saas/app/(saas)/` - SaaS-only routes (billing, admin, waitlist, pricing) - via submodule
 - Route-level middleware handles authentication and admin access control
 
 #### Database & ORM

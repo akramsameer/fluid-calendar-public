@@ -70,3 +70,10 @@ developer-staging-kubeconfig.yaml
 developer-kubeconfig.yaml
 *kubeconfig*.yaml
 dev-access/
+
+# SaaS submodule (in public repo, this is a git submodule)
+# Uncomment the line below when this becomes the public repo
+# saas/
+
+# Scratch files
+scratch.md

@@ -1,0 +1,23 @@
+{
+  "name": "@fluidcalendar/saas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SaaS features for FluidCalendar",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@ai-sdk/azure": "^3.0.13",
+    "@stripe/react-stripe-js": "^3.6.0",
+    "@stripe/stripe-js": "^7.2.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "ai": "^6.0.42",
+    "bullmq": "^5.41.9",
+    "ioredis": "^5.6.0",
+    "resend": "^4.1.2",
+    "stripe": "^18.0.0"
+  },
+  "peerDependencies": {
+    "next": ">=15.0.0",
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  }
+}
