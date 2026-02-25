@@ -19,15 +19,13 @@ import { useShortcutsStore } from "@/store/shortcuts";
 
 import "../globals.css";
 
-// Dynamically import the NotificationProvider based on SAAS flag
+// Import NotificationProvider - open-source version by default,
+// SaaS version symlinked in by setup-saas.ts when submodule is present
 const NotificationProvider = dynamic<{ children: React.ReactNode }>(
   () =>
-    import(
-      `@/components/providers/NotificationProvider${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true"
-        ? ".saas"
-        : ".open"
-      }`
-    ).then((mod) => mod.NotificationProvider),
+    import("@/components/providers/NotificationProvider").then(
+      (mod) => mod.NotificationProvider
+    ),
   {
     ssr: false,
     loading: () => <>{/* Render nothing while loading */}</>,

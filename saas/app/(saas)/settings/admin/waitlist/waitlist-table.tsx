@@ -36,7 +36,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { WaitlistEntry, useWaitlistStore } from "@/store/waitlist.saas";
+import { WaitlistEntry, useWaitlistStore } from "@/store/waitlist";
 
 // TODO: Implement modal dialogs for bulk actions:
 // 1. Bulk invite modal - to collect date and custom message

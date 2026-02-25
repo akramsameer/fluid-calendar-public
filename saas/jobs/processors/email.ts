@@ -1,6 +1,6 @@
 import { Job } from "bullmq";
 
-import { EmailService } from "@/lib/email/email-service.saas";
+import { EmailService } from "@/lib/email/email-service";
 import { getResend } from "@/lib/email/resend";
 import { logger } from "@/lib/logger";
 

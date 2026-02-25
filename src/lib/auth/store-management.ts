@@ -50,10 +50,9 @@ export function clearStoresOnLogout() {
   useFocusModeStore.getState().clear();
   useSettingsStore.getState().clear();
 
-  // Clear SaaS-specific stores if available
-  import(
-    `@/store/waitlist${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}`
-  )
+  // Clear waitlist store - open-source version by default (no-op),
+  // SaaS version symlinked in by setup-saas.ts when submodule is present
+  import("@/store/waitlist")
     .then(({ useWaitlistStore }) => {
       try {
         useWaitlistStore.getState().clear();
@@ -143,11 +142,10 @@ export async function initializeStores() {
     console.error("Failed to initialize calendar store:", error);
   }
 
-  // Initialize waitlist store if available
+  // Initialize waitlist store - open-source version by default (no-op),
+  // SaaS version symlinked in by setup-saas.ts when submodule is present
   try {
-    const { useWaitlistStore } = await import(
-      `@/store/waitlist${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ? ".saas" : ".open"}`
-    );
+    const { useWaitlistStore } = await import("@/store/waitlist");
     const waitlistStore = useWaitlistStore.getState();
     if (waitlistStore && waitlistStore.fetchEntries) {
       const waitlistPromise = waitlistStore.fetchEntries();

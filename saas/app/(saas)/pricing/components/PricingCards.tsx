@@ -20,7 +20,7 @@ import { SubscriptionPlan } from "@prisma/client";
 import { TrialSection } from "@/components/subscription";
 import { useEarlyBirdStatus } from "@/hooks/use-early-bird-status";
 import { useCalendarProviderCount } from "@/hooks/use-calendar-provider-count";
-import { useCheckoutMutation } from "@/lib/services/subscription.saas";
+import { useCheckoutMutation } from "@/lib/services/subscription";
 import { getButtonState, getPlanEnum } from "@/lib/utils/plan-comparison";
 import { validatePlanDowngrade } from "@/lib/utils/plan-validation";
 import { useSubscription } from "@/hooks/useSubscription";

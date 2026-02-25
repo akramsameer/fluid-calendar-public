@@ -16,10 +16,12 @@ import {
 
 const LOG_SOURCE = "StripeWebhook";
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
-if (!endpointSecret) {
-  throw new Error("Missing STRIPE_WEBHOOK_SECRET environment variable");
+function getEndpointSecret(): string {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error("Missing STRIPE_WEBHOOK_SECRET environment variable");
+  }
+  return secret;
 }
 
 export async function POST(req: Request) {
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(body, sig, getEndpointSecret());
 
     logger.info(
       "✅ Webhook signature verified successfully",

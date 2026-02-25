@@ -14,7 +14,6 @@ import { WeekView } from "@/components/calendar/WeekView";
 import { SponsorshipBanner } from "@/components/ui/sponsorship-banner";
 
 import { addDays, formatDate, newDate, subDays } from "@/lib/date-utils";
-import { isSaasEnabled } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 import {
@@ -26,12 +25,12 @@ import { useTaskStore } from "@/store/task";
 
 import { CalendarEvent, CalendarFeed } from "@/types/calendar";
 
-// Dynamically import the appropriate version of the LifetimeAccessBanner
+// Import LifetimeAccessBanner - open-source version (no-op) by default,
+// SaaS version symlinked in by setup-saas.ts when submodule is present
 const LifetimeAccessBanner = dynamic(
-  () => import(`./LifetimeAccessBanner.${isSaasEnabled ? "saas" : "open"}`).then(
-    (mod) => mod.LifetimeAccessBanner
-  ),
-  { ssr: false } // Disable SSR for this component to prevent import errors
+  () =>
+    import("./LifetimeAccessBanner").then((mod) => mod.LifetimeAccessBanner),
+  { ssr: false }
 );
 
 interface CalendarProps {

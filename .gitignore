@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/.next-os/
 /out/
 
 # production
@@ -74,6 +75,24 @@ dev-access/
 # SaaS submodule (in public repo, this is a git submodule)
 # Uncomment the line below when this becomes the public repo
 # saas/
+
+# SaaS setup backup files (created by setup-saas.ts, restored by clean-saas-symlinks.ts)
+*.os-backup
+
+# SaaS symlinks created by setup-saas.ts (DO NOT COMMIT - these point to private saas/ submodule)
+# Directory symlinks (recursive file mirrors)
+src/app/(saas)/
+src/app/api/admin/
+src/app/api/sse/
+src/app/api/subscription/lifetime/
+src/app/api/tasks/schedule-all/queue/
+src/app/api/waitlist/
+src/saas/
+# Individual file symlinks
+src/lib/actions/subscription.ts
+src/lib/email/waitlist.ts
+src/lib/hooks/useSubscription.ts
+src/lib/services/subscription.ts
 
 # Scratch files
 scratch.md

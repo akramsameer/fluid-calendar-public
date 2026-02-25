@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { isSaasEnabled } from "@/lib/config";
 import { logger } from "@/lib/logger";
-import { subscriptionService } from "@/lib/services/subscription.saas";
+import { subscriptionService } from "@/lib/services/subscription";
 
 import { useSubscription } from "@/hooks/useSubscription";
 

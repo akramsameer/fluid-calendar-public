@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react";
 
 import { useQuery } from "@tanstack/react-query";
 
-import { subscriptionService } from "@/lib/services/subscription.saas";
+import { subscriptionService } from "@/lib/services/subscription";
 
 interface SubscriptionStatus {
   hasActiveSubscription: boolean;

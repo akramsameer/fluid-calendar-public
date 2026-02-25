@@ -25,20 +25,11 @@ import { useAdmin } from "@/hooks/use-admin";
 
 import { useSettingsStore } from "@/store/settings";
 
-// Add dynamic import for the waitlist page
-const WaitlistPage = dynamic(
-  () =>
-    import(
-      `./waitlist/page${
-        process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true"
-          ? ".saas"
-          : ".open"
-      }`
-    ),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
+// Import waitlist page - open-source version by default,
+// SaaS version symlinked in by setup-saas.ts when submodule is present
+const WaitlistPage = dynamic(() => import("./waitlist/page"), {
+  loading: () => <p>Loading...</p>,
+});
 
 type SettingsTab =
   | "accounts"

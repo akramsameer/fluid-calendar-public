@@ -7,9 +7,12 @@
  *
  * Actions performed:
  * 1. Detects if saas/ submodule is populated
- * 2. Creates symlinks for SaaS routes in src/app/(saas)
- * 3. Merges SaaS dependencies into package.json
- * 4. Merges Prisma schemas
+ * 2. Creates symlinks for SaaS routes, API routes, and worker files
+ * 3. Symlinks SaaS overrides for shared modules (subscription service, etc.)
+ * 4. Merges SaaS dependencies into package.json
+ * 5. Merges Prisma schemas
+ * 6. Updates User model with SaaS relations
+ * 7. Sets environment variable for SaaS features
  */
 
 import * as fs from "fs";
@@ -58,22 +61,25 @@ function isSaasSubmodulePresent(): boolean {
 }
 
 /**
- * Create a symlink, handling cross-platform differences
+ * Create a directory symlink, handling cross-platform differences
  */
-function createSymlink(target: string, linkPath: string): boolean {
+function createDirSymlink(target: string, linkPath: string): boolean {
   try {
-    // Remove existing symlink or directory
-    if (fs.existsSync(linkPath)) {
+    // Remove existing symlink
+    if (fs.existsSync(linkPath) || fs.lstatSync(linkPath).isSymbolicLink()) {
       const stats = fs.lstatSync(linkPath);
       if (stats.isSymbolicLink()) {
         fs.unlinkSync(linkPath);
       } else if (stats.isDirectory()) {
-        // If it's a real directory, don't overwrite
-        logSkip(`${linkPath} exists as directory, skipping`);
+        logSkip(`${linkPath} exists as real directory, skipping`);
         return false;
       }
     }
+  } catch {
+    // Path doesn't exist, which is fine
+  }
 
+  try {
     // Create parent directory if needed
     const parentDir = path.dirname(linkPath);
     if (!fs.existsSync(parentDir)) {
@@ -85,35 +91,315 @@ function createSymlink(target: string, linkPath: string): boolean {
     fs.symlinkSync(target, linkPath, type);
     return true;
   } catch (error) {
-    logError(`Failed to create symlink: ${error}`);
+    logError(`Failed to create directory symlink ${linkPath}: ${error}`);
     return false;
   }
 }
 
 /**
- * Setup symlinks for SaaS routes
+ * Create a file symlink, handling cross-platform differences.
+ * Backs up the original file if it exists (for open-source stubs being overridden).
  */
-function setupRouteSymlinks(): void {
-  logStep("Setting up SaaS route symlinks");
+function createFileSymlink(target: string, linkPath: string): boolean {
+  try {
+    // Remove existing symlink or file
+    if (fs.existsSync(linkPath)) {
+      const stats = fs.lstatSync(linkPath);
+      if (stats.isSymbolicLink()) {
+        fs.unlinkSync(linkPath);
+      } else if (stats.isFile()) {
+        // Back up the original file (open-source stub)
+        const backupPath = linkPath + ".os-backup";
+        fs.copyFileSync(linkPath, backupPath);
+        fs.unlinkSync(linkPath);
+      }
+    }
+  } catch {
+    // Path doesn't exist, which is fine
+  }
 
-  const symlinks = [
+  try {
+    // Create parent directory if needed
+    const parentDir = path.dirname(linkPath);
+    if (!fs.existsSync(parentDir)) {
+      fs.mkdirSync(parentDir, { recursive: true });
+    }
+
+    // Create file symlink
+    const type = process.platform === "win32" ? "file" : "file";
+    fs.symlinkSync(target, linkPath, type);
+    return true;
+  } catch (error) {
+    logError(`Failed to create file symlink ${linkPath}: ${error}`);
+    return false;
+  }
+}
+
+/**
+ * Recursively mirror a directory tree for Turbopack compatibility.
+ * Turbopack doesn't follow directory symlinks for route discovery at any level,
+ * so we create real directories at every level and only symlink individual files.
+ */
+function mirrorDirWithFileSymlinks(
+  targetDir: string,
+  linkDir: string,
+  label: string
+): void {
+  if (!fs.existsSync(targetDir)) {
+    logSkip(`Target not found: ${targetDir}`);
+    return;
+  }
+
+  // Remove existing directory symlink if the old approach left one
+  try {
+    if (fs.existsSync(linkDir) && fs.lstatSync(linkDir).isSymbolicLink()) {
+      fs.unlinkSync(linkDir);
+    }
+  } catch {
+    // ignore
+  }
+
+  // Create real directory
+  if (!fs.existsSync(linkDir)) {
+    fs.mkdirSync(linkDir, { recursive: true });
+  }
+
+  // Process each child entry
+  const entries = fs.readdirSync(targetDir);
+  for (const entry of entries) {
+    const entryTarget = path.join(targetDir, entry);
+    const entryLink = path.join(linkDir, entry);
+    const entryLabel = `${label}/${entry}`;
+
+    // Remove stale symlink
+    try {
+      if (fs.existsSync(entryLink) && fs.lstatSync(entryLink).isSymbolicLink()) {
+        fs.unlinkSync(entryLink);
+      }
+    } catch {
+      // ignore
+    }
+
+    if (fs.statSync(entryTarget).isFile()) {
+      // Symlink individual files
+      const relTarget = path.relative(linkDir, entryTarget);
+      if (createFileSymlink(relTarget, entryLink)) {
+        logSuccess(`Symlinked: ${entryLabel} → ${relTarget}`);
+      }
+    } else {
+      // Recurse into subdirectories
+      mirrorDirWithFileSymlinks(entryTarget, entryLink, entryLabel);
+    }
+  }
+}
+
+/**
+ * Setup symlinks for SaaS content into src/
+ *
+ * Strategy:
+ * - Expanded directory symlinks for Turbopack compatibility (real dirs with symlinked children)
+ * - File symlinks for individual overrides (subscription service, etc.)
+ */
+function setupSymlinks(): void {
+  logStep("Setting up SaaS symlinks");
+
+  // === Expanded directory symlinks ===
+  // Turbopack doesn't follow directory symlinks for route discovery,
+  // so we create real directories and symlink each child entry inside them.
+
+  const expandedDirSymlinks = [
+    // SaaS app routes (pages, layouts)
     {
       target: path.join(SAAS_DIR, "app", "(saas)"),
       link: path.join(SRC_DIR, "app", "(saas)"),
+      label: "src/app/(saas)",
+    },
+    // Admin API routes
+    {
+      target: path.join(SAAS_DIR, "api", "admin"),
+      link: path.join(SRC_DIR, "app", "api", "admin"),
+      label: "src/app/api/admin",
+    },
+    // SSE API route
+    {
+      target: path.join(SAAS_DIR, "api", "sse"),
+      link: path.join(SRC_DIR, "app", "api", "sse"),
+      label: "src/app/api/sse",
+    },
+    // Subscription lifetime API routes
+    {
+      target: path.join(SAAS_DIR, "api", "subscription", "lifetime"),
+      link: path.join(SRC_DIR, "app", "api", "subscription", "lifetime"),
+      label: "src/app/api/subscription/lifetime",
+    },
+    // Waitlist API routes
+    {
+      target: path.join(SAAS_DIR, "api", "waitlist"),
+      link: path.join(SRC_DIR, "app", "api", "waitlist"),
+      label: "src/app/api/waitlist",
+    },
+    // Task schedule queue API route
+    {
+      target: path.join(SAAS_DIR, "api", "tasks", "schedule-all", "queue"),
+      link: path.join(SRC_DIR, "app", "api", "tasks", "schedule-all", "queue"),
+      label: "src/app/api/tasks/schedule-all/queue",
+    },
+    // SaaS jobs/workers directory
+    {
+      target: path.join(SAAS_DIR, "jobs"),
+      link: path.join(SRC_DIR, "saas", "jobs"),
+      label: "src/saas/jobs",
+    },
+    // SaaS k8s directory
+    {
+      target: path.join(SAAS_DIR, "k8s"),
+      link: path.join(SRC_DIR, "saas", "k8s"),
+      label: "src/saas/k8s",
     },
   ];
 
-  for (const { target, link } of symlinks) {
+  for (const { target, link, label } of expandedDirSymlinks) {
+    mirrorDirWithFileSymlinks(target, link, label);
+  }
+
+  // === File symlinks for SaaS overrides ===
+  // These override open-source stubs with SaaS implementations
+
+  const fileOverrides = [
+    // Subscription service (overrides the open-source stub)
+    {
+      target: path.join(SAAS_DIR, "lib", "services", "subscription.ts"),
+      link: path.join(SRC_DIR, "lib", "services", "subscription.ts"),
+    },
+    // SaaS task-sync route (overrides the open-source synchronous version)
+    {
+      target: path.join(SAAS_DIR, "api", "task-sync", "sync", "route.ts"),
+      link: path.join(SRC_DIR, "app", "api", "task-sync", "sync", "route.ts"),
+    },
+    // NotificationProvider (overrides open-source no-op with SaaS SSE notifications)
+    {
+      target: path.join(
+        SAAS_DIR,
+        "components",
+        "providers",
+        "NotificationProvider.tsx"
+      ),
+      link: path.join(
+        SRC_DIR,
+        "components",
+        "providers",
+        "NotificationProvider.tsx"
+      ),
+    },
+    // LifetimeAccessBanner (overrides open-source no-op with SaaS banner)
+    {
+      target: path.join(
+        SAAS_DIR,
+        "components",
+        "calendar",
+        "LifetimeAccessBanner.tsx"
+      ),
+      link: path.join(
+        SRC_DIR,
+        "components",
+        "calendar",
+        "LifetimeAccessBanner.tsx"
+      ),
+    },
+    // SponsorshipBanner (overrides open-source GitHub sponsor banner with SaaS no-op)
+    {
+      target: path.join(
+        SAAS_DIR,
+        "components",
+        "ui",
+        "sponsorship-banner.tsx"
+      ),
+      link: path.join(SRC_DIR, "components", "ui", "sponsorship-banner.tsx"),
+    },
+    // Email service (overrides open-source direct send with SaaS queue-based)
+    {
+      target: path.join(SAAS_DIR, "lib", "email", "email-service.ts"),
+      link: path.join(SRC_DIR, "lib", "email", "email-service.ts"),
+    },
+    // Email waitlist service
+    {
+      target: path.join(SAAS_DIR, "lib", "email", "waitlist.ts"),
+      link: path.join(SRC_DIR, "lib", "email", "waitlist.ts"),
+    },
+    // Subscription actions
+    {
+      target: path.join(SAAS_DIR, "lib", "actions", "subscription.ts"),
+      link: path.join(SRC_DIR, "lib", "actions", "subscription.ts"),
+    },
+    // useSubscription hook (SaaS version)
+    {
+      target: path.join(SAAS_DIR, "lib", "hooks", "useSubscription.ts"),
+      link: path.join(SRC_DIR, "lib", "hooks", "useSubscription.ts"),
+    },
+    // Waitlist store (overrides open-source no-op with SaaS implementation)
+    {
+      target: path.join(SAAS_DIR, "store", "waitlist.ts"),
+      link: path.join(SRC_DIR, "store", "waitlist.ts"),
+    },
+    // Waitlist settings page (overrides open-source placeholder with SaaS admin page)
+    {
+      target: path.join(
+        SAAS_DIR,
+        "app",
+        "(common)",
+        "settings",
+        "waitlist",
+        "page.tsx"
+      ),
+      link: path.join(
+        SRC_DIR,
+        "app",
+        "(common)",
+        "settings",
+        "waitlist",
+        "page.tsx"
+      ),
+    },
+  ];
+
+  for (const { target, link } of fileOverrides) {
     if (!fs.existsSync(target)) {
-      logSkip(`Target not found: ${target}`);
+      logSkip(`Override target not found: ${target}`);
       continue;
     }
 
-    // Calculate relative path for symlink
     const relativeTarget = path.relative(path.dirname(link), target);
 
-    if (createSymlink(relativeTarget, link)) {
-      logSuccess(`Created symlink: ${path.basename(link)} → ${relativeTarget}`);
+    if (createFileSymlink(relativeTarget, link)) {
+      logSuccess(
+        `Override: ${path.relative(ROOT_DIR, link)} → ${relativeTarget}`
+      );
+    }
+  }
+}
+
+/**
+ * Handle route conflicts between open-source and SaaS pages.
+ * The (open) route group provides the OS landing page at /,
+ * which conflicts with (saas)/page.tsx. Back up and remove it.
+ */
+function handleRouteConflicts(): void {
+  logStep("Resolving route conflicts");
+
+  const conflictingFiles = [
+    path.join(SRC_DIR, "app", "(open)", "page.tsx"),
+  ];
+
+  for (const filePath of conflictingFiles) {
+    if (fs.existsSync(filePath) && !fs.lstatSync(filePath).isSymbolicLink()) {
+      const backupPath = filePath + ".os-backup";
+      fs.copyFileSync(filePath, backupPath);
+      fs.unlinkSync(filePath);
+      logSuccess(
+        `Backed up and removed: ${path.relative(ROOT_DIR, filePath)}`
+      );
+    } else {
+      logSkip(`No conflict: ${path.relative(ROOT_DIR, filePath)}`);
     }
   }
 }
@@ -193,10 +479,10 @@ function mergePrismaSchema(): void {
   logStep("Merging Prisma schemas");
 
   const mainSchemaPath = path.join(ROOT_DIR, "prisma", "schema.prisma");
-  const saasSchemaPath = path.join(SAAS_DIR, "prisma", "schema.saas.prisma");
+  const saasSchemaPath = path.join(SAAS_DIR, "prisma", "schema.prisma");
 
   if (!fs.existsSync(saasSchemaPath)) {
-    logSkip("No saas/prisma/schema.saas.prisma found");
+    logSkip("No saas/prisma/schema.prisma found");
     return;
   }
 
@@ -217,7 +503,7 @@ function mergePrismaSchema(): void {
       .trim();
 
     // Append SaaS models to main schema
-    const mergedSchema = `${mainSchema}\n\n// =============================================================================\n// SaaS Models (merged from saas/prisma/schema.saas.prisma)\n// =============================================================================\n\n${saasModels}`;
+    const mergedSchema = `${mainSchema}\n\n// =============================================================================\n// SaaS Models (merged from saas/prisma/schema.prisma)\n// =============================================================================\n\n${saasModels}`;
 
     fs.writeFileSync(mainSchemaPath, mergedSchema);
     logSuccess("Merged SaaS models into prisma/schema.prisma");
@@ -284,7 +570,8 @@ function updateEnvironment(): void {
     }
 
     if (!envContent.includes("NEXT_PUBLIC_ENABLE_SAAS_FEATURES")) {
-      envContent += "\n# SaaS features enabled by setup-saas.ts\nNEXT_PUBLIC_ENABLE_SAAS_FEATURES=true\n";
+      envContent +=
+        "\n# SaaS features enabled by setup-saas.ts\nNEXT_PUBLIC_ENABLE_SAAS_FEATURES=true\n";
       fs.writeFileSync(envLocalPath, envContent);
       logSuccess("Set NEXT_PUBLIC_ENABLE_SAAS_FEATURES=true in .env.local");
     } else {
@@ -307,14 +594,18 @@ async function main(): Promise<void> {
   if (!isSaasSubmodulePresent()) {
     log("\nSaaS submodule not found or empty.", "yellow");
     log("Running in open-source mode.\n", "dim");
-    log("To enable SaaS features, clone with: git clone --recurse-submodules\n", "dim");
+    log(
+      "To enable SaaS features, clone with: git clone --recurse-submodules\n",
+      "dim"
+    );
     return;
   }
 
   log("\nSaaS submodule detected. Setting up...", "green");
 
   // Run setup steps
-  setupRouteSymlinks();
+  setupSymlinks();
+  handleRouteConflicts();
   mergeDependencies();
   mergePrismaSchema();
   updateUserModel();

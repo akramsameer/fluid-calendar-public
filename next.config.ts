@@ -4,7 +4,6 @@ import * as path from "path";
 
 /**
  * Detect if the SaaS submodule is present and populated
- * This allows automatic SaaS feature detection without manual env var configuration
  */
 const detectSaasSubmodule = (): boolean => {
   try {
@@ -15,20 +14,30 @@ const detectSaasSubmodule = (): boolean => {
   }
 };
 
-// Check for SaaS: either env var is set OR submodule is present
 const hasSaasSubmodule = detectSaasSubmodule();
+
+// Respect explicit env var override. When NEXT_PUBLIC_ENABLE_SAAS_FEATURES is
+// explicitly "false" (e.g. build:os), disable SaaS even if submodule is present.
+const isExplicitlyDisabled =
+  process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "false";
 const isSaasEnabled =
-  process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" || hasSaasSubmodule;
+  !isExplicitlyDisabled &&
+  (process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ||
+    hasSaasSubmodule);
 
 // Log detection status during build
-if (process.env.NODE_ENV !== "production" || process.env.NEXT_PHASE === "phase-production-build") {
+if (
+  process.env.NODE_ENV !== "production" ||
+  process.env.NEXT_PHASE === "phase-production-build"
+) {
   console.log(`\n[next.config] SaaS Detection:`);
   console.log(`  - Submodule present: ${hasSaasSubmodule}`);
-  console.log(`  - Env var set: ${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true"}`);
+  console.log(
+    `  - Env var: ${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES ?? "(not set)"}`
+  );
   console.log(`  - SaaS enabled: ${isSaasEnabled}\n`);
 }
 
-/** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
   // Disable all development indicators
   devIndicators: false,
@@ -41,30 +50,14 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_HAS_SAAS: isSaasEnabled ? "true" : "false",
   },
 
-  // Determine which file extensions to use based on SAAS enablement
-  pageExtensions: (() => {
-    // Base extensions
-    const baseExtensions = ["js", "jsx", "ts", "tsx"];
-
-    if (isSaasEnabled) {
-      // For SAAS version, include .saas. files and exclude .open. files
-      return [
-        ...baseExtensions.map((ext) => ext),
-        ...baseExtensions.map((ext) => `saas.${ext}`),
-      ].filter((ext) => !ext.includes(".open."));
-    } else {
-      // For open source version, include .open. files and exclude .saas. files
-      return [
-        ...baseExtensions.map((ext) => ext),
-        ...baseExtensions.map((ext) => `open.${ext}`),
-      ].filter((ext) => !ext.includes(".saas."));
-    }
-  })(),
+  // Standard page extensions only — no .saas. or .open. suffixes needed.
+  // SaaS content is provided via symlinks from setup-saas.ts when the submodule is present.
+  pageExtensions: ["js", "jsx", "ts", "tsx"],
 
   // Webpack configuration for path aliases
   webpack: (config) => {
-    // Add @saas/* path alias when submodule is present
-    if (hasSaasSubmodule) {
+    // Add @saas/* path alias only when SaaS is enabled
+    if (isSaasEnabled && hasSaasSubmodule) {
       config.resolve.alias = {
         ...config.resolve.alias,
         "@saas": path.join(process.cwd(), "saas"),

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
-import { verifyPaymentStatus } from "@/lib/actions/subscription.saas";
+import { verifyPaymentStatus } from "@/lib/actions/subscription";
 import { logger } from "@/lib/logger";
 import {
     SUBSCRIPTION_PLANS,

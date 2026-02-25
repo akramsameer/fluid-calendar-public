@@ -25,7 +25,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-import { useWaitlistStore } from "@/store/waitlist.saas";
+import { useWaitlistStore } from "@/store/waitlist";
 
 export function InvitationManager() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(

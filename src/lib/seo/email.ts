@@ -163,7 +163,7 @@ export async function sendArticleGenerationNotification(
     // Try to use the SaaS email service if available
     try {
       // Dynamic import to avoid build issues in open-source version
-      const { EmailService } = await import("@/lib/email/email-service.saas");
+      const { EmailService } = await import("@/lib/email/email-service");
 
       await EmailService.sendEmail({
         to: adminEmail,

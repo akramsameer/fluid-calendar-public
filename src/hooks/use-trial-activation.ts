@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { toast } from "sonner";
 
-import { subscriptionService } from "@/lib/services/subscription.saas";
+import { subscriptionService } from "@/lib/services/subscription";
 
 export function useTrialActivation() {
   const [isLoading, setIsLoading] = useState(false);

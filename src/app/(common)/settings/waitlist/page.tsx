@@ -1,0 +1,1 @@
+../../../../../saas/app/(common)/settings/waitlist/page.tsx
