@@ -1,4 +1,5 @@
 import Script from "next/script";
+import NextTopLoader from "nextjs-toploader";
 
 import { Providers } from "@/components/providers";
 
@@ -14,6 +15,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body className="flex h-full flex-col bg-background antialiased">
+        <NextTopLoader
+          color="linear-gradient(to right, var(--brand-green), var(--brand-teal), var(--brand-cyan))"
+          height={3}
+          showSpinner={false}
+          shadow={false}
+        />
         {/* X (Twitter) Pixel */}
         <Script id="x-pixel" strategy="afterInteractive">
           {`
