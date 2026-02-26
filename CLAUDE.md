@@ -139,6 +139,70 @@ The project uses an open-core model with a Git submodule for SaaS features:
   - `npm run build` - Full build (includes SaaS if submodule present)
   - `npm run build:os` - Open-source only build
 - **Setup Script**: `scripts/setup-saas.ts` integrates the submodule (symlinks, schema merge)
+- **Clean Script**: `scripts/clean-saas-symlinks.ts` removes symlinks and restores OS stubs (used by `build:os`)
+
+### Open-Core Development Rules — CRITICAL
+
+**Every feature, bug fix, or change MUST be evaluated against these rules.** Before writing any code, determine: does this touch SaaS-only functionality, or core open-source functionality?
+
+#### What is SaaS-only (goes in `saas/`):
+- Stripe / payments / subscriptions / billing
+- Booking system (BookingLink, Booking, availability)
+- pSEO / article generation / learn pages
+- Waitlist / beta program
+- Admin dashboard (admin routes, job management)
+- Background jobs (BullMQ workers)
+- AI services (article generation, AI calls)
+- Email sending via Resend (the actual send — not the stub interface)
+- Subscription enforcement (plan limits, trial logic)
+- Any Prisma models: Subscription, BookingLink, Booking, Article, JobRecord, Waitlist, etc.
+
+#### What is core open-source (goes in `src/`):
+- Calendar (Google, Outlook, CalDAV integration)
+- Task management and auto-scheduling
+- User authentication and settings
+- Core UI components
+- OS stubs that return safe defaults
+
+#### Rules for adding NEW features:
+
+1. **New SaaS feature**: All code goes in `saas/`. Add symlink entries to `scripts/setup-saas.ts` and `scripts/clean-saas-symlinks.ts`. If core code needs to import it, create an OS stub in `src/` that returns a safe default.
+
+2. **New core feature**: Code goes in `src/`. Must work without the `saas/` submodule. Verify with `npm run build:os`.
+
+3. **New Prisma model (SaaS)**: Add to `saas/prisma/schema.prisma`. Do NOT add to `prisma/schema.prisma` — the setup script merges them automatically. If adding relations to User, the `updateUserModel()` function in `setup-saas.ts` handles it.
+
+4. **New Prisma model (core)**: Add to `prisma/schema.prisma`. Create a migration with `npx prisma migrate dev`.
+
+5. **New dependency (SaaS-only)**: Add to `saas/package.json`. Do NOT add to root `package.json` — the setup script merges them automatically.
+
+6. **New dependency (core)**: Add to root `package.json` normally.
+
+#### Rules for OS stubs:
+
+When core code imports a module that only exists in SaaS mode, create an OS stub in `src/` that:
+- Exports the same interface/types
+- Returns safe defaults (e.g., `hasActiveSubscription: false`, `canAdd: true`)
+- Is a no-op for side-effect functions (e.g., email sending logs instead)
+- Gets overridden by `setup-saas.ts` via file symlink when SaaS submodule is present
+- Gets restored by `clean-saas-symlinks.ts` from `.os-backup` when building OS
+
+#### Checklist for SaaS code changes:
+
+- [ ] Code placed in `saas/`, not `src/`
+- [ ] Symlink entries added to `scripts/setup-saas.ts` (expanded dir or file override)
+- [ ] Mirror entries added to `scripts/clean-saas-symlinks.ts` (EXPANDED_DIRS or FILE_OVERRIDES)
+- [ ] Path added to `.gitignore` (only for pure SaaS paths without OS stubs)
+- [ ] OS stub created in `src/` if core code imports the module
+- [ ] `npm run build:os` passes (no SaaS imports leak into OS build)
+- [ ] `npm run type-check` passes
+- [ ] `npm run lint` passes with 0 warnings
+
+#### How symlinks work (Turbopack-compatible):
+
+- **Expanded directories**: `mirrorDirWithFileSymlinks()` creates real directories with symlinked files inside (Turbopack doesn't follow directory symlinks for route discovery)
+- **File overrides**: `createFileSymlink()` backs up the OS stub to `.os-backup`, then creates a symlink to the SaaS version
+- **Cleanup**: `clean-saas-symlinks.ts` removes all symlinks and restores `.os-backup` files
 
 ### Core Application Structure
 
