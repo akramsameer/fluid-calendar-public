@@ -474,13 +474,8 @@ model AICallLog {
 // =============================================================================
 // User Model Extensions
 // =============================================================================
-// Note: These relations are added to the core User model when schemas are merged
-//
-// The following fields need to be added to the User model:
-//   subscription         Subscription?
-//   JobRecord            JobRecord[]
-//   subscriptionHistory  SubscriptionHistory[]
-//   subscriptionUsage    SubscriptionUsage?
-//   bookingLinks         BookingLink[]
-//   bookings             Booking[]             @relation("HostBookings")
+// These relations are automatically added to the core User model by
+// setup-saas.ts updateUserModel() when schemas are merged.
+// Do NOT add the relation fields here as comments — the detection logic
+// uses regex matching and commented-out fields cause false positives.
 // =============================================================================

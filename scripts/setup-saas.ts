@@ -15,6 +15,7 @@
  * 7. Sets environment variable for SaaS features
  */
 
+import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -695,8 +696,8 @@ function updateUserModel(): void {
   try {
     let schema = fs.readFileSync(mainSchemaPath, "utf-8");
 
-    // Check if User model already has SaaS relations
-    if (schema.includes("subscription         Subscription?")) {
+    // Check if User model already has SaaS relations (ignore commented-out lines)
+    if (/^\s+subscription\s+Subscription\?/m.test(schema)) {
       logSkip("User model already has SaaS relations");
       return;
     }
@@ -783,14 +784,35 @@ async function main(): Promise<void> {
   updateUserModel();
   updateEnvironment();
 
+  // Install new dependencies (--ignore-scripts prevents recursive postinstall → setup-saas loop)
+  logStep("Installing dependencies");
+  try {
+    execSync("npm install --ignore-scripts", {
+      cwd: ROOT_DIR,
+      stdio: "inherit",
+    });
+    logSuccess("Dependencies installed");
+  } catch {
+    logError("Failed to install dependencies — run 'npm install' manually");
+  }
+
+  // Generate Prisma client
+  logStep("Generating Prisma client");
+  try {
+    execSync("npx prisma generate", { cwd: ROOT_DIR, stdio: "inherit" });
+    logSuccess("Prisma client generated");
+  } catch {
+    logError(
+      "Failed to generate Prisma client — run 'npx prisma generate' manually"
+    );
+  }
+
   log("\n╔════════════════════════════════════════╗", "green");
   log("║     SaaS Setup Complete!               ║", "green");
   log("╚════════════════════════════════════════╝", "green");
   log("\nNext steps:", "dim");
-  log("1. Run: npm install (to install new dependencies)", "dim");
-  log("2. Run: npx prisma generate", "dim");
-  log("3. Run: npx prisma migrate dev", "dim");
-  log("4. Run: npm run dev\n", "dim");
+  log("1. Run: npx prisma migrate dev (if schema changed)", "dim");
+  log("2. Run: npm run dev\n", "dim");
 }
 
 // Run main function
