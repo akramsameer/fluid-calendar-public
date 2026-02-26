@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { LogOut, Settings, DollarSign } from "lucide-react";
+import { DollarSign, LogOut, Settings } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +18,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useLogout } from "@/lib/auth/store-management";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useLogout } from "@/lib/auth/store-management";
+import { isSaasEnabled } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 export function UserMenu() {
@@ -143,13 +144,15 @@ export function UserMenu() {
           </DropdownMenuItem>
         )}
 
-        {/* Pricing - always allow (since that's where they can purchase) */}
-        <DropdownMenuItem asChild>
-          <Link href="/pricing" className="cursor-pointer">
-            <DollarSign className="mr-2 h-4 w-4" />
-            <span>Pricing</span>
-          </Link>
-        </DropdownMenuItem>
+        {/* Pricing - only shown in SaaS mode */}
+        {isSaasEnabled && (
+          <DropdownMenuItem asChild>
+            <Link href="/pricing" className="cursor-pointer">
+              <DollarSign className="mr-2 h-4 w-4" />
+              <span>Pricing</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer"
