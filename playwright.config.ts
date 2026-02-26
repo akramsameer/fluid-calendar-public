@@ -60,6 +60,7 @@ export default defineConfig({
         /(?<!google-)calendar\.spec/,
         /tasks\.spec/,
         /settings\.spec/,
+        /verify-build\.spec/,
       ],
     },
 
@@ -89,6 +90,7 @@ export default defineConfig({
         /(?<!google-)calendar\.spec/,
         /tasks\.spec/,
         /settings\.spec/,
+        /verify-build\.spec/,
       ],
     },
 
