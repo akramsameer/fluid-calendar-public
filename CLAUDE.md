@@ -242,6 +242,73 @@ export async function handleCheckoutSessionCompleted(session) {
 - Automated task synchronization
 - Job tracking and retry mechanisms
 
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (common)/        # Core routes — calendar, tasks, settings
+│   ├── (saas)/          # SaaS routes — billing, admin (symlinked from saas/)
+│   ├── (open)/          # Open-source landing page
+│   ├── (marketing)/     # Marketing pages
+│   └── api/             # API routes
+├── components/
+│   ├── auth/            # Authentication
+│   ├── calendar/        # Calendar UI
+│   ├── tasks/           # Task management UI
+│   ├── settings/        # Settings forms
+│   ├── subscription/    # Billing & subscription
+│   ├── ui/              # Reusable UI primitives
+│   └── providers/       # Context providers
+├── lib/                 # Utilities, integrations, business logic
+├── store/               # Zustand stores
+├── services/            # Service layer
+├── hooks/               # Custom React hooks
+├── types/               # Shared TypeScript types
+└── middleware.ts        # Auth & route protection
+
+saas/                    # Private submodule (symlinked into src/)
+├── app/                 # SaaS route pages
+├── api/                 # SaaS API routes
+├── components/          # SaaS-only components
+├── lib/                 # SaaS utilities (stripe, email, etc.)
+├── store/               # SaaS-specific stores
+├── jobs/                # BullMQ background workers
+├── prisma/              # Schema extensions
+└── k8s/                 # Kubernetes manifests
+```
+
+## Coding Rules
+
+### 1. Modular File Organization
+Avoid monolithic files. Each file should have **one responsibility**. When a feature grows, break it into a module folder:
+
+```
+feature/
+├── index.ts             # Public API — re-exports what consumers need
+├── feature-logic.ts     # Core logic
+├── feature-types.ts     # Types
+└── feature-utils.ts     # Helpers
+```
+
+Only `index.ts` is the public interface. Internal files are implementation details.
+
+### 2. File Size Limit
+Aim for **100–150 lines per file max**. If a file grows beyond that, refactor it into a module folder per the pattern above.
+
+### 3. One Component Per File
+Each React component gets its own file. Co-locate related styles, utils, and types alongside it.
+
+### 4. Import Conventions
+- Always use `@/` path aliases (e.g., `@/lib/logger`, `@/components/ui/button`)
+- Never import directly from `saas/` — use the symlinked paths under `src/`
+
+### 5. Quality Gates
+- **0 ESLint warnings** — enforced by pre-commit hooks
+- **TypeScript must compile clean** after changes
+- Prettier formatting enforced on commit
+- When removing features, clean up all related code: APIs, stores, components, types, imports
+
 ## Development Patterns
 
 ### Component Organization
