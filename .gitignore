@@ -50,6 +50,7 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+tests/.auth/
 /logs/
 diff.txt
 data/*
@@ -85,14 +86,44 @@ src/app/(saas)/
 src/app/api/admin/
 src/app/api/sse/
 src/app/api/subscription/lifetime/
+src/app/api/subscription/checkout/
+src/app/api/subscription/trial/
+src/app/api/subscription/early-bird-status/
+src/app/api/webhooks/stripe/
 src/app/api/tasks/schedule-all/queue/
 src/app/api/waitlist/
+src/app/api/cron/
+src/app/book/
+src/app/api/book/
+src/app/api/booking-links/
+src/app/api/bookings/
+src/app/api/user/username/
+src/app/(common)/bookings/
+src/app/(marketing)/learn/
+src/components/subscription/
+src/components/settings/BookingLinksSettings.tsx
 src/saas/
-# Individual file symlinks
+# Individual file symlinks (SaaS overrides)
 src/lib/actions/subscription.ts
 src/lib/email/waitlist.ts
 src/lib/hooks/useSubscription.ts
 src/lib/services/subscription.ts
+src/lib/services/calendar-provider-permissions.ts
+src/lib/stripe/
+src/lib/booking/
+src/lib/seo/
+src/lib/availability/
+src/lib/username.ts
+src/lib/subscription/
+src/lib/utils/plan-comparison.ts
+src/lib/validations/booking.ts
+src/lib/email/resend.ts
+src/hooks/use-early-bird-status.ts
+src/hooks/use-trial-activation.ts
+src/types/booking.ts
+src/lib/ai/
+src/lib/waitlist/
+src/lib/utils/plan-validation.ts
 
 # Scratch files
 scratch.md

@@ -1,8 +1,3 @@
-/**
- * Open-source stub types for subscription.
- * When SaaS submodule is present, this is replaced via symlink.
- */
-
 export interface TrialActivationResponse {
   success: boolean;
   message: string;

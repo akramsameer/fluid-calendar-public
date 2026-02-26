@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 
 import { AccountManager } from "@/components/settings/AccountManager";
 import { AutoScheduleSettings } from "@/components/settings/AutoScheduleSettings";
-import { BookingLinksSettings } from "@/components/settings/BookingLinksSettings";
 import { CalendarSettings } from "@/components/settings/CalendarSettings";
 import { ImportExportSettings } from "@/components/settings/ImportExportSettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
@@ -30,6 +29,19 @@ import { useSettingsStore } from "@/store/settings";
 const WaitlistPage = dynamic(() => import("./waitlist/page"), {
   loading: () => <p>Loading...</p>,
 });
+
+// BookingLinksSettings is only available when SaaS submodule is present.
+// Use a variable path to prevent TypeScript from checking for the module at compile time.
+const bookingSettingsPath = "@/components/settings/BookingLinksSettings";
+const BookingLinksSettings = isSaasEnabled
+  ? dynamic(
+      () =>
+        import(
+          /* webpackIgnore: true */ bookingSettingsPath
+        ).then((mod) => mod.BookingLinksSettings),
+      { loading: () => <p>Loading...</p> }
+    )
+  : () => null;
 
 type SettingsTab =
   | "accounts"
@@ -56,12 +68,14 @@ export default function SettingsPage() {
   }, [initializeSettings]);
 
   const tabs = useMemo(() => {
-    const baseTabs = [
+    const coreTabs = [
       { id: "accounts", label: "Accounts" },
       { id: "user", label: "User" },
       { id: "calendar", label: "Calendar" },
       { id: "auto-schedule", label: "Auto-Schedule" },
-      { id: "booking-links", label: "Booking Links" },
+      ...(isSaasEnabled
+        ? [{ id: "booking-links", label: "Booking Links" }]
+        : []),
       { id: "task-sync", label: "Task Sync" },
       { id: "notifications", label: "Notifications" },
       { id: "import-export", label: "Import/Export" },
@@ -77,17 +91,17 @@ export default function SettingsPage() {
       // Only add the waitlist tab if SAAS features are enabled
       if (isSaasEnabled) {
         return [
-          ...baseTabs,
+          ...coreTabs,
           ...adminTabs,
           { id: "waitlist", label: "Beta Waitlist" },
           { id: "admin-dashboard", label: "Admin Dashboard" },
         ] as const;
       }
 
-      return [...baseTabs, ...adminTabs] as const;
+      return [...coreTabs, ...adminTabs] as const;
     }
 
-    return baseTabs;
+    return coreTabs;
   }, [isAdmin]);
 
   const [activeTab, setActiveTab] = useState<SettingsTab>("accounts");

@@ -21,8 +21,28 @@ const EXPANDED_DIRS = [
   "src/app/api/admin",
   "src/app/api/sse",
   "src/app/api/subscription/lifetime",
+  "src/app/api/subscription/checkout",
+  "src/app/api/subscription/status",
+  "src/app/api/subscription/trial",
+  "src/app/api/subscription/early-bird-status",
   "src/app/api/waitlist",
   "src/app/api/tasks/schedule-all/queue",
+  "src/app/api/webhooks/stripe",
+  "src/app/api/book",
+  "src/app/api/booking-links",
+  "src/app/api/bookings",
+  "src/app/api/user/username",
+  "src/app/api/cron/generate-article",
+  "src/app/book",
+  "src/app/(common)/bookings",
+  "src/app/(marketing)/learn",
+  "src/lib/stripe",
+  "src/lib/booking",
+  "src/lib/availability",
+  "src/lib/seo",
+  "src/lib/ai",
+  "src/lib/subscription",
+  "src/components/subscription",
   "src/saas/jobs",
   "src/saas/k8s",
 ];
@@ -33,14 +53,27 @@ const EXPANDED_DIRS = [
  */
 const FILE_OVERRIDES = [
   "src/lib/services/subscription.ts",
+  "src/lib/services/calendar-provider-permissions.ts",
   "src/app/api/task-sync/sync/route.ts",
   "src/components/providers/NotificationProvider.tsx",
   "src/components/calendar/LifetimeAccessBanner.tsx",
   "src/components/ui/sponsorship-banner.tsx",
   "src/lib/email/email-service.ts",
+  "src/lib/email/resend.ts",
   "src/lib/email/waitlist.ts",
   "src/lib/actions/subscription.ts",
-  "src/lib/hooks/useSubscription.ts",
+  "src/hooks/useSubscription.ts",
+  "src/hooks/use-early-bird-status.ts",
+  "src/hooks/use-trial-activation.ts",
+  "src/lib/utils/plan-comparison.ts",
+  "src/lib/utils/plan-validation.ts",
+  "src/lib/validations/booking.ts",
+  "src/lib/username.ts",
+  "src/lib/waitlist/position.ts",
+  "src/types/subscription.ts",
+  "src/types/booking.ts",
+  "src/app/sitemap.ts",
+  "src/components/settings/BookingLinksSettings.tsx",
   "src/store/waitlist.ts",
   "src/app/(common)/settings/waitlist/page.tsx",
 ];
@@ -76,6 +109,21 @@ function cleanMirroredDir(dirPath: string, label: string): number {
           cleaned += cleanMirroredDir(entryPath, entryLabel);
         }
       }
+      // Restore any .os-backup files (OS stubs that were backed up by setup-saas.ts)
+      const afterEntries = fs.readdirSync(dirPath);
+      for (const entry of afterEntries) {
+        if (entry.endsWith(".os-backup")) {
+          const originalName = entry.replace(".os-backup", "");
+          const originalPath = path.join(dirPath, originalName);
+          const backupPath = path.join(dirPath, entry);
+          if (!fs.existsSync(originalPath)) {
+            fs.renameSync(backupPath, originalPath);
+            console.log(`  Restored: ${label}/${originalName}`);
+            cleaned++;
+          }
+        }
+      }
+
       // Remove the directory if now empty
       const remaining = fs.readdirSync(dirPath);
       if (remaining.length === 0) {
@@ -139,7 +187,31 @@ function cleanSymlinks(): void {
   const emptyDirCandidates = [
     "src/saas",
     "src/app/api/admin",
+    "src/app/api/webhooks/stripe",
+    "src/app/api/webhooks",
+    "src/app/api/subscription/checkout",
+    "src/app/api/subscription/status",
+    "src/app/api/subscription/trial",
+    "src/app/api/subscription/early-bird-status",
+    "src/app/api/subscription/lifetime",
+    "src/app/api/book",
+    "src/app/api/booking-links",
+    "src/app/api/bookings",
+    "src/app/api/user/username",
+    "src/app/api/cron/generate-article",
+    "src/app/api/cron",
+    "src/app/book",
+    "src/app/(common)/bookings",
+    "src/app/(marketing)/learn",
+    "src/app/(marketing)",
     "src/app/(saas)",
+    "src/lib/stripe",
+    "src/lib/booking",
+    "src/lib/availability",
+    "src/lib/seo",
+    "src/lib/ai",
+    "src/lib/subscription",
+    "src/components/subscription",
   ];
   for (const dir of emptyDirCandidates) {
     const fullPath = path.join(ROOT_DIR, dir);

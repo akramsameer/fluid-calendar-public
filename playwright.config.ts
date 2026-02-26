@@ -12,7 +12,6 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -38,13 +37,72 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // Auth setup — runs once to create shared session state
+    {
+      name: "setup",
+      testDir: "./tests",
+      testMatch: /fixtures\/auth\.ts/,
+    },
+
+    // Unauthenticated core tests (smoke, auth flows)
     {
       name: "chromium",
+      testDir: "./tests",
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
         launchOptions: {},
       },
+      testIgnore: [
+        /fixtures\//,
+        /debug\.spec/,
+        /google-calendar\.spec/,
+        /(?<!google-)calendar\.spec/,
+        /tasks\.spec/,
+        /settings\.spec/,
+      ],
+    },
+
+    // Unauthenticated SaaS tests (open-source build verification)
+    {
+      name: "chromium-saas",
+      testDir: "./saas/tests",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        launchOptions: {},
+      },
+      testMatch: [/open-source\.spec/],
+    },
+
+    // Authenticated core tests — depend on setup project
+    {
+      name: "authenticated",
+      testDir: "./tests",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        storageState: "tests/.auth/user.json",
+      },
+      dependencies: ["setup"],
+      testMatch: [
+        /(?<!google-)calendar\.spec/,
+        /tasks\.spec/,
+        /settings\.spec/,
+      ],
+    },
+
+    // Authenticated SaaS tests — depend on setup project
+    {
+      name: "authenticated-saas",
+      testDir: "./saas/tests",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        storageState: "tests/.auth/user.json",
+      },
+      dependencies: ["setup"],
+      testMatch: [/booking\.spec/, /admin\.spec/],
     },
 
     // {

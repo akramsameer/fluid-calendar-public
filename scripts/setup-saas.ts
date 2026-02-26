@@ -256,6 +256,113 @@ function setupSymlinks(): void {
       link: path.join(SRC_DIR, "saas", "k8s"),
       label: "src/saas/k8s",
     },
+    // --- Stripe ---
+    {
+      target: path.join(SAAS_DIR, "api", "webhooks", "stripe"),
+      link: path.join(SRC_DIR, "app", "api", "webhooks", "stripe"),
+      label: "src/app/api/webhooks/stripe",
+    },
+    {
+      target: path.join(SAAS_DIR, "lib", "stripe"),
+      link: path.join(SRC_DIR, "lib", "stripe"),
+      label: "src/lib/stripe",
+    },
+    // --- Subscription API routes ---
+    {
+      target: path.join(SAAS_DIR, "api", "subscription", "checkout"),
+      link: path.join(SRC_DIR, "app", "api", "subscription", "checkout"),
+      label: "src/app/api/subscription/checkout",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "subscription", "status"),
+      link: path.join(SRC_DIR, "app", "api", "subscription", "status"),
+      label: "src/app/api/subscription/status",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "subscription", "trial"),
+      link: path.join(SRC_DIR, "app", "api", "subscription", "trial"),
+      label: "src/app/api/subscription/trial",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "subscription", "early-bird-status"),
+      link: path.join(SRC_DIR, "app", "api", "subscription", "early-bird-status"),
+      label: "src/app/api/subscription/early-bird-status",
+    },
+    // --- Subscription components ---
+    {
+      target: path.join(SAAS_DIR, "components", "subscription"),
+      link: path.join(SRC_DIR, "components", "subscription"),
+      label: "src/components/subscription",
+    },
+    // --- Subscription lib ---
+    {
+      target: path.join(SAAS_DIR, "lib", "subscription"),
+      link: path.join(SRC_DIR, "lib", "subscription"),
+      label: "src/lib/subscription",
+    },
+    // --- Booking ---
+    {
+      target: path.join(SAAS_DIR, "app", "book"),
+      link: path.join(SRC_DIR, "app", "book"),
+      label: "src/app/book",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "book"),
+      link: path.join(SRC_DIR, "app", "api", "book"),
+      label: "src/app/api/book",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "booking-links"),
+      link: path.join(SRC_DIR, "app", "api", "booking-links"),
+      label: "src/app/api/booking-links",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "bookings"),
+      link: path.join(SRC_DIR, "app", "api", "bookings"),
+      label: "src/app/api/bookings",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "user", "username"),
+      link: path.join(SRC_DIR, "app", "api", "user", "username"),
+      label: "src/app/api/user/username",
+    },
+    {
+      target: path.join(SAAS_DIR, "app", "(common)", "bookings"),
+      link: path.join(SRC_DIR, "app", "(common)", "bookings"),
+      label: "src/app/(common)/bookings",
+    },
+    {
+      target: path.join(SAAS_DIR, "lib", "booking"),
+      link: path.join(SRC_DIR, "lib", "booking"),
+      label: "src/lib/booking",
+    },
+    {
+      target: path.join(SAAS_DIR, "lib", "availability"),
+      link: path.join(SRC_DIR, "lib", "availability"),
+      label: "src/lib/availability",
+    },
+    // --- pSEO / Articles ---
+    {
+      target: path.join(SAAS_DIR, "app", "(marketing)", "learn"),
+      link: path.join(SRC_DIR, "app", "(marketing)", "learn"),
+      label: "src/app/(marketing)/learn",
+    },
+    {
+      target: path.join(SAAS_DIR, "lib", "seo"),
+      link: path.join(SRC_DIR, "lib", "seo"),
+      label: "src/lib/seo",
+    },
+    {
+      target: path.join(SAAS_DIR, "api", "cron", "generate-article"),
+      link: path.join(SRC_DIR, "app", "api", "cron", "generate-article"),
+      label: "src/app/api/cron/generate-article",
+    },
+    // --- AI ---
+    {
+      target: path.join(SAAS_DIR, "lib", "ai"),
+      link: path.join(SRC_DIR, "lib", "ai"),
+      label: "src/lib/ai",
+    },
   ];
 
   for (const { target, link, label } of expandedDirSymlinks) {
@@ -331,10 +438,75 @@ function setupSymlinks(): void {
       target: path.join(SAAS_DIR, "lib", "actions", "subscription.ts"),
       link: path.join(SRC_DIR, "lib", "actions", "subscription.ts"),
     },
-    // useSubscription hook (SaaS version)
+    // useSubscription hook (SaaS version — overrides OS stub in src/hooks/)
     {
       target: path.join(SAAS_DIR, "lib", "hooks", "useSubscription.ts"),
-      link: path.join(SRC_DIR, "lib", "hooks", "useSubscription.ts"),
+      link: path.join(SRC_DIR, "hooks", "useSubscription.ts"),
+    },
+    // use-early-bird-status hook
+    {
+      target: path.join(SAAS_DIR, "lib", "hooks", "use-early-bird-status.ts"),
+      link: path.join(SRC_DIR, "hooks", "use-early-bird-status.ts"),
+    },
+    // use-trial-activation hook
+    {
+      target: path.join(SAAS_DIR, "lib", "hooks", "use-trial-activation.ts"),
+      link: path.join(SRC_DIR, "hooks", "use-trial-activation.ts"),
+    },
+    // Resend email client (overrides OS no-op)
+    {
+      target: path.join(SAAS_DIR, "lib", "email", "resend.ts"),
+      link: path.join(SRC_DIR, "lib", "email", "resend.ts"),
+    },
+    // Calendar provider permissions (overrides OS always-allow stub)
+    {
+      target: path.join(SAAS_DIR, "lib", "services", "calendar-provider-permissions.ts"),
+      link: path.join(SRC_DIR, "lib", "services", "calendar-provider-permissions.ts"),
+    },
+    // Plan comparison utility
+    {
+      target: path.join(SAAS_DIR, "lib", "utils", "plan-comparison.ts"),
+      link: path.join(SRC_DIR, "lib", "utils", "plan-comparison.ts"),
+    },
+    // Plan validation utility
+    {
+      target: path.join(SAAS_DIR, "lib", "utils", "plan-validation.ts"),
+      link: path.join(SRC_DIR, "lib", "utils", "plan-validation.ts"),
+    },
+    // Booking validation
+    {
+      target: path.join(SAAS_DIR, "lib", "validations", "booking.ts"),
+      link: path.join(SRC_DIR, "lib", "validations", "booking.ts"),
+    },
+    // Username utility
+    {
+      target: path.join(SAAS_DIR, "lib", "username.ts"),
+      link: path.join(SRC_DIR, "lib", "username.ts"),
+    },
+    // Waitlist position utility
+    {
+      target: path.join(SAAS_DIR, "lib", "waitlist", "position.ts"),
+      link: path.join(SRC_DIR, "lib", "waitlist", "position.ts"),
+    },
+    // Subscription types (overrides OS stub)
+    {
+      target: path.join(SAAS_DIR, "types", "subscription.ts"),
+      link: path.join(SRC_DIR, "types", "subscription.ts"),
+    },
+    // Booking types
+    {
+      target: path.join(SAAS_DIR, "types", "booking.ts"),
+      link: path.join(SRC_DIR, "types", "booking.ts"),
+    },
+    // Sitemap (overrides OS core-only sitemap with article pages)
+    {
+      target: path.join(SAAS_DIR, "app", "sitemap.ts"),
+      link: path.join(SRC_DIR, "app", "sitemap.ts"),
+    },
+    // BookingLinksSettings component
+    {
+      target: path.join(SAAS_DIR, "components", "settings", "BookingLinksSettings.tsx"),
+      link: path.join(SRC_DIR, "components", "settings", "BookingLinksSettings.tsx"),
     },
     // Waitlist store (overrides open-source no-op with SaaS implementation)
     {
