@@ -44,12 +44,16 @@ test.describe("Tasks - CRUD Operations", () => {
 
     // Submit the form
     await page.getByRole("button", { name: "Create" }).click();
+    await page.waitForTimeout(500);
 
-    // Wait for modal to close
-    await page.waitForTimeout(1000);
+    // Close the modal (it doesn't auto-close after create)
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
 
     // Verify the task appears in the list
-    await expect(page.getByText(taskTitle)).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("tr", { hasText: taskTitle })).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("edit an existing task via edit button", async ({ page }) => {
@@ -61,7 +65,11 @@ test.describe("Tasks - CRUD Operations", () => {
     await page.locator("[data-create-task-button]").click();
     await page.locator("#title").fill(taskTitle);
     await page.getByRole("button", { name: "Create" }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
+
+    // Close the modal (it doesn't auto-close after create)
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
 
     // Find the task row (tr) that contains the task title
     const taskRow = page.locator("tr", { hasText: taskTitle });
@@ -95,7 +103,11 @@ test.describe("Tasks - CRUD Operations", () => {
     await page.locator("[data-create-task-button]").click();
     await page.locator("#title").fill(taskTitle);
     await page.getByRole("button", { name: "Create" }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
+
+    // Close the modal (it doesn't auto-close after create)
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
 
     // Find the task row (tr) that contains the task title
     const taskRow = page.locator("tr", { hasText: taskTitle });
@@ -103,6 +115,14 @@ test.describe("Tasks - CRUD Operations", () => {
 
     // Handle the native confirm dialog that appears on delete
     page.on("dialog", (dialog) => dialog.accept());
+
+    // Hide TanStack Query DevTools overlay that intercepts pointer events
+    await page.evaluate(() => {
+      const devtools = document.querySelector(".tsqd-parent-container");
+      if (devtools instanceof HTMLElement) {
+        devtools.style.display = "none";
+      }
+    });
 
     // Click the delete button (trash icon) within that row
     await taskRow.getByTitle("Delete task").click();

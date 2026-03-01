@@ -37,12 +37,13 @@ test.describe("Auth - Sign In Page", () => {
     page,
   }) => {
     test.skip(
-      !process.env.TEST_USER_EMAIL,
-      "Skipped: set TEST_USER_EMAIL and TEST_USER_PASSWORD env vars"
+      process.env.SKIP_AUTH_TEST === "true",
+      "Explicitly skipped via SKIP_AUTH_TEST=true"
     );
 
-    const email = process.env.TEST_USER_EMAIL!;
-    const password = process.env.TEST_USER_PASSWORD!;
+    // Use defaults matching the auth fixture
+    const email = process.env.TEST_USER_EMAIL || "test@fluidcalendar.com";
+    const password = process.env.TEST_USER_PASSWORD || "testpassword123";
 
     await page.goto("/auth/signin");
 

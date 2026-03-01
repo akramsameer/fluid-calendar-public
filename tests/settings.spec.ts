@@ -23,8 +23,9 @@ test.describe("Settings - Accounts Tab", () => {
     await page.getByText("Accounts").first().click();
     await page.waitForTimeout(500);
 
-    // The accounts section should be visible
-    await expect(page.locator("body")).toBeVisible();
+    // Verify Connected Accounts heading and provider buttons
+    await expect(page.getByText("Connected Accounts")).toBeVisible();
+    await expect(page.getByText("Calendar Providers")).toBeVisible();
   });
 });
 
@@ -78,8 +79,11 @@ test.describe("Settings - Calendar Tab", () => {
     await page.getByText("Calendar").first().click();
     await page.waitForTimeout(500);
 
-    // Calendar settings content should be visible
-    await expect(page.locator("body")).toBeVisible();
+    // Verify calendar-specific settings elements
+    await expect(page.getByText("Calendar Settings")).toBeVisible();
+    await expect(
+      page.getByText("Working Hours", { exact: true })
+    ).toBeVisible();
   });
 });
 
@@ -93,8 +97,12 @@ test.describe("Settings - Auto-Schedule Tab", () => {
     await page.getByText("Auto-Schedule").first().click();
     await page.waitForTimeout(500);
 
-    // Should show working hours or scheduling config
-    await expect(page.locator("body")).toBeVisible();
+    // Verify auto-schedule specific elements
+    await expect(page.getByText("Auto-Schedule Settings")).toBeVisible();
+    await expect(
+      page.getByText("Working Hours", { exact: true })
+    ).toBeVisible();
+    await expect(page.getByText("Buffer Time")).toBeVisible();
   });
 });
 
@@ -103,11 +111,13 @@ test.describe("Settings - Booking Links Tab", () => {
     await page.goto("/settings#booking-links");
     await page.waitForTimeout(1000);
 
+    // Click the Booking Links tab in the sidebar
     await page.getByText("Booking Links").first().click();
     await page.waitForTimeout(500);
 
-    // Should show booking links section
-    await expect(page.locator("body")).toBeVisible();
+    // Verify the tab is selected (highlighted in sidebar)
+    const bookingLinksTab = page.locator('a[href="#booking-links"]');
+    await expect(bookingLinksTab).toBeVisible();
   });
 });
 
@@ -119,7 +129,13 @@ test.describe("Settings - Notifications Tab", () => {
     await page.getByText("Notifications").first().click();
     await page.waitForTimeout(500);
 
-    await expect(page.locator("body")).toBeVisible();
+    // Verify notification-specific elements
+    await expect(
+      page.getByRole("heading", { name: "Notification Settings" })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Daily Email Updates", { exact: true })
+    ).toBeVisible();
   });
 });
 

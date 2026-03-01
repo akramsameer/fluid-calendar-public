@@ -44,7 +44,7 @@ export default defineConfig({
       testMatch: /fixtures\/auth\.ts/,
     },
 
-    // Unauthenticated core tests (smoke, auth flows)
+    // Unauthenticated core tests (smoke, auth flows, reset-password)
     {
       name: "chromium",
       testDir: "./tests",
@@ -61,10 +61,12 @@ export default defineConfig({
         /tasks\.spec/,
         /settings\.spec/,
         /verify-build\.spec/,
+        /focus\.spec/,
+        /import-export\.spec/,
       ],
     },
 
-    // Unauthenticated SaaS tests (open-source build verification)
+    // Unauthenticated SaaS tests (pricing, learn, subscription, open-source)
     {
       name: "chromium-saas",
       testDir: "./saas/tests",
@@ -73,7 +75,11 @@ export default defineConfig({
         viewport: { width: 1920, height: 1080 },
         launchOptions: {},
       },
-      testMatch: [/open-source\.spec/],
+      testMatch: [
+        /open-source\.spec/,
+        /learn\.spec/,
+        /subscription\.spec/,
+      ],
     },
 
     // Authenticated core tests — depend on setup project
@@ -91,6 +97,8 @@ export default defineConfig({
         /tasks\.spec/,
         /settings\.spec/,
         /verify-build\.spec/,
+        /focus\.spec/,
+        /import-export\.spec/,
       ],
     },
 
@@ -104,7 +112,32 @@ export default defineConfig({
         storageState: "tests/.auth/user.json",
       },
       dependencies: ["setup"],
-      testMatch: [/booking\.spec/, /admin\.spec/],
+      testMatch: [/booking\.spec/, /admin\.spec/, /pricing\.spec/],
+    },
+
+    // OS build verification — run explicitly via test:e2e:os or test:e2e:full
+    {
+      name: "os-build",
+      testDir: "./saas/tests",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        baseURL: "http://localhost:3001",
+      },
+      testMatch: [/open-source\.spec/],
+    },
+
+    // Integration tests — run explicitly via test:e2e:integration
+    {
+      name: "integration",
+      testDir: "./tests",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        storageState: "tests/.auth/user.json",
+      },
+      dependencies: ["setup"],
+      testMatch: [/google-calendar\.spec/],
     },
 
     // {
