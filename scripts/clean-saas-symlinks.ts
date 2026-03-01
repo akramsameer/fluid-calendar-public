@@ -183,6 +183,26 @@ function cleanSymlinks(): void {
     }
   }
 
+  // Restore package.json and prisma/schema.prisma from backups
+  const mergedFileBackups = [
+    "package.json",
+    path.join("prisma", "schema.prisma"),
+  ];
+  for (const target of mergedFileBackups) {
+    const fullPath = path.join(ROOT_DIR, target);
+    const backupPath = fullPath + ".os-backup";
+    try {
+      if (fs.existsSync(backupPath)) {
+        fs.copyFileSync(backupPath, fullPath);
+        fs.unlinkSync(backupPath);
+        console.log(`  Restored: ${target}`);
+        cleaned++;
+      }
+    } catch {
+      // Ignore errors
+    }
+  }
+
   // Clean up empty directories left behind
   const emptyDirCandidates = [
     "src/saas",

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import {
   getCalendarProviderLimit,
   hasUnlimitedCalendarProviders,
-} from "@/lib/subscription/plan-config";
+} from "@saas/lib/subscription/plan-config";
 
 const LOG_SOURCE = "CalendarProviderPermissions";
 

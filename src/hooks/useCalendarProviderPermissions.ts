@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { CalendarProviderPermissionResult } from "@/lib/services/calendar-provider-permissions";
+import { CalendarProviderPermissionResult } from "@saas/services/calendar-provider-permissions";
 
 /**
  * Hook to check calendar provider permissions for the current user

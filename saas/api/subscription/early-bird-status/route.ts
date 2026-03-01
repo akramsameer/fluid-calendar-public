@@ -4,7 +4,7 @@ import { SubscriptionPlan } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { EARLY_BIRD_CONFIG } from "@/lib/stripe/price-config";
+import { EARLY_BIRD_CONFIG } from "@saas/lib/stripe/price-config";
 
 const LOG_SOURCE = "EarlyBirdStatus";
 

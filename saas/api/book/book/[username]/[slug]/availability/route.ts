@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAvailableSlots } from "@/lib/availability";
+import { getAvailableSlots } from "@saas/lib/availability";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { availabilityRequestSchema } from "@/lib/validations/booking";
+import { availabilityRequestSchema } from "@saas/lib/validations/booking";
 
 const LOG_SOURCE = "public-availability-route";
 

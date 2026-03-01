@@ -3,13 +3,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
-import { verifyPaymentStatus } from "@/lib/actions/subscription";
+import { verifyPaymentStatus } from "@saas/actions/subscription";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import {
     SUBSCRIPTION_PLANS,
     SUBSCRIPTION_STATUS,
-} from "@/lib/stripe/constants";
+} from "@saas/lib/stripe/constants";
 
 import LifetimeSuccessClient from "./LifetimeSuccessClient";
 

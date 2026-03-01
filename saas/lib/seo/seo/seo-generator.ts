@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 
 import { AICallType, ArticleCluster, ArticleClusterStatus } from "@prisma/client";
 
-import { getAIService } from "@/lib/ai";
+import { getAIService } from "@saas/lib/ai";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 

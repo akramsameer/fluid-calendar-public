@@ -1,7 +1,7 @@
 import { Job } from "bullmq";
 
-import { EmailService } from "@/lib/email/email-service";
-import { getResend } from "@/lib/email/resend";
+import { EmailService } from "@saas/email/email-service";
+import { getResend } from "@saas/email/resend";
 import { logger } from "@/lib/logger";
 
 import { getRedisOptions } from "../config/redis";

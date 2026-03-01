@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   LifetimeSubscriptionRequest,
   subscriptionService,
-} from "../services/subscription";
+} from "@saas/services/subscription";
 
 interface SubscriptionStatus {
   hasActiveSubscription: boolean;

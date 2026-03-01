@@ -8,7 +8,7 @@ import { Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import { useLifetimeStatusQuery } from "@/lib/services/subscription";
+import { useLifetimeStatusQuery } from "@saas/services/subscription";
 import { cn } from "@/lib/utils";
 
 const bannerVariants = cva("relative w-full", {

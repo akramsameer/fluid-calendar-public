@@ -17,7 +17,7 @@ import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { parseSelectedCalendars, parseWorkDays } from "@/lib/autoSchedule";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { CustomAvailability, TimeSlot, AvailableSlots } from "@/types/booking";
+import { CustomAvailability, TimeSlot, AvailableSlots } from "@saas/types/booking";
 
 const LOG_SOURCE = "AvailabilityService";
 

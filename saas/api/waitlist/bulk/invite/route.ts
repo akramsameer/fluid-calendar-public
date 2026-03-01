@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/auth/api-auth";
 import {
   sendInvitationEmail,
   sendReferralMilestoneEmail,
-} from "@/lib/email/waitlist";
+} from "@saas/email/waitlist";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 

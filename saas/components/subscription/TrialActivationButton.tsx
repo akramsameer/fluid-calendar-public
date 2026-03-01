@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-import { useTrialActivation } from "@/hooks/use-trial-activation";
+import { useTrialActivation } from "@saas/hooks/use-trial-activation";
 
 import { TrialActivationDialog } from "./TrialActivationDialog";
 

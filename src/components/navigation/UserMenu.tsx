@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@saas/hooks/useSubscription";
 import { useLogout } from "@/lib/auth/store-management";
 import { isSaasEnabled } from "@/lib/config";
 import { cn } from "@/lib/utils";

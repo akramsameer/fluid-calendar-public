@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_STATUS,
-} from "@/lib/stripe/constants";
+} from "@saas/lib/stripe/constants";
 
 export async function GET(request: NextRequest) {
   const token = await getToken({

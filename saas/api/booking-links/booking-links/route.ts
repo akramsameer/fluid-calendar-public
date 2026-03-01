@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { generateUniqueUsername } from "@/lib/username";
-import { createBookingLinkSchema } from "@/lib/validations/booking";
-import { canCreateBookingLink } from "@/lib/booking/feature-gating";
+import { generateUniqueUsername } from "@saas/lib/username";
+import { createBookingLinkSchema } from "@saas/lib/validations/booking";
+import { canCreateBookingLink } from "@saas/lib/booking/feature-gating";
 
 const LOG_SOURCE = "booking-links-route";
 

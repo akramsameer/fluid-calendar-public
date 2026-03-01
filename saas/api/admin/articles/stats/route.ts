@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { getClusterStats } from "@/lib/seo";
+import { getClusterStats } from "@saas/lib/seo";
 
 const LOG_SOURCE = "AdminArticlesStatsAPI";
 

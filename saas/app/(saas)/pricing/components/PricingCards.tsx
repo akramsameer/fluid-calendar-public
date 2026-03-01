@@ -17,13 +17,13 @@ import { useState } from "react";
 
 import { SubscriptionPlan } from "@prisma/client";
 
-import { TrialSection } from "@/components/subscription";
-import { useEarlyBirdStatus } from "@/hooks/use-early-bird-status";
+import { TrialSection } from "@saas/components/subscription";
+import { useEarlyBirdStatus } from "@saas/hooks/use-early-bird-status";
 import { useCalendarProviderCount } from "@/hooks/use-calendar-provider-count";
-import { useCheckoutMutation } from "@/lib/services/subscription";
-import { getButtonState, getPlanEnum } from "@/lib/utils/plan-comparison";
-import { validatePlanDowngrade } from "@/lib/utils/plan-validation";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useCheckoutMutation } from "@saas/services/subscription";
+import { getButtonState, getPlanEnum } from "@saas/lib/utils/plan-comparison";
+import { validatePlanDowngrade } from "@saas/lib/utils/plan-validation";
+import { useSubscription } from "@saas/hooks/useSubscription";
 import { toast } from "sonner";
 
 // Plan configurations based on the subscription schema

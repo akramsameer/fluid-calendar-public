@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { queues } from "@/saas/jobs/queues";
+import { queues } from "@saas/jobs/queues";
 import { JobStatus } from "@prisma/client";
 
 import { requireAdmin } from "@/lib/auth/api-auth";

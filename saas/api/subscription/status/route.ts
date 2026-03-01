@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_STATUS,
-} from "@/lib/stripe/constants";
+} from "@saas/lib/stripe/constants";
 
 const LOG_SOURCE = "SubscriptionStatus";
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { addTaskScheduleJob } from "@/saas/jobs/queues";
+import { addTaskScheduleJob } from "@saas/jobs/queues";
 
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";

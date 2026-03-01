@@ -4,9 +4,9 @@ import Stripe from "stripe";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
-import { getPlanFromPriceId } from "@/lib/stripe/price-config";
-import { getCalendarProviderLimit } from "@/lib/subscription/plan-config";
+import { stripe } from "@saas/lib/stripe";
+import { getPlanFromPriceId } from "@saas/lib/stripe/price-config";
+import { getCalendarProviderLimit } from "@saas/lib/subscription/plan-config";
 
 const LOG_SOURCE = "StripeWebhookHandlers";
 

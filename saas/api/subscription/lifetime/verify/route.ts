@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@saas/lib/stripe";
 import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_STATUS,
-} from "@/lib/stripe/constants";
-import { LEGACY_LIFETIME_PRICE_IDS } from "@/lib/stripe/price-config";
+} from "@saas/lib/stripe/constants";
+import { LEGACY_LIFETIME_PRICE_IDS } from "@saas/lib/stripe/price-config";
 
 const LOG_SOURCE = "LifetimeVerify";
 

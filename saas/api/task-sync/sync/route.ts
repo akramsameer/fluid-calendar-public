@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { addTaskSyncJob } from "@/saas/jobs/queues";
+import { addTaskSyncJob } from "@saas/jobs/queues";
 import { z } from "zod";
 
 import { authenticateRequest } from "@/lib/auth/api-auth";

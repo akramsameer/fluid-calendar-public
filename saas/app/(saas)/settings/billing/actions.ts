@@ -6,8 +6,8 @@ import { SubscriptionPlan } from "@prisma/client";
 import { getAuthOptions } from "@/lib/auth/auth-options";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
-import { EARLY_BIRD_CONFIG } from "@/lib/stripe/price-config";
+import { stripe } from "@saas/lib/stripe";
+import { EARLY_BIRD_CONFIG } from "@saas/lib/stripe/price-config";
 
 const LOG_SOURCE = "BillingActions";
 

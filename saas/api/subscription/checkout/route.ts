@@ -7,16 +7,16 @@ import { z } from "zod";
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
-import { STRIPE_METADATA_KEYS } from "@/lib/stripe/constants";
+import { stripe } from "@saas/lib/stripe";
+import { STRIPE_METADATA_KEYS } from "@saas/lib/stripe/constants";
 import {
   EARLY_BIRD_CONFIG,
   LEGACY_LIFETIME_PRICE_IDS,
   STRIPE_PRICE_MAP,
   getLifetimePriceId,
-} from "@/lib/stripe/price-config";
-import { PLAN_CONFIG } from "@/lib/subscription/plan-config";
-import { isValidPlanUpgrade } from "@/lib/utils/plan-comparison";
+} from "@saas/lib/stripe/price-config";
+import { PLAN_CONFIG } from "@saas/lib/subscription/plan-config";
+import { isValidPlanUpgrade } from "@saas/lib/utils/plan-comparison";
 
 const LOG_SOURCE = "UniversalCheckout";
 

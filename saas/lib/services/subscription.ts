@@ -2,7 +2,7 @@
 import { SubscriptionPlan } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { TrialActivationResponse } from "@/types/subscription";
+import { TrialActivationResponse } from "@saas/types/subscription";
 
 import { api } from "@/lib/services/api";
 

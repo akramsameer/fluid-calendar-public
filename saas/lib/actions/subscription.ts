@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { logger } from "@/lib/logger";
-import { stripe } from "@/lib/stripe";
-import { STRIPE_METADATA_KEYS } from "@/lib/stripe/constants";
-import { LEGACY_LIFETIME_PRICE_IDS } from "@/lib/stripe/price-config";
+import { stripe } from "@saas/lib/stripe";
+import { STRIPE_METADATA_KEYS } from "@saas/lib/stripe/constants";
+import { LEGACY_LIFETIME_PRICE_IDS } from "@saas/lib/stripe/price-config";
 
 const LOG_SOURCE = "SubscriptionActions";
 

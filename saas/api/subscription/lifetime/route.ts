@@ -4,13 +4,13 @@ import { SubscriptionPlan } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
-import { STRIPE_METADATA_KEYS } from "@/lib/stripe/constants";
+import { stripe } from "@saas/lib/stripe";
+import { STRIPE_METADATA_KEYS } from "@saas/lib/stripe/constants";
 import {
   EARLY_BIRD_CONFIG,
   LEGACY_LIFETIME_PRICE_IDS,
   getLifetimePriceId,
-} from "@/lib/stripe/price-config";
+} from "@saas/lib/stripe/price-config";
 
 const LOG_SOURCE = "LifetimeSubscription";
 

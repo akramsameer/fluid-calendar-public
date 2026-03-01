@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { decrementCalendarProviderUsage } from "@/lib/services/calendar-provider-permissions";
+import { decrementCalendarProviderUsage } from "@saas/services/calendar-provider-permissions";
 
 const LOG_SOURCE = "accounts-route";
 

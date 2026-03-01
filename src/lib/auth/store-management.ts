@@ -52,7 +52,7 @@ export function clearStoresOnLogout() {
 
   // Clear waitlist store - open-source version by default (no-op),
   // SaaS version symlinked in by setup-saas.ts when submodule is present
-  import("@/store/waitlist")
+  import("@saas/stores/waitlist")
     .then(({ useWaitlistStore }) => {
       try {
         useWaitlistStore.getState().clear();
@@ -145,7 +145,7 @@ export async function initializeStores() {
   // Initialize waitlist store - open-source version by default (no-op),
   // SaaS version symlinked in by setup-saas.ts when submodule is present
   try {
-    const { useWaitlistStore } = await import("@/store/waitlist");
+    const { useWaitlistStore } = await import("@saas/stores/waitlist");
     const waitlistStore = useWaitlistStore.getState();
     if (waitlistStore && waitlistStore.fetchEntries) {
       const waitlistPromise = waitlistStore.fetchEntries();

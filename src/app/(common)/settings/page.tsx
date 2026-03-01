@@ -24,24 +24,20 @@ import { useAdmin } from "@/hooks/use-admin";
 
 import { useSettingsStore } from "@/store/settings";
 
-// Import waitlist page - open-source version by default,
-// SaaS version symlinked in by setup-saas.ts when submodule is present
-const WaitlistPage = dynamic(() => import("./waitlist/page"), {
-  loading: () => <p>Loading...</p>,
-});
+// WaitlistPage — OS stub shows "SaaS only" message, SaaS provides real admin page via @saas alias
+const WaitlistPage = dynamic(
+  () => import("@saas/routes/waitlist-settings"),
+  { loading: () => <p>Loading...</p> }
+);
 
-// BookingLinksSettings is only available when SaaS submodule is present.
-// Use a variable path to prevent TypeScript from checking for the module at compile time.
-const bookingSettingsPath = "@/components/settings/BookingLinksSettings";
-const BookingLinksSettings = isSaasEnabled
-  ? dynamic(
-      () =>
-        import(
-          /* webpackIgnore: true */ bookingSettingsPath
-        ).then((mod) => mod.BookingLinksSettings),
-      { loading: () => <p>Loading...</p> }
-    )
-  : () => null;
+// BookingLinksSettings — OS stub returns null, SaaS provides real component via @saas alias
+const BookingLinksSettings = dynamic(
+  () =>
+    import("@saas/components/BookingLinksSettings").then(
+      (mod) => mod.BookingLinksSettings
+    ),
+  { loading: () => <p>Loading...</p> }
+);
 
 type SettingsTab =
   | "accounts"

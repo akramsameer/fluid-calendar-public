@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useWaitlistStore } from "@/store/waitlist";
+import { useWaitlistStore } from "@saas/stores/waitlist";
 
 import { BetaSettings } from "./beta-settings";
 import { InvitationManager } from "./invitation-manager";

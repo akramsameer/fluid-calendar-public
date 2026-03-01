@@ -7,9 +7,9 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { isSaasEnabled } from "@/lib/config";
 import { logger } from "@/lib/logger";
-import { subscriptionService } from "@/lib/services/subscription";
+import { subscriptionService } from "@saas/services/subscription";
 
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@saas/hooks/useSubscription";
 
 const LOG_SOURCE = "SubscriptionGuard";
 

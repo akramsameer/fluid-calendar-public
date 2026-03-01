@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 
-import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
+import { SubscriptionGuard } from "@saas/components/subscription";
 
 import { SessionProvider } from "./SessionProvider";
 import { StoreInitializer } from "./StoreInitializer";

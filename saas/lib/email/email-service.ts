@@ -1,4 +1,4 @@
-import { EmailJobData, addEmailJob } from "@/saas/jobs/queues";
+import { EmailJobData, addEmailJob } from "@saas/jobs/queues";
 
 import { logger } from "@/lib/logger";
 

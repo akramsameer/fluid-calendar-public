@@ -349,7 +349,7 @@ function setupSymlinks(): void {
       label: "src/app/(marketing)/learn",
     },
     {
-      target: path.join(SAAS_DIR, "lib", "seo"),
+      target: path.join(SAAS_DIR, "lib", "seo", "seo"),
       link: path.join(SRC_DIR, "lib", "seo"),
       label: "src/lib/seo",
     },
@@ -585,10 +585,16 @@ function mergeDependencies(): void {
 
   const mainPkgPath = path.join(ROOT_DIR, "package.json");
   const saasPkgPath = path.join(SAAS_DIR, "package.json");
+  const backupPath = mainPkgPath + ".os-backup";
 
   if (!fs.existsSync(saasPkgPath)) {
     logSkip("No saas/package.json found");
     return;
+  }
+
+  // Back up the original before modifying
+  if (!fs.existsSync(backupPath)) {
+    fs.copyFileSync(mainPkgPath, backupPath);
   }
 
   try {
@@ -653,10 +659,16 @@ function mergePrismaSchema(): void {
 
   const mainSchemaPath = path.join(ROOT_DIR, "prisma", "schema.prisma");
   const saasSchemaPath = path.join(SAAS_DIR, "prisma", "schema.prisma");
+  const backupPath = mainSchemaPath + ".os-backup";
 
   if (!fs.existsSync(saasSchemaPath)) {
     logSkip("No saas/prisma/schema.prisma found");
     return;
+  }
+
+  // Back up the original before modifying
+  if (!fs.existsSync(backupPath)) {
+    fs.copyFileSync(mainSchemaPath, backupPath);
   }
 
   try {

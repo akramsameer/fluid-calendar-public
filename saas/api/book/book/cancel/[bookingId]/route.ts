@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateRequest } from "@/lib/auth/api-auth";
-import { cancelBooking } from "@/lib/booking/cancel-booking";
+import { cancelBooking } from "@saas/lib/booking/cancel-booking";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { cancelBookingSchema } from "@/lib/validations/booking";
+import { cancelBookingSchema } from "@saas/lib/validations/booking";
 
 const LOG_SOURCE = "cancel-booking-route";
 

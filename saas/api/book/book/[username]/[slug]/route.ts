@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { isSlotAvailable } from "@/lib/availability";
-import { createBookingWithEvent } from "@/lib/booking/create-booking";
+import { isSlotAvailable } from "@saas/lib/availability";
+import { createBookingWithEvent } from "@saas/lib/booking/create-booking";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { createBookingSchema } from "@/lib/validations/booking";
+import { createBookingSchema } from "@saas/lib/validations/booking";
 
 const LOG_SOURCE = "public-booking-route";
 

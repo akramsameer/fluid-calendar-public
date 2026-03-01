@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { validateUsername, generateUniqueUsername } from "@/lib/username";
-import { usernameSchema } from "@/lib/validations/booking";
+import { validateUsername, generateUniqueUsername } from "@saas/lib/username";
+import { usernameSchema } from "@saas/lib/validations/booking";
 
 const LOG_SOURCE = "user-username-route";
 

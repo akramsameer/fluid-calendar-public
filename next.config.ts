@@ -14,7 +14,22 @@ const detectSaasSubmodule = (): boolean => {
   }
 };
 
+/**
+ * Detect if the SaaS src/ re-export layer exists (new alias-based architecture).
+ * When saas/src/index.ts exists, @saas imports resolve to saas/src/ instead of src/features/.
+ */
+const detectSaasSrc = (): boolean => {
+  try {
+    return fs.existsSync(
+      path.join(process.cwd(), "saas", "src", "index.ts")
+    );
+  } catch {
+    return false;
+  }
+};
+
 const hasSaasSubmodule = detectSaasSubmodule();
+const hasSaasSrc = detectSaasSrc();
 
 // Respect explicit env var override. When NEXT_PUBLIC_ENABLE_SAAS_FEATURES is
 // explicitly "false" (e.g. build:os), disable SaaS even if submodule is present.
@@ -25,6 +40,14 @@ const isSaasEnabled =
   (process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES === "true" ||
     hasSaasSubmodule);
 
+// Determine @saas alias target:
+// - If SaaS src/ layer exists and SaaS is enabled → saas/src/ (real implementations)
+// - Otherwise → src/features/ (OS stubs)
+const saasAliasPath =
+  isSaasEnabled && hasSaasSrc
+    ? path.join(process.cwd(), "saas", "src")
+    : path.resolve(process.cwd(), "src", "features");
+
 // Log detection status during build
 if (
   process.env.NODE_ENV !== "production" ||
@@ -32,10 +55,12 @@ if (
 ) {
   console.log(`\n[next.config] SaaS Detection:`);
   console.log(`  - Submodule present: ${hasSaasSubmodule}`);
+  console.log(`  - SaaS src/ layer: ${hasSaasSrc}`);
   console.log(
     `  - Env var: ${process.env.NEXT_PUBLIC_ENABLE_SAAS_FEATURES ?? "(not set)"}`
   );
-  console.log(`  - SaaS enabled: ${isSaasEnabled}\n`);
+  console.log(`  - SaaS enabled: ${isSaasEnabled}`);
+  console.log(`  - @saas alias: ${saasAliasPath}\n`);
 }
 
 const nextConfig: NextConfig = {
@@ -54,15 +79,19 @@ const nextConfig: NextConfig = {
   // SaaS content is provided via symlinks from setup-saas.ts when the submodule is present.
   pageExtensions: ["js", "jsx", "ts", "tsx"],
 
+  // Transpile SaaS package when using the src/ re-export layer
+  transpilePackages:
+    isSaasEnabled && hasSaasSrc
+      ? [path.join(process.cwd(), "saas", "src")]
+      : [],
+
   // Webpack configuration for path aliases
   webpack: (config) => {
-    // Add @saas/* path alias only when SaaS is enabled
-    if (isSaasEnabled && hasSaasSubmodule) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "@saas": path.join(process.cwd(), "saas"),
-      };
-    }
+    // @saas alias — always set, points to either saas/src/ or src/features/
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@saas": saasAliasPath,
+    };
     return config;
   },
 };

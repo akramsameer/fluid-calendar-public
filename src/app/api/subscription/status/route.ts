@@ -1,14 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-/**
- * Open-source stub for subscription status API.
- * Always returns no active subscription.
- * When SaaS submodule is present, this is replaced via symlink.
- */
-export async function GET() {
-  return NextResponse.json({
-    hasActiveSubscription: false,
-    plan: null,
-    status: null,
-  });
+import { isSaasEnabled } from "@/lib/config";
+
+export async function GET(req: NextRequest) {
+  if (!isSaasEnabled) {
+    return NextResponse.json({ error: "Not available" }, { status: 404 });
+  }
+  const handler = await import("@saas/api/subscription/status/route");
+  return handler.GET(req);
 }

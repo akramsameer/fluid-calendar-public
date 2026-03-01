@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import { logger } from "@/lib/logger";
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@saas/lib/stripe";
 import {
   handleCheckoutSessionCompleted,
   handleCustomerSubscriptionDeleted,
@@ -12,7 +12,7 @@ import {
   handleCustomerSubscriptionUpdated,
   handleInvoicePaymentFailed,
   handleInvoicePaymentSucceeded,
-} from "@/lib/stripe/webhook-handlers";
+} from "@saas/lib/stripe/webhook-handlers";
 
 const LOG_SOURCE = "StripeWebhook";
 

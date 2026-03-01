@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
-import { checkCalendarProviderPermission } from "@/lib/services/calendar-provider-permissions";
+import { checkCalendarProviderPermission } from "@saas/services/calendar-provider-permissions";
 
 const LOG_SOURCE = "CalendarProviderPermissionsAPI";
 

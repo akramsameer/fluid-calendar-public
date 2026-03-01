@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
 import { requireAdmin } from "@/lib/auth/api-auth";
-import { sendInvitationEmail } from "@/lib/email/waitlist";
+import { sendInvitationEmail } from "@saas/email/waitlist";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 

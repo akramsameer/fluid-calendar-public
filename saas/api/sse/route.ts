@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   clearNotifications,
   getNotifications,
-} from "@/saas/jobs/utils/notification";
+} from "../../jobs/utils/notification";
 
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";

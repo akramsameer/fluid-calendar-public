@@ -5,7 +5,7 @@ import {
   generateClusterContent,
   selectNextClusterForGeneration,
   sendArticleGenerationNotification,
-} from "@/lib/seo";
+} from "@saas/lib/seo";
 
 const LOG_SOURCE = "CronGenerateArticle";
 

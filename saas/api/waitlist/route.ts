@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
-import { EmailService } from "@/lib/email/email-service";
-import { sendVerificationEmail } from "@/lib/email/waitlist";
+import { EmailService } from "@saas/email/email-service";
+import { sendVerificationEmail } from "@saas/email/waitlist";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 

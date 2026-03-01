@@ -11,7 +11,7 @@ import { RiKeyboardLine } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 
 import { useShortcutsStore } from "@/store/shortcuts";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@saas/hooks/useSubscription";
 
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";

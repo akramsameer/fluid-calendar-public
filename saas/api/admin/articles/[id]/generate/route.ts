@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import {
   generateClusterContent,
   sendArticleGenerationNotification,
-} from "@/lib/seo";
+} from "@saas/lib/seo";
 
 const LOG_SOURCE = "AdminArticleGenerateAPI";
 

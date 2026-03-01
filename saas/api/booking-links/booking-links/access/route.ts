@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateRequest } from "@/lib/auth/api-auth";
-import { getBookingFeatureAccess } from "@/lib/booking/feature-gating";
+import { getBookingFeatureAccess } from "@saas/lib/booking/feature-gating";
 import { logger } from "@/lib/logger";
 
 const LOG_SOURCE = "booking-links-access-route";

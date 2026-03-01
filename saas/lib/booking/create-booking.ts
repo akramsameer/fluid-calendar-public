@@ -2,7 +2,7 @@ import { BookingLink, Booking } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { sendBookingConfirmationToGuest, sendBookingNotificationToHost } from "@/lib/booking/emails";
+import { sendBookingConfirmationToGuest, sendBookingNotificationToHost } from "@saas/lib/booking/emails";
 
 const LOG_SOURCE = "CreateBookingService";
 

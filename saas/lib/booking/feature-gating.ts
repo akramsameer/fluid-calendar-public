@@ -3,7 +3,7 @@ import { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 import { isSaasEnabled } from "@/lib/config";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { BookingFeatureAccess } from "@/types/booking";
+import { BookingFeatureAccess } from "@saas/types/booking";
 
 const LOG_SOURCE = "BookingFeatureGating";
 

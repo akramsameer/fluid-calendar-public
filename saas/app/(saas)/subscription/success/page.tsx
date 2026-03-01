@@ -3,11 +3,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
-import { verifyPaymentStatus } from "@/lib/actions/subscription";
+import { verifyPaymentStatus } from "@saas/actions/subscription";
 import { logger } from "@/lib/logger";
 import {
     SUBSCRIPTION_PLANS,
-} from "@/lib/stripe/constants";
+} from "@saas/lib/stripe/constants";
 
 import SuccessClient from "./SuccessClient";
 

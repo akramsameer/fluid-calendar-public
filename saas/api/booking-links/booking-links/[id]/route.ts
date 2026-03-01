@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { updateBookingLinkSchema } from "@/lib/validations/booking";
+import { updateBookingLinkSchema } from "@saas/lib/validations/booking";
 
 const LOG_SOURCE = "booking-links-id-route";
 

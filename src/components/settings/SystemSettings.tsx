@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { clearResendInstance } from "@/lib/email/resend";
+import { clearResendInstance } from "@saas/email/resend";
 import { logger } from "@/lib/logger";
 
 import { useSettingsStore } from "@/store/settings";

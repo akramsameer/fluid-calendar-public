@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Waitlist } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 
-import { addToAudienceAndsendWaitlistConfirmationEmail } from "@/lib/email/waitlist";
+import { addToAudienceAndsendWaitlistConfirmationEmail } from "@saas/email/waitlist";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { getWaitlistPosition } from "@/lib/waitlist/position";
+import { getWaitlistPosition } from "@saas/lib/waitlist/position";
 
 const LOG_SOURCE = "WaitlistVerifyAPI";
 

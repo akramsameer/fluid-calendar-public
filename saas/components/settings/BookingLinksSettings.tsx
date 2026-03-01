@@ -41,8 +41,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { SettingsSection } from "./SettingsSection";
-import { BookingFeatureAccess } from "@/types/booking";
+import { SettingsSection } from "@/components/settings/SettingsSection";
+import { BookingFeatureAccess } from "@saas/types/booking";
 
 interface BookingLink {
   id: string;

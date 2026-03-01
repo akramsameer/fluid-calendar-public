@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { RESERVED_USERNAMES } from "@/types/booking";
+import { RESERVED_USERNAMES } from "@saas/types/booking";
 
 // Username validation schema
 export const usernameSchema = z

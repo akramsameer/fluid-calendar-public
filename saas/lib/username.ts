@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { RESERVED_USERNAMES, UsernameValidationResult } from "@/types/booking";
+import { RESERVED_USERNAMES, UsernameValidationResult } from "@saas/types/booking";
 
 /**
  * Generate a username from an email address

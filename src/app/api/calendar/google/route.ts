@@ -12,7 +12,7 @@ import { prisma } from "@/lib/prisma";
 import {
   checkCalendarProviderPermission,
   incrementCalendarProviderUsage,
-} from "@/lib/services/calendar-provider-permissions";
+} from "@saas/services/calendar-provider-permissions";
 import { TokenManager } from "@/lib/token-manager";
 
 const LOG_SOURCE = "GoogleCalendarAPI";

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { addDailySummaryJob } from "@/saas/jobs/queues";
+import { addDailySummaryJob } from "@saas/jobs/queues";
 
 import { requireAdmin } from "@/lib/auth/api-auth";
 

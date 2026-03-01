@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
-import { seedArticleClusters } from "@/lib/seo/cluster-seeds";
+import { seedArticleClusters } from "@saas/lib/seo/cluster-seeds";
 
 const LOG_SOURCE = "AdminArticlesSeedAPI";
 

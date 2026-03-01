@@ -19,11 +19,10 @@ import { useShortcutsStore } from "@/store/shortcuts";
 
 import "../globals.css";
 
-// Import NotificationProvider - open-source version by default,
-// SaaS version symlinked in by setup-saas.ts when submodule is present
+// NotificationProvider — OS stub is no-op, SaaS provides SSE notifications via @saas alias
 const NotificationProvider = dynamic<{ children: React.ReactNode }>(
   () =>
-    import("@/components/providers/NotificationProvider").then(
+    import("@saas/components/NotificationProvider").then(
       (mod) => mod.NotificationProvider
     ),
   {

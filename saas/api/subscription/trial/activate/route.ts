@@ -5,7 +5,7 @@ import { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 import { authenticateRequest } from "@/lib/auth/api-auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { getCalendarProviderLimit } from "@/lib/subscription/plan-config";
+import { getCalendarProviderLimit } from "@saas/lib/subscription/plan-config";
 
 const LOG_SOURCE = "TrialActivation";
 

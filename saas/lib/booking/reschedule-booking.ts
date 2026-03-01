@@ -3,11 +3,11 @@ import { addMinutes } from "date-fns";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { isSlotAvailable } from "@/lib/availability";
+import { isSlotAvailable } from "@saas/lib/availability";
 import {
   sendRescheduleConfirmationToGuest,
   sendRescheduleNotificationToHost,
-} from "@/lib/booking/emails";
+} from "@saas/lib/booking/emails";
 
 const LOG_SOURCE = "RescheduleBookingService";
 

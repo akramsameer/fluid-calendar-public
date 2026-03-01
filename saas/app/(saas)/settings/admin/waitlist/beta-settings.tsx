@@ -27,7 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-import { useWaitlistStore } from "@/store/waitlist";
+import { useWaitlistStore } from "@saas/stores/waitlist";
 
 export function BetaSettings() {
   const {

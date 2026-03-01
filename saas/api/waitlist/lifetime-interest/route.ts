@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
-import { EmailService } from "@/lib/email/email-service";
+import { EmailService } from "@saas/email/email-service";
 import { logger } from "@/lib/logger";
 
 const LOG_SOURCE = "LifetimeInterestAPI";

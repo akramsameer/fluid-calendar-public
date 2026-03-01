@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { useLifetimeSubscription } from "@/lib/hooks/useSubscription";
+import { useLifetimeSubscription } from "@saas/hooks/useSubscription";
 
 export function LifetimeOffer() {
   const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ export function LifetimeOffer() {
     createLifetimeCheckout(
       { email, name: name || undefined },
       {
-        onSuccess: (data) => {
+        onSuccess: (data: { url: string }) => {
           // Redirect to Stripe Checkout
           window.location.href = data.url;
         },

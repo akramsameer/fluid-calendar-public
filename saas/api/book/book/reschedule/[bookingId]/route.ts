@@ -5,8 +5,8 @@ import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth/auth-options";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { rescheduleBooking } from "@/lib/booking/reschedule-booking";
-import { rescheduleBookingSchema } from "@/lib/validations/booking";
+import { rescheduleBooking } from "@saas/lib/booking/reschedule-booking";
+import { rescheduleBookingSchema } from "@saas/lib/validations/booking";
 
 const LOG_SOURCE = "reschedule-booking-route";
 

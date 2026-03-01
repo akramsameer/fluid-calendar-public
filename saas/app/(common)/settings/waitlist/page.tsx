@@ -1,6 +1,6 @@
 "use client";
 
-import { WaitlistDashboard } from "@/app/(saas)/settings/admin/waitlist/waitlist-dashboard";
+import { WaitlistDashboard } from "../../(saas)/settings/admin/waitlist/waitlist-dashboard";
 
 import AccessDeniedMessage from "@/components/auth/AccessDeniedMessage";
 

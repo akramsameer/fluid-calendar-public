@@ -11,7 +11,7 @@ import { FeedManager } from "@/components/calendar/FeedManager";
 import { MonthView } from "@/components/calendar/MonthView";
 import { MultiMonthView } from "@/components/calendar/MultiMonthView";
 import { WeekView } from "@/components/calendar/WeekView";
-import { SponsorshipBanner } from "@/components/ui/sponsorship-banner";
+import { SponsorshipBanner } from "@saas/components/sponsorship-banner";
 
 import { addDays, formatDate, newDate, subDays } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
@@ -25,11 +25,12 @@ import { useTaskStore } from "@/store/task";
 
 import { CalendarEvent, CalendarFeed } from "@/types/calendar";
 
-// Import LifetimeAccessBanner - open-source version (no-op) by default,
-// SaaS version symlinked in by setup-saas.ts when submodule is present
+// LifetimeAccessBanner — OS stub returns null, SaaS provides real banner via @saas alias
 const LifetimeAccessBanner = dynamic(
   () =>
-    import("./LifetimeAccessBanner").then((mod) => mod.LifetimeAccessBanner),
+    import("@saas/components/LifetimeAccessBanner").then(
+      (mod) => mod.LifetimeAccessBanner
+    ),
   { ssr: false }
 );
 

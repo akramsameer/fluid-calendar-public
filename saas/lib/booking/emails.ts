@@ -1,9 +1,9 @@
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 
-import { getResend } from "@/lib/email/resend";
+import { getResend } from "@saas/email/resend";
 import { logger } from "@/lib/logger";
-import { generateIcsFile } from "@/lib/booking/ics";
+import { generateIcsFile } from "@saas/lib/booking/ics";
 
 const LOG_SOURCE = "BookingEmails";
 const FROM_EMAIL = "FluidCalendar <noreply@fluidcalendar.com>";
