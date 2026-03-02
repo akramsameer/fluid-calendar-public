@@ -213,7 +213,7 @@ async function processReferralNotifications(
   newEntry: Waitlist
 ) {
   const { sendReferralMilestoneEmail } = await import(
-    "@/lib/email/waitlist"
+    "@saas/email/waitlist"
   );
 
   // Update referrer's referral count and priority score

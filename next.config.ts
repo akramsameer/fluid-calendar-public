@@ -43,10 +43,13 @@ const isSaasEnabled =
 // Determine @saas alias target:
 // - If SaaS src/ layer exists and SaaS is enabled → saas/src/ (real implementations)
 // - Otherwise → src/features/ (OS stubs)
+// Absolute path for webpack, relative for Turbopack
 const saasAliasPath =
   isSaasEnabled && hasSaasSrc
     ? path.join(process.cwd(), "saas", "src")
     : path.resolve(process.cwd(), "src", "features");
+const saasAliasRelative =
+  isSaasEnabled && hasSaasSrc ? "./saas/src" : "./src/features";
 
 // Log detection status during build
 if (
@@ -85,13 +88,29 @@ const nextConfig: NextConfig = {
       ? [path.join(process.cwd(), "saas", "src")]
       : [],
 
-  // Webpack configuration for path aliases
-  webpack: (config) => {
-    // @saas alias — always set, points to either saas/src/ or src/features/
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@saas": saasAliasPath,
-    };
+  // Turbopack configuration for path aliases (dev server)
+  turbopack: {
+    resolveAlias: {
+      "@saas": saasAliasRelative,
+      "@saas/*": `${saasAliasRelative}/*`,
+    },
+  },
+
+  // Webpack configuration for path aliases (production builds)
+  webpack: (config, { webpack }) => {
+    // Use NormalModuleReplacementPlugin to rewrite @saas/* imports BEFORE
+    // the resolver runs. This prevents JsConfigPathsPlugin (which reads
+    // tsconfig paths) from overriding the alias with the OS-stub path.
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(
+        /^@saas(\/|$)/,
+        (resource: { request: string }) => {
+          resource.request = resource.request.replace(
+          /^@saas(\/|$)/,
+          saasAliasPath + "$1"
+        );
+      })
+    );
     return config;
   },
 };

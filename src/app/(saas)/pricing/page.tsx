@@ -2,8 +2,16 @@ import { notFound } from "next/navigation";
 
 import { isSaasEnabled } from "@/lib/config";
 
-export default async function Page() {
+export const dynamic = "force-dynamic";
+
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function Page(props: Props) {
   if (!isSaasEnabled) return notFound();
-  const { default: Component } = await import("@saas/routes/(saas)/pricing/page");
-  return <Component />;
+  const { default: Component } = await import(
+    "@saas/routes/(saas)/pricing/page"
+  );
+  return <Component {...props} />;
 }

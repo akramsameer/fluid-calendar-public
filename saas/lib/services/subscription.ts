@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { TrialActivationResponse } from "@saas/types/subscription";
 
-import { api } from "@/lib/services/api";
+import { api, forceSignOut } from "@/lib/services/api";
 
 export interface LifetimeSubscriptionRequest {
   email: string;
@@ -55,6 +55,7 @@ export const subscriptionService = {
       clearTimeout(timeoutId);
 
       if (response.status === 401) {
+        forceSignOut();
         throw new Error("Authentication required");
       }
 
