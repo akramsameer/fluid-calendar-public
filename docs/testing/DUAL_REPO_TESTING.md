@@ -9,20 +9,44 @@ Tracks build and test results for the open-core architecture across two test rep
 | **Private (SaaS)** | `git@github.com:akramsameer/fluid-calendar-saas-test.git` | Full repo with `saas/` — tests full SaaS build |
 | **Public (OS)** | `git@github.com:akramsameer/fluid-calendar-test.git` | OS-only — no `saas/` directory, tests `build:os` |
 
-## Rule: Push After Every Change
+## Commit & Push Workflow
 
-After every change to the main repo, push to **both** test repos:
+This is the private repo (`fluid-calendar-saas`). The public repo (`fluid-calendar-test`) is an
+OS-only mirror. All development happens here — never commit directly in the public repo.
+
+### After every commit, push to both repos:
 
 ```bash
-# Push to SaaS test repo (full codebase)
+# 1. Commit your changes (as normal)
+git add <files>
+git commit -m "your message"
+
+# 2. Push to private repo (origin)
+git push origin v2-beta
+
+# 3. Push to SaaS test repo (full mirror)
 git push saas-test v2-beta
 
-# Push to OS test repo (OS-only branch)
-# Update os-only worktree, then push
+# 4. Sync the os-only branch and push to public repo
 cd /tmp/fluid-os-test
-git merge --ff-only origin/v2-beta  # or cherry-pick/rebase as needed
-git push os-test os-only
+git merge origin/v2-beta        # saas/ changes are ignored (in .gitignore)
+git push os-test os-only:main   # os-only branch → main on public repo
 ```
+
+### What happens to each type of change:
+
+| Change type | Private repo | Public repo |
+|-------------|-------------|-------------|
+| Core code (`src/`) | Included | Included (via merge) |
+| SaaS code (`saas/`) | Included | Excluded (`.gitignore`) |
+| Prisma schema (`prisma/`) | Included | Included (merged schema is committed) |
+| Config files (`.env.example`, `next.config.ts`, etc.) | Included | Included |
+
+### Important notes:
+- The `os-only` branch has `saas/` in `.gitignore`, so merging from `v2-beta` automatically
+  skips SaaS files
+- The public repo's `main` branch = the `os-only` branch
+- Never commit directly in the public repo or the os-only worktree
 
 ## Setup
 
@@ -32,8 +56,14 @@ git remote add saas-test git@github.com:akramsameer/fluid-calendar-saas-test.git
 git remote add os-test git@github.com:akramsameer/fluid-calendar-test.git
 ```
 
+### Branches
+| Branch | Remote | Purpose |
+|--------|--------|---------|
+| `v2-beta` | `origin`, `saas-test` | Main dev branch (full codebase) |
+| `os-only` | `os-test` (as `main`) | OS-only mirror (no `saas/`) |
+
 ### OS-Only Branch
-The `os-only` branch is created from `v2-beta` with:
+The `os-only` branch was created from `v2-beta` with:
 - `saas/` removed from git tracking (`git rm -r --cached saas/`)
 - `saas/` uncommented in `.gitignore`
 - `opensource.md` removed (contains documented secrets that trigger GitHub push protection)

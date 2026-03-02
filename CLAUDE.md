@@ -127,6 +127,35 @@ npm run start:worker
 npm run start:worker:prod
 ```
 
+## Dual-Repo Commit Workflow
+
+This project uses two repos to separate public (OS) and private (SaaS) code:
+
+| Repo | Remote | Branch | Contains |
+|------|--------|--------|----------|
+| **Private** (`fluid-calendar-saas-test`) | `saas-test` | `v2-beta` | Full codebase including `saas/` |
+| **Public** (`fluid-calendar-test`) | `os-test` | `main` | Everything except `saas/` |
+
+### After every commit, push to both repos:
+
+```bash
+# 1. Push to private repo
+git push origin v2-beta
+git push saas-test v2-beta
+
+# 2. Sync os-only branch and push to public repo
+cd /tmp/fluid-os-test
+git merge origin/v2-beta        # saas/ changes skipped via .gitignore
+git push os-test os-only:main   # os-only → main on public repo
+```
+
+### Key rules:
+- **All development happens in the private repo** — never commit directly in the public repo
+- Core code changes (`src/`) flow to both repos automatically
+- SaaS code changes (`saas/`) only go to the private repo
+- The `os-only` branch has `saas/` in `.gitignore`, so merges skip SaaS files
+- See `docs/testing/DUAL_REPO_TESTING.md` for full setup details and test results
+
 ## Architecture Overview
 
 ### Open-Core Architecture
