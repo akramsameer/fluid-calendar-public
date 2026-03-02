@@ -1,0 +1,173 @@
+
+> fluid-calendar@0.1.0 build:os
+> NEXT_PUBLIC_ENABLE_SAAS_FEATURES=false next build
+
+   ▲ Next.js 15.3.8
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 14.0s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/113) ...
+   Generating static pages (28/113) 
+   Generating static pages (56/113) 
+   Generating static pages (84/113) 
+ ✓ Generating static pages (113/113)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                           Size  First Load JS
+┌ ○ /                                              2.57 kB         194 kB
+├ ○ /_not-found                                      471 B         102 kB
+├ ○ /admin                                           471 B         102 kB
+├ ○ /admin/articles                                  471 B         102 kB
+├ ○ /admin/jobs                                      471 B         102 kB
+├ ƒ /api/accounts                                    471 B         102 kB
+├ ƒ /api/admin/articles                              471 B         102 kB
+├ ƒ /api/admin/articles/[id]                         471 B         102 kB
+├ ƒ /api/admin/articles/[id]/generate                471 B         102 kB
+├ ƒ /api/admin/articles/[id]/publish                 471 B         102 kB
+├ ƒ /api/admin/articles/[id]/skip                    471 B         102 kB
+├ ƒ /api/admin/articles/seed                         471 B         102 kB
+├ ƒ /api/admin/articles/stats                        471 B         102 kB
+├ ƒ /api/admin/jobs/recent                           471 B         102 kB
+├ ƒ /api/admin/jobs/retry                            471 B         102 kB
+├ ƒ /api/admin/jobs/stats                            471 B         102 kB
+├ ƒ /api/admin/jobs/trigger-daily-summary            471 B         102 kB
+├ ƒ /api/auth/[...nextauth]                          471 B         102 kB
+├ ƒ /api/auth/check-admin                            471 B         102 kB
+├ ƒ /api/auth/public-signup                          471 B         102 kB
+├ ƒ /api/auth/register                               471 B         102 kB
+├ ƒ /api/auth/reset-password/request                 471 B         102 kB
+├ ƒ /api/auth/reset-password/reset                   471 B         102 kB
+├ ƒ /api/auto-schedule-settings                      471 B         102 kB
+├ ƒ /api/book/book/[username]/[slug]                 471 B         102 kB
+├ ƒ /api/book/book/[username]/[slug]/availability    471 B         102 kB
+├ ƒ /api/book/book/booking/[bookingId]               471 B         102 kB
+├ ƒ /api/book/book/cancel/[bookingId]                471 B         102 kB
+├ ƒ /api/book/book/reschedule/[bookingId]            471 B         102 kB
+├ ƒ /api/booking-links/booking-links                 471 B         102 kB
+├ ƒ /api/booking-links/booking-links/[id]            471 B         102 kB
+├ ƒ /api/booking-links/booking-links/access          471 B         102 kB
+├ ƒ /api/bookings                                    471 B         102 kB
+├ ƒ /api/calendar-providers/count                    471 B         102 kB
+├ ƒ /api/calendar-providers/permissions              471 B         102 kB
+├ ƒ /api/calendar-providers/sync-usage               471 B         102 kB
+├ ƒ /api/calendar-settings                           471 B         102 kB
+├ ƒ /api/calendar/caldav                             471 B         102 kB
+├ ƒ /api/calendar/caldav/auth                        471 B         102 kB
+├ ƒ /api/calendar/caldav/available                   471 B         102 kB
+├ ƒ /api/calendar/caldav/events                      471 B         102 kB
+├ ƒ /api/calendar/caldav/sync                        471 B         102 kB
+├ ƒ /api/calendar/caldav/test                        471 B         102 kB
+├ ƒ /api/calendar/google                             471 B         102 kB
+├ ƒ /api/calendar/google/[id]                        471 B         102 kB
+├ ƒ /api/calendar/google/auth                        471 B         102 kB
+├ ƒ /api/calendar/google/available                   471 B         102 kB
+├ ƒ /api/calendar/google/events                      471 B         102 kB
+├ ƒ /api/calendar/outlook                            471 B         102 kB
+├ ƒ /api/calendar/outlook/auth                       471 B         102 kB
+├ ƒ /api/calendar/outlook/available                  471 B         102 kB
+├ ƒ /api/calendar/outlook/events                     471 B         102 kB
+├ ƒ /api/calendar/outlook/sync                       471 B         102 kB
+├ ƒ /api/cron/generate-article                       471 B         102 kB
+├ ƒ /api/data-settings                               471 B         102 kB
+├ ƒ /api/events                                      471 B         102 kB
+├ ƒ /api/events/[id]                                 471 B         102 kB
+├ ƒ /api/export/tasks                                471 B         102 kB
+├ ƒ /api/feeds                                       471 B         102 kB
+├ ƒ /api/feeds/[id]                                  471 B         102 kB
+├ ƒ /api/feeds/[id]/sync                             471 B         102 kB
+├ ƒ /api/import/tasks                                471 B         102 kB
+├ ƒ /api/integration-settings                        471 B         102 kB
+├ ƒ /api/integration-status                          471 B         102 kB
+├ ƒ /api/notification-settings                       471 B         102 kB
+├ ƒ /api/projects                                    471 B         102 kB
+├ ƒ /api/projects/[id]                               471 B         102 kB
+├ ƒ /api/settings/homepage-disabled                  471 B         102 kB
+├ ƒ /api/setup                                       471 B         102 kB
+├ ƒ /api/setup/check                                 471 B         102 kB
+├ ƒ /api/sse                                         471 B         102 kB
+├ ƒ /api/stats                                       471 B         102 kB
+├ ƒ /api/subscription/checkout                       471 B         102 kB
+├ ƒ /api/subscription/early-bird-status              471 B         102 kB
+├ ƒ /api/subscription/lifetime                       471 B         102 kB
+├ ƒ /api/subscription/lifetime/status                471 B         102 kB
+├ ƒ /api/subscription/lifetime/verify                471 B         102 kB
+├ ƒ /api/subscription/status                         471 B         102 kB
+├ ƒ /api/subscription/trial/activate                 471 B         102 kB
+├ ƒ /api/system-settings                             471 B         102 kB
+├ ƒ /api/tags                                        471 B         102 kB
+├ ƒ /api/tags/[id]                                   471 B         102 kB
+├ ƒ /api/task-sync/mappings                          471 B         102 kB
+├ ƒ /api/task-sync/mappings/[id]                     471 B         102 kB
+├ ƒ /api/task-sync/providers                         471 B         102 kB
+├ ƒ /api/task-sync/providers/[id]                    471 B         102 kB
+├ ƒ /api/task-sync/providers/[id]/lists              471 B         102 kB
+├ ƒ /api/task-sync/sync                              471 B         102 kB
+├ ƒ /api/tasks                                       471 B         102 kB
+├ ƒ /api/tasks/[id]                                  471 B         102 kB
+├ ƒ /api/tasks/normalize-recurrence                  471 B         102 kB
+├ ƒ /api/tasks/schedule-all                          471 B         102 kB
+├ ƒ /api/tasks/schedule-all/queue                    471 B         102 kB
+├ ƒ /api/user-settings                               471 B         102 kB
+├ ƒ /api/user/username                               471 B         102 kB
+├ ƒ /api/users                                       471 B         102 kB
+├ ƒ /api/waitlist                                    471 B         102 kB
+├ ƒ /api/waitlist/bulk/boost                         471 B         102 kB
+├ ƒ /api/waitlist/bulk/delete                        471 B         102 kB
+├ ƒ /api/waitlist/bulk/export                        471 B         102 kB
+├ ƒ /api/waitlist/bulk/invite                        471 B         102 kB
+├ ƒ /api/waitlist/bulk/resend                        471 B         102 kB
+├ ƒ /api/waitlist/entries                            471 B         102 kB
+├ ƒ /api/waitlist/entries/[id]                       471 B         102 kB
+├ ƒ /api/waitlist/invitations                        471 B         102 kB
+├ ƒ /api/waitlist/invitations/[id]/resend            471 B         102 kB
+├ ƒ /api/waitlist/join                               471 B         102 kB
+├ ƒ /api/waitlist/lifetime-interest                  471 B         102 kB
+├ ƒ /api/waitlist/register                           471 B         102 kB
+├ ƒ /api/waitlist/settings                           471 B         102 kB
+├ ƒ /api/waitlist/settings/templates                 471 B         102 kB
+├ ƒ /api/waitlist/stats                              471 B         102 kB
+├ ƒ /api/waitlist/status                             471 B         102 kB
+├ ƒ /api/waitlist/unsubscribe                        471 B         102 kB
+├ ƒ /api/waitlist/verify                             471 B         102 kB
+├ ƒ /api/webhooks/stripe                             471 B         102 kB
+├ ○ /auth/reset-password                           25.2 kB         144 kB
+├ ƒ /auth/signin                                   7.69 kB         169 kB
+├ ○ /beta                                            471 B         102 kB
+├ ○ /beta/join                                       471 B         102 kB
+├ ○ /beta/status                                     471 B         102 kB
+├ ○ /beta/verified                                   471 B         102 kB
+├ ○ /beta/verify                                     471 B         102 kB
+├ ƒ /book/book/[username]/[slug]                     471 B         102 kB
+├ ƒ /book/book/manage/[bookingId]                    471 B         102 kB
+├ ○ /bookings                                        471 B         102 kB
+├ ƒ /calendar                                      97.3 kB         279 kB
+├ ○ /focus                                         10.9 kB         185 kB
+├ ○ /learn/learn                                     471 B         102 kB
+├ ƒ /learn/learn/[slug]                              471 B         102 kB
+├ ƒ /pricing                                         471 B         102 kB
+├ ○ /privacy                                         471 B         102 kB
+├ ○ /settings                                      27.7 kB         228 kB
+├ ○ /settings/waitlist                             1.42 kB         103 kB
+├ ƒ /setup                                         4.58 kB         119 kB
+├ ƒ /sitemap.xml                                     471 B         102 kB
+├ ○ /subscription/lifetime/setup-password            471 B         102 kB
+├ ƒ /subscription/lifetime/setup-password/api        471 B         102 kB
+├ ƒ /subscription/lifetime/success                   471 B         102 kB
+├ ƒ /subscription/success                            471 B         102 kB
+├ ○ /tasks                                         53.4 kB         254 kB
+└ ○ /terms                                           471 B         102 kB
++ First Load JS shared by all                       102 kB
+  ├ chunks/1684-ac4188ff23aa8a48.js                46.6 kB
+  ├ chunks/4bd1b696-e1a7e2373f9edef7.js            53.2 kB
+  └ other shared chunks (total)                    2.08 kB
+
+
+ƒ Middleware                                       53.8 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

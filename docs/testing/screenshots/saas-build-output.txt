@@ -1,0 +1,173 @@
+
+> fluid-calendar@0.1.0 build
+> next build
+
+   ▲ Next.js 15.3.8
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.0s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/113) ...
+   Generating static pages (28/113) 
+   Generating static pages (56/113) 
+   Generating static pages (84/113) 
+ ✓ Generating static pages (113/113)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                           Size  First Load JS
+┌ ○ /                                              18.7 kB         251 kB
+├ ○ /_not-found                                      425 B         103 kB
+├ ○ /admin                                         2.16 kB         125 kB
+├ ○ /admin/articles                                11.3 kB         166 kB
+├ ○ /admin/jobs                                    11.7 kB         171 kB
+├ ƒ /api/accounts                                    425 B         103 kB
+├ ƒ /api/admin/articles                              425 B         103 kB
+├ ƒ /api/admin/articles/[id]                         425 B         103 kB
+├ ƒ /api/admin/articles/[id]/generate                425 B         103 kB
+├ ƒ /api/admin/articles/[id]/publish                 425 B         103 kB
+├ ƒ /api/admin/articles/[id]/skip                    425 B         103 kB
+├ ƒ /api/admin/articles/seed                         425 B         103 kB
+├ ƒ /api/admin/articles/stats                        425 B         103 kB
+├ ƒ /api/admin/jobs/recent                           425 B         103 kB
+├ ƒ /api/admin/jobs/retry                            425 B         103 kB
+├ ƒ /api/admin/jobs/stats                            425 B         103 kB
+├ ƒ /api/admin/jobs/trigger-daily-summary            425 B         103 kB
+├ ƒ /api/auth/[...nextauth]                          425 B         103 kB
+├ ƒ /api/auth/check-admin                            425 B         103 kB
+├ ƒ /api/auth/public-signup                          425 B         103 kB
+├ ƒ /api/auth/register                               425 B         103 kB
+├ ƒ /api/auth/reset-password/request                 425 B         103 kB
+├ ƒ /api/auth/reset-password/reset                   425 B         103 kB
+├ ƒ /api/auto-schedule-settings                      425 B         103 kB
+├ ƒ /api/book/book/[username]/[slug]                 425 B         103 kB
+├ ƒ /api/book/book/[username]/[slug]/availability    425 B         103 kB
+├ ƒ /api/book/book/booking/[bookingId]               425 B         103 kB
+├ ƒ /api/book/book/cancel/[bookingId]                425 B         103 kB
+├ ƒ /api/book/book/reschedule/[bookingId]            425 B         103 kB
+├ ƒ /api/booking-links/booking-links                 425 B         103 kB
+├ ƒ /api/booking-links/booking-links/[id]            425 B         103 kB
+├ ƒ /api/booking-links/booking-links/access          425 B         103 kB
+├ ƒ /api/bookings                                    425 B         103 kB
+├ ƒ /api/calendar-providers/count                    425 B         103 kB
+├ ƒ /api/calendar-providers/permissions              425 B         103 kB
+├ ƒ /api/calendar-providers/sync-usage               425 B         103 kB
+├ ƒ /api/calendar-settings                           425 B         103 kB
+├ ƒ /api/calendar/caldav                             425 B         103 kB
+├ ƒ /api/calendar/caldav/auth                        425 B         103 kB
+├ ƒ /api/calendar/caldav/available                   425 B         103 kB
+├ ƒ /api/calendar/caldav/events                      425 B         103 kB
+├ ƒ /api/calendar/caldav/sync                        425 B         103 kB
+├ ƒ /api/calendar/caldav/test                        425 B         103 kB
+├ ƒ /api/calendar/google                             425 B         103 kB
+├ ƒ /api/calendar/google/[id]                        425 B         103 kB
+├ ƒ /api/calendar/google/auth                        425 B         103 kB
+├ ƒ /api/calendar/google/available                   425 B         103 kB
+├ ƒ /api/calendar/google/events                      425 B         103 kB
+├ ƒ /api/calendar/outlook                            425 B         103 kB
+├ ƒ /api/calendar/outlook/auth                       425 B         103 kB
+├ ƒ /api/calendar/outlook/available                  425 B         103 kB
+├ ƒ /api/calendar/outlook/events                     425 B         103 kB
+├ ƒ /api/calendar/outlook/sync                       425 B         103 kB
+├ ƒ /api/cron/generate-article                       425 B         103 kB
+├ ƒ /api/data-settings                               425 B         103 kB
+├ ƒ /api/events                                      425 B         103 kB
+├ ƒ /api/events/[id]                                 425 B         103 kB
+├ ƒ /api/export/tasks                                425 B         103 kB
+├ ƒ /api/feeds                                       425 B         103 kB
+├ ƒ /api/feeds/[id]                                  425 B         103 kB
+├ ƒ /api/feeds/[id]/sync                             425 B         103 kB
+├ ƒ /api/import/tasks                                425 B         103 kB
+├ ƒ /api/integration-settings                        425 B         103 kB
+├ ƒ /api/integration-status                          425 B         103 kB
+├ ƒ /api/notification-settings                       425 B         103 kB
+├ ƒ /api/projects                                    425 B         103 kB
+├ ƒ /api/projects/[id]                               425 B         103 kB
+├ ƒ /api/settings/homepage-disabled                  425 B         103 kB
+├ ƒ /api/setup                                       425 B         103 kB
+├ ƒ /api/setup/check                                 425 B         103 kB
+├ ƒ /api/sse                                         425 B         103 kB
+├ ƒ /api/stats                                       425 B         103 kB
+├ ƒ /api/subscription/checkout                       425 B         103 kB
+├ ƒ /api/subscription/early-bird-status              425 B         103 kB
+├ ƒ /api/subscription/lifetime                       425 B         103 kB
+├ ƒ /api/subscription/lifetime/status                425 B         103 kB
+├ ƒ /api/subscription/lifetime/verify                425 B         103 kB
+├ ƒ /api/subscription/status                         425 B         103 kB
+├ ƒ /api/subscription/trial/activate                 425 B         103 kB
+├ ƒ /api/system-settings                             425 B         103 kB
+├ ƒ /api/tags                                        425 B         103 kB
+├ ƒ /api/tags/[id]                                   425 B         103 kB
+├ ƒ /api/task-sync/mappings                          425 B         103 kB
+├ ƒ /api/task-sync/mappings/[id]                     425 B         103 kB
+├ ƒ /api/task-sync/providers                         425 B         103 kB
+├ ƒ /api/task-sync/providers/[id]                    425 B         103 kB
+├ ƒ /api/task-sync/providers/[id]/lists              425 B         103 kB
+├ ƒ /api/task-sync/sync                              425 B         103 kB
+├ ƒ /api/tasks                                       425 B         103 kB
+├ ƒ /api/tasks/[id]                                  425 B         103 kB
+├ ƒ /api/tasks/normalize-recurrence                  425 B         103 kB
+├ ƒ /api/tasks/schedule-all                          425 B         103 kB
+├ ƒ /api/tasks/schedule-all/queue                    425 B         103 kB
+├ ƒ /api/user-settings                               425 B         103 kB
+├ ƒ /api/user/username                               425 B         103 kB
+├ ƒ /api/users                                       425 B         103 kB
+├ ƒ /api/waitlist                                    425 B         103 kB
+├ ƒ /api/waitlist/bulk/boost                         425 B         103 kB
+├ ƒ /api/waitlist/bulk/delete                        425 B         103 kB
+├ ƒ /api/waitlist/bulk/export                        425 B         103 kB
+├ ƒ /api/waitlist/bulk/invite                        425 B         103 kB
+├ ƒ /api/waitlist/bulk/resend                        425 B         103 kB
+├ ƒ /api/waitlist/entries                            425 B         103 kB
+├ ƒ /api/waitlist/entries/[id]                       425 B         103 kB
+├ ƒ /api/waitlist/invitations                        425 B         103 kB
+├ ƒ /api/waitlist/invitations/[id]/resend            425 B         103 kB
+├ ƒ /api/waitlist/join                               425 B         103 kB
+├ ƒ /api/waitlist/lifetime-interest                  425 B         103 kB
+├ ƒ /api/waitlist/register                           425 B         103 kB
+├ ƒ /api/waitlist/settings                           425 B         103 kB
+├ ƒ /api/waitlist/settings/templates                 425 B         103 kB
+├ ƒ /api/waitlist/stats                              425 B         103 kB
+├ ƒ /api/waitlist/status                             425 B         103 kB
+├ ƒ /api/waitlist/unsubscribe                        425 B         103 kB
+├ ƒ /api/waitlist/verify                             425 B         103 kB
+├ ƒ /api/webhooks/stripe                             425 B         103 kB
+├ ○ /auth/reset-password                           3.52 kB         144 kB
+├ ƒ /auth/signin                                   8.96 kB         174 kB
+├ ○ /beta                                             6 kB         225 kB
+├ ○ /beta/join                                     5.17 kB         149 kB
+├ ○ /beta/status                                    4.5 kB         145 kB
+├ ○ /beta/verified                                 2.38 kB         116 kB
+├ ○ /beta/verify                                   2.68 kB         116 kB
+├ ƒ /book/book/[username]/[slug]                    3.9 kB         155 kB
+├ ƒ /book/book/manage/[bookingId]                  3.87 kB         155 kB
+├ ○ /bookings                                      7.84 kB         147 kB
+├ ƒ /calendar                                      97.6 kB         285 kB
+├ ○ /focus                                         14.8 kB         191 kB
+├ ○ /learn/learn                                     186 B         106 kB
+├ ƒ /learn/learn/[slug]                              186 B         106 kB
+├ ƒ /pricing                                       12.8 kB         272 kB
+├ ○ /privacy                                         425 B         103 kB
+├ ○ /settings                                      22.8 kB         254 kB
+├ ○ /settings/waitlist                             37.9 kB         213 kB
+├ ƒ /setup                                         4.59 kB         119 kB
+├ ƒ /sitemap.xml                                     425 B         103 kB
+├ ○ /subscription/lifetime/setup-password           9.3 kB         132 kB
+├ ƒ /subscription/lifetime/setup-password/api        425 B         103 kB
+├ ƒ /subscription/lifetime/success                  3.4 kB         150 kB
+├ ƒ /subscription/success                          3.37 kB         150 kB
+├ ○ /tasks                                         55.6 kB         261 kB
+└ ○ /terms                                           425 B         103 kB
++ First Load JS shared by all                       102 kB
+  ├ chunks/1684-40539bbeb901bd12.js                46.6 kB
+  ├ chunks/4bd1b696-aff17a3d0d6cdb7c.js            53.2 kB
+  └ other shared chunks (total)                    2.35 kB
+
+
+ƒ Middleware                                       54.1 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
