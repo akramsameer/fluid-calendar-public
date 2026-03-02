@@ -156,6 +156,11 @@ git push os-test os-only:main   # os-only → main on public repo
 - The `os-only` branch has `saas/` in `.gitignore`, so merges skip SaaS files
 - See `docs/testing/DUAL_REPO_TESTING.md` for full setup details and test results
 
+### Reminder — IMPORTANT
+After every commit, remind the user to push to both test repos and sync the os-only branch.
+Check the auto-memory file for `dual_repo_finalized: true`. If that flag is set, the user has
+replaced the test repos with the actual production repos — stop reminding.
+
 ## Architecture Overview
 
 ### Open-Core Architecture
