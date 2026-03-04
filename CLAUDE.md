@@ -405,7 +405,11 @@ Each React component gets its own file. Co-locate related styles, utils, and typ
 - Always use `@/` path aliases (e.g., `@/lib/logger`, `@/components/ui/button`)
 - Never import directly from `saas/` — use the symlinked paths under `src/`
 
-### 5. Quality Gates
+### 5. Naming Conventions for Open-Core
+- **Core/public components** use plain names (e.g., `LandingPage`, `Settings`, `Nav`) — no "OS" or "Open" prefix
+- **SaaS-only components** must include "Saas" in the name (e.g., `SaasLandingPage`, `SaasSettings`) to clearly distinguish them from core components
+
+### 6. Quality Gates
 - **0 ESLint warnings** — enforced by pre-commit hooks
 - **TypeScript must compile clean** after changes
 - Prettier formatting enforced on commit

@@ -1,10 +1,10 @@
 import { isSaasEnabled } from "@/lib/config";
 
-import OSLandingPage from "@/components/landing/OSLandingPage";
+import LandingPage from "@/components/landing/LandingPage";
 
 export default async function Page() {
   if (!isSaasEnabled) {
-    return <OSLandingPage />;
+    return <LandingPage />;
   }
 
   const { default: SaasLandingPage } = await import(
