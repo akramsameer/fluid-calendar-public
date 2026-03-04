@@ -21,17 +21,19 @@ OS-only mirror. All development happens here — never commit directly in the pu
 git add <files>
 git commit -m "your message"
 
-# 2. Push to private repo (origin)
-git push origin v2-beta
+# 2. Push to both repos with the automated script
+./scripts/push-dual.sh
 
-# 3. Push to SaaS test repo (full mirror)
-git push saas-test v2-beta
-
-# 4. Sync the os-only branch and push to public repo
-cd /tmp/fluid-os-test
-git merge origin/v2-beta        # saas/ changes are ignored (in .gitignore)
-git push os-test os-only:main   # os-only branch → main on public repo
+# Or with options:
+./scripts/push-dual.sh --branch staging   # target a specific branch on the public repo
+./scripts/push-dual.sh --no-origin        # skip pushing to origin (if already pushed)
 ```
+
+The script pushes to `origin` and `saas-test`, merges into the `os-only` worktree at
+`/tmp/fluid-os-test`, and pushes to `os-test`. It includes safety checks:
+- Verifies `saas/` is in the worktree's `.gitignore` before merging
+- Checks no `saas/` files leaked into the merge
+- Aborts cleanly on merge conflicts
 
 ### What happens to each type of change:
 

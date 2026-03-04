@@ -139,15 +139,19 @@ This project uses two repos to separate public (OS) and private (SaaS) code:
 ### After every commit, push to both repos:
 
 ```bash
-# 1. Push to private repo
-git push origin v2-beta
-git push saas-test v2-beta
+# Push to both repos (default: public branch = main)
+./scripts/push-dual.sh
 
-# 2. Sync os-only branch and push to public repo
-cd /tmp/fluid-os-test
-git merge origin/v2-beta        # saas/ changes skipped via .gitignore
-git push os-test os-only:main   # os-only → main on public repo
+# Push to a specific branch on the public repo
+./scripts/push-dual.sh --branch staging
+
+# Skip pushing to origin (if already pushed)
+./scripts/push-dual.sh --no-origin
 ```
+
+The script handles: pushing to `origin` and `saas-test`, merging into the `os-only` worktree,
+and pushing to `os-test`. It includes safety checks to prevent `saas/` code from leaking to
+the public repo.
 
 ### Key rules:
 - **All development happens in the private repo** — never commit directly in the public repo
@@ -157,7 +161,7 @@ git push os-test os-only:main   # os-only → main on public repo
 - See `docs/testing/DUAL_REPO_TESTING.md` for full setup details and test results
 
 ### Reminder — IMPORTANT
-After every commit, remind the user to push to both test repos and sync the os-only branch.
+After every commit, remind the user to run `./scripts/push-dual.sh` to push to both repos.
 Check the auto-memory file for `dual_repo_finalized: true`. If that flag is set, the user has
 replaced the test repos with the actual production repos — stop reminding.
 
